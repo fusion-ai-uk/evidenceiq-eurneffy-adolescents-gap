@@ -8,7 +8,6 @@ import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSq
 type Audience = "all" | "hcp" | "patient" | "caregiver"
 
 export default function DashboardPage() {
-	const [audience, setAudience] = useState<Audience>("all")
   const [concise, setConcise] = useState<boolean>(true)
   const [themes, setThemes] = useState<any[]>([])
   const [themesLoading, setThemesLoading] = useState<boolean>(false)
@@ -51,37 +50,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header + quick filters */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1>Dashboard</h1>
-          <p className="lead">High‑level, scannable takeaways. Click any card to go deeper.</p>
+      <div className="flex flex-col gap-1">
+        <h1>Dashboard</h1>
+        <p className="lead">High‑level, scannable takeaways. Click any card to go deeper.</p>
       </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="text-[11px] text-muted-foreground">Density</div>
-          <div className="inline-flex rounded-md border border-border/60 bg-card/60 overflow-hidden">
-            {[[true,'Concise'],[false,'Detailed']].map(([v,label]) => (
-              <button
-                key={String(v)}
-                onClick={() => setConcise(Boolean(v))}
-                className={`px-3 py-1.5 text-xs transition-colors ${concise===Boolean(v)?"bg-primary/20 text-primary":"hover:bg-accent/40"}`}
-              >{label as string}</button>
-            ))}
-          </div>
-          <div className="ml-3 text-[11px] text-muted-foreground">Audience</div>
-          <div className="inline-flex rounded-md border border-border/60 bg-card/60 overflow-hidden">
-            {["all","hcp","patient","caregiver"].map(v => (
-              <button
-                key={v}
-                onClick={() => setAudience(v as Audience)}
-                className={`px-3 py-1.5 text-xs capitalize transition-colors ${audience===v?"bg-primary/20 text-primary":"hover:bg-accent/40"}`}
-              >{v}</button>
-            ))}
-          </div>
-        </div>
-              </div>
 
       {/* 1. Themes */}
-      <Section title="General Themes" href="/themes" subtitle={`Theme Explorer · ${audience==='all'?'All audiences':audience.toUpperCase()}`}> 
+      <Section title="General Themes" href="/themes" subtitle="Theme Explorer">
         {themesLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading themes…</div>
         )}
