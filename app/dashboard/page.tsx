@@ -388,14 +388,14 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   // HCP takeaway
   items.push({
     title: 'What wins with HCPs',
-      summary: `HCPs want simple, workable steps. Keep “who/when” clear and add the next action. Include eligibility cues, referral routes, and a one‑screen monitoring checklist.`,
+    summary: `In the HCP slice, posts with the most traction are practical and low‑friction. Threads cluster around “who qualifies”, “when to use”, and “what happens next”. This suggests an appetite for simple operational guidance rather than long arguments. As a broad steer, clarity on “who/when” with an obvious next step (e.g., a concise referral route and a one‑screen monitoring view) aligns with what the audience is already seeking.`,
     icons: [Users, Key, Smile], views: 0, likes: 0, replies: 0, sentiment: hcp.s,
   })
 
   // Patient takeaway
   items.push({
     title: 'What lands with patients',
-      summary: `Patients read plain English. Set day‑to‑day expectations (appointments, common side‑effects, what’s normal vs call). Add one helpful link per asset.`,
+    summary: `Patient comments focus on everyday life: appointments, common side‑effects, and what is normal versus a reason to call. The pattern in the data indicates that plain language with short, relatable examples is preferred over clinical phrasing. A gentle steer is to set expectations in clear terms and point to one genuinely useful link per asset so readers are not overloaded.`,
     icons: [HeartPulse, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: patient.s,
   })
 
@@ -403,7 +403,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (caregiver.v > 0 || Math.abs(caregiver.s) > 0.05) {
     items.push({
       title: 'Caregiver voice is small but important',
-      summary: `Caregivers ask for practical help and clear contacts. A small tile with transport tips and out‑of‑hours numbers buys goodwill and lowers anxiety.`,
+      summary: `Caregiver volume is smaller, but the content is specific: transport, scheduling, and who to ring out‑of‑hours. The takeaway is that concrete information reduces anxiety more than general reassurance. As a light touch, a small tile that captures essential contacts and practical tips tends to be well received.`,
       icons: [Users, Meh, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: caregiver.s,
     })
   }
@@ -411,7 +411,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   // Cross‑audience rule of thumb
   items.push({
     title: 'One job per post',
-      summary: `One job per asset works best: explain eligibility, set expectations, or give a next step. Keep it short; cadence beats complexity.`,
+    summary: `Across audiences, the strongest performers do one clear job: either explain eligibility, set expectations, or provide a next step. When an asset tries to do all three, engagement usually drops. The takeaway is that clarity and cadence matter more than volume—short, focused posts are easier to understand and share.`,
     icons: [Eye, ThumbsUp, Smile], views: 0, likes: 0, replies: 0, sentiment: 0,
   })
 
@@ -419,7 +419,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (items.length < 6) {
     items.push({
       title: 'Tone before reach',
-      summary: `Fix understanding before chasing reach. If comments show confusion, simplify the message and tighten the next step; tone and reach improve.`,
+      summary: `Where confusion shows up in comments, tone tends to soften and reach stalls. That pattern suggests understanding is a prerequisite for scale. A broad steer is to simplify the core message first and only then work on expanding distribution; both tone and reach typically improve together.`,
       icons: [Smile, Eye, ThumbsUp], views: 0, likes: 0, replies: 0, sentiment: 0,
     })
   }
@@ -427,7 +427,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (items.length < 6) {
     items.push({
       title: 'Close with one action',
-      summary: `End each asset with one clear action—refer, book, or read a one‑screen guide. One link wins; too many choices kill follow‑through.`,
+      summary: `In this dataset, assets that end with a single, unambiguous action are shared more often than those with multiple options. Too many choices tend to dilute follow‑through. The takeaway is simply that one clear action works best; the exact action can vary by audience.`,
       icons: [Key, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: 0,
     })
   }
@@ -499,7 +499,7 @@ function buildCompetitorTakeaways(durRows: any[], psiRows: any[]) {
       if (!leader) return
       items.push({
         title,
-        summary: `${leader.therapy} currently leads on ${asp.toLowerCase()} sentiment. ${hint}`,
+        summary: `${leader.therapy} currently leads on ${asp.toLowerCase()} sentiment in this slice of conversation. That leadership helps set expectations for how readers judge nearby content. At a high level, it’s useful context when deciding where to place emphasis; ${hint}`,
         icons: [Smile, Eye, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: 0,
       })
     }
