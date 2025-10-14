@@ -133,14 +133,14 @@ function Section({ title, subtitle, href, children }: { title: string; subtitle?
             aria-label={`Explore Data: ${title}`}
           >
             Explore Data <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
+            </Link>
+          </div>
         {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
-      </div>
+            </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {children}
-      </div>
-    </div>
+          </div>
+        </div>
   )
 }
 
@@ -151,8 +151,8 @@ function Card({ id, title, children, href, variant = "default", concise = true }
       <div className="text-sm font-semibold tracking-tight mb-2">{title}</div>
       <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
         {children}
-      </p>
-    </div>
+                </p>
+              </div>
   )
 }
 
@@ -162,7 +162,7 @@ function StatCard({ label, value, tone = "up", href }: { label: string; value: s
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className={`mt-1 text-lg font-semibold ${tone === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>{value}</div>
       <div className="text-[11px] text-muted-foreground mt-1">vs 6‑mo baseline</div>
-    </div>
+                  </div>
   )
 }
 
@@ -178,10 +178,10 @@ function MiniBar({ title, items, href }: { title: string; items: { k: string; v:
               <div className="h-full bg-primary/40" style={{ height: `${Math.round(10 + norm(it.v) * 90)}%` }} />
             </div>
             <div className="text-[11px] text-muted-foreground text-center">{it.k} {(it.v>=0?'+':'')}{it.v.toFixed(2)}</div>
-          </div>
+            </div>
         ))}
+          </div>
         </div>
-    </div>
   )
 }
 
@@ -242,7 +242,7 @@ function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: strin
       key === 'qol' ? 'people look for day‑to‑day expectations and tips' :
       'CAR‑T remains the mental anchor for comparisons'
     const engageWord = likeRate > 0.01 ? 'engagement is strong' : likeRate > 0.002 ? 'engagement is steady' : 'engagement is modest'
-    const summary = `${defaultTitle} ${shareWord} ${toneWord}. We see that ${talkWord}, and ${engageWord} across related threads. Next move: ${implication}`
+    const summary = `${defaultTitle} ${shareWord} ${toneWord}. So what: ${talkWord}. Action: ${implication}`
     return { title: defaultTitle, summary, icons, views, likes, replies, sentiment }
   }
 
@@ -257,7 +257,7 @@ function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: strin
   // Add a roll‑up if enough data
   if (all.length >= 5) {
     const meanSent = all.map((x) => x.sentiment).reduce(sum, 0) / all.length
-    const rollupSummary = `Big picture: durability leads the story, access questions drive action, and safety chatter plays in the background. The read: ride the durability wave with a clear 3L fit, answer “who/when” in a single screen, and keep a calm checklist for safety.`
+    const rollupSummary = `Executive read: Durability sets the frame; access queries create conversion moments; safety remains background noise. Action: ride the durability wave with a clear 3L fit, publish a one‑screen “who/when”, and keep a calm safety checklist.`
     items.unshift({
       title: 'What the market is really seeing',
       summary: rollupSummary,
@@ -298,7 +298,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
     const cats = topUps.map((x) => String(x.category)).join(', ')
     items.push({
       title: 'Momentum spike',
-      summary: `Conversation lifted above baseline in ${cats}. Use this window to drop bite‑size 3L fit reminders and eligibility shortcuts so recall rides the wave. Keep tone measured; let the trend carry reach.`,
+      summary: `Conversation lifted above baseline in ${cats}. So what: attention is available now. Action: ship bite‑size 3L‑fit reminders and eligibility shortcuts; let the trend carry reach.`,
       icons: [TrendingUp, Eye, ThumbsUp],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -308,7 +308,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
     const cats = topDowns.map((x) => String(x.category)).join(', ')
     items.push({
       title: 'Cooling pockets',
-      summary: `Some themes quietened (${cats}). If these matter to the 3L story, re‑seed with one strong proof point and a clean visual. Otherwise, let them rest and focus where attention already flows.`,
+      summary: `Some themes quietened (${cats}). So what: deprioritise unless critical to 3L. Action: if important, re‑seed with one strong proof point and a clean visual; otherwise, focus where attention already flows.`,
       icons: [ThermometerSnowflake, Eye, Meh],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -318,7 +318,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (rows.some((r) => /access|eligib|ta947|nice/i.test(String(r.category)))) {
     items.push({
       title: 'Access questions create action',
-      summary: `When eligibility or “who/where” trends, people are ready to move. Meet that intent with a one‑screen answer (who qualifies → refer → monitor). The simpler the step, the more it gets shared inside DGH teams.`,
+      summary: `When eligibility or “who/where” trends, people are ready to act. Action: meet intent with a one‑screen answer (who qualifies → refer → monitor). Simpler steps get shared inside DGH teams.`,
       icons: [Key, MessageSquare, Eye],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -328,7 +328,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (rows.some((r) => /safety|crs|icans|rash|photosens/i.test(String(r.category)))) {
     items.push({
       title: 'Safety reassurance beats rebuttal',
-      summary: `Spikes around safety are best handled with calm checklists and “what good looks like” examples, not arguments. It keeps tone stable and credibility high in patient and HCP lanes alike.`,
+      summary: `Safety spikes require calm checklists and “what good looks like” examples—not argument. Action: show escalation routes; it preserves tone and credibility across lanes.`,
       icons: [Shield, Smile, MessageSquare],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -378,14 +378,14 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   // HCP takeaway
   items.push({
     title: 'What wins with HCPs',
-    summary: `HCP posts respond best to clarity and workflow. When we give a simple “who/when” and a practical next step, tone lifts and threads remain constructive. Keep it service‑oriented: eligibility cues, referral routes, and monitoring checklists.`,
+      summary: `HCPs respond to operational clarity. So what: simplify “who/when” and the immediate next step. Action: publish eligibility cues, referral routes, and a one‑screen monitoring checklist.`,
     icons: [Users, Key, Smile], views: 0, likes: 0, replies: 0, sentiment: hcp.s,
   })
 
   // Patient takeaway
   items.push({
     title: 'What lands with patients',
-    summary: `Patients read in plain language and remember examples. Start with what treatment means day‑to‑day (appointments, common side‑effects, what’s normal vs call the team). Then give one helpful link.`,
+      summary: `Patients process plain language, not jargon. So what: set day‑to‑day expectations (appointments, common side‑effects, what’s normal vs call). Action: one helpful link per asset.`,
     icons: [HeartPulse, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: patient.s,
   })
 
@@ -393,7 +393,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (caregiver.v > 0 || Math.abs(caregiver.s) > 0.05) {
     items.push({
       title: 'Caregiver voice is small but important',
-      summary: `When caregivers speak, it’s usually about burden and “who to call”. A small tile with practical tips (transport, who to ring out‑of‑hours) buys a lot of goodwill and lowers anxiety.`,
+      summary: `Caregivers ask for burden‑reducers and contact clarity. Action: a small tile with transport tips and out‑of‑hours contacts; it buys goodwill and lowers anxiety.`,
       icons: [Users, Meh, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: caregiver.s,
     })
   }
@@ -401,7 +401,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   // Cross‑audience rule of thumb
   items.push({
     title: 'One job per post',
-    summary: `Across audiences, the most effective posts do one job well. Pick one: explain eligibility, set expectations, or give a next step. Then stop. Cadence beats complexity.`,
+      summary: `Across audiences, single‑job assets outperform. Action: choose one—explain eligibility, set expectations, or give a next step—and stop. Cadence beats complexity.`,
     icons: [Eye, ThumbsUp, Smile], views: 0, likes: 0, replies: 0, sentiment: 0,
   })
 
@@ -409,7 +409,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (items.length < 6) {
     items.push({
       title: 'Tone before reach',
-      summary: `Fix comprehension before pushing for scale. If comments show confusion, simplify the message and tighten the next step—tone improves, and reach follows.`,
+      summary: `Fix comprehension before scale. Action: when comments show confusion, simplify the core message and tighten the next step; tone improves and reach follows.`,
       icons: [Smile, Eye, ThumbsUp], views: 0, likes: 0, replies: 0, sentiment: 0,
     })
   }
@@ -417,7 +417,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   if (items.length < 6) {
     items.push({
       title: 'Close with one action',
-      summary: `End every asset with one clear action—refer, book, or read a one‑screen guide. Choice overload reduces follow‑through; one link wins.`,
+      summary: `Close every asset with one action—refer, book, or read a one‑screen guide. One link wins; choice overload kills follow‑through.`,
       icons: [Key, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: 0,
     })
   }
@@ -489,7 +489,7 @@ function buildCompetitorTakeaways(durRows: any[], psiRows: any[]) {
       if (!leader) return
       items.push({
         title,
-        summary: `${leader.therapy} has the strongest ${asp} sentiment right now. ${hint}`,
+        summary: `${leader.therapy} leads ${asp.toLowerCase()} sentiment. So what: expectation is set by ${leader.therapy}. Action: ${hint}`,
         icons: [Smile, Eye, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: 0,
       })
     }
@@ -572,7 +572,7 @@ function TakeawayCard({ data, concise }: { data: { title: string; summary: strin
         <span className={`inline-flex items-center gap-1 ml-auto ${tone==='pos'?'text-emerald-400':tone==='neg'?'text-rose-400':'text-muted-foreground'}`}>
           <ToneIcon className="h-3.5 w-3.5" /> {data.sentiment.toFixed(2)}
         </span>
-      </div>
+        </div>
     </div>
   )
 }
