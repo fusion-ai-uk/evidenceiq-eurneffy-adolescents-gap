@@ -11,11 +11,10 @@ export async function GET() {
       SELECT
         LOWER(COALESCE(Name,'')) AS name,
         LOWER(COALESCE(Topic, '')) AS topic,
-        COALESCE(` +
-    "`Topic Title`, Topic) AS topic_title,\n" +
-    "        LOWER(COALESCE(CAST(combined_text_translated AS STRING), CAST(text AS STRING))) AS body,\n" +
-    "        SAFE_CAST(sentiment_compound AS FLOAT64) AS sentiment, HCP_score, Patient_score, Caregiver_score, \`Payer _ NHS Trust_score\` AS payer_score, createdAt\n" +
-    `      FROM \`${posts}\`
+        COALESCE(\`Topic Title\`, Topic) AS topic_title,
+        LOWER(COALESCE(CAST(combined_text_translated AS STRING), CAST(text AS STRING))) AS body,
+        SAFE_CAST(sentiment_compound AS FLOAT64) AS sentiment, HCP_score, Patient_score, Caregiver_score, \`Payer _ NHS Trust_score\` AS payer_score, createdAt
+      FROM \`${posts}\`
     ),
     tagged AS (
       SELECT
