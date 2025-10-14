@@ -56,7 +56,7 @@ export function BaselineAlerts() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground">{r.category}</span>
+                      <span className="text-sm font-medium text-foreground">{formatCategory(r.category)}</span>
                       {severity === "high" && <AlertCircle className="h-4 w-4 text-orange-500" />}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -97,4 +97,23 @@ export function BaselineAlerts() {
       </CardContent>
     </Card>
   )
+}
+
+function formatCategory(raw: string): string {
+  const s = String(raw || '').trim().toLowerCase()
+  const titleize = (txt: string) => txt.split(/\s+/).map(w => {
+    if (["qol","crs","icans","nhs","uk","ta947"].includes(w)) return w.toUpperCase()
+    if (w === 'cart' || w === 'car-t' || (w === 'car' && txt.includes('car t'))) return 'CAR-T'
+    return w.charAt(0).toUpperCase() + w.slice(1)
+  }).join(' ')
+
+  if (s.startsWith('treatmentthemes')) {
+    const rest = s.replace(/^treatmentthemes[_:-]?/, '').replace(/[_-]+/g, ' ').trim()
+    const nice = titleize(rest.replace(/qol/,'QoL'))
+    return `Treatment Themes: ${nice}`
+  }
+
+  // Drug and common keys title-cased
+  const generic = titleize(s.replace(/[_-]+/g, ' '))
+  return generic
 }

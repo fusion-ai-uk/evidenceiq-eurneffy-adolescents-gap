@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { HintIcon } from '@/components/ui/hint'
 
 export type TimelineFilterState = {
@@ -80,7 +79,7 @@ export function TimelineFilters({ onApply }: { onApply: (f: TimelineFilterState)
           </div>
         </div>
         <div id="stakeholder-toggles" className="flex flex-col items-center gap-1 md:col-span-1">
-          <span className="text-xs text-muted-foreground">Stakeholders (strictness)
+          <span className="text-xs text-muted-foreground">Stakeholders
             <HintIcon className="ml-2 align-middle" content={"Filters weight curves by posts likely from each audience (HCP, patient, caregiver, payer). Probabilistic—compare viewpoints, not identity."} />
           </span>
           <div className="flex items-center justify-center gap-3 text-xs">
@@ -89,14 +88,7 @@ export function TimelineFilters({ onApply }: { onApply: (f: TimelineFilterState)
             <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={f.caregiver} onChange={(e) => setF({ ...f, caregiver: e.target.checked })} />Caregiver</label>
             <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={f.payer} onChange={(e) => setF({ ...f, payer: e.target.checked })} />Payer</label>
           </div>
-          <div id="strictness-slider" className="flex items-center justify-center gap-2 text-xs w-full max-w-[420px]">
-            <span>Strictness
-              <HintIcon className="ml-2 align-middle" content={"Slide right to include only strong-likelihood posts (cleaner, fewer). Slide left for broader context (more posts)."} />
-            </span>
-            <input aria-label="Stakeholder strictness" type="range" min={0} max={1} step={0.1} value={f.stakeholderThreshold} onChange={(e) => setF({ ...f, stakeholderThreshold: Number(e.target.value) })} />
-            <Badge variant="secondary">{f.stakeholderThreshold.toFixed(1)}</Badge>
-          </div>
-          <div className="text-[11px] text-muted-foreground text-center">Lower = broader include; higher = only strong audience association.</div>
+          {/* Strictness fixed at 0.5 (UI removed) */}
         </div>
         <div id="sentiment-chips" className="flex flex-col items-center gap-1 md:col-span-1">
           <span className="text-xs text-muted-foreground">Sentiment
