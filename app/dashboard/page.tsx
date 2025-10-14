@@ -143,9 +143,9 @@ function Section({ title, subtitle, href, children }: { title: string; subtitle?
           <Link
             href={href}
             className="ml-1 inline-flex items-center gap-1 rounded-md border border-border/60 bg-card/60 px-2.5 py-1 text-[11px] hover:bg-accent/40"
-            aria-label={`Open ${title}`}
+            aria-label={`Explore Data: ${title}`}
           >
-            Open <ArrowRight className="h-3.5 w-3.5" />
+            Explore Data <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
