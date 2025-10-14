@@ -83,7 +83,7 @@ export function TopBar() {
         <CommandList>
           <CommandGroup heading="Navigate">
             <CommandItem asChild>
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/dashboard">Executive Summary</Link>
             </CommandItem>
             <CommandItem asChild>
               <Link href="/themes">General Themes</Link>

@@ -52,8 +52,8 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header + quick filters */}
       <div className="flex flex-col gap-1">
-        <h1>Dashboard</h1>
-        <p className="lead">High‑level, scannable takeaways. Click any card to go deeper.</p>
+        <h1>Executive Summary</h1>
+        <p className="lead">High‑level, scannable takeaways.</p>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           <span className="opacity-80">Legend:</span>
           <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />Attention</span>

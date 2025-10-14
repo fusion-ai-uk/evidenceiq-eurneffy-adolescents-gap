@@ -15,7 +15,7 @@ type AppShellProps = {
 }
 
 const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard },
   { name: 'General Themes', href: '/themes', icon: MessageCircle },
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
