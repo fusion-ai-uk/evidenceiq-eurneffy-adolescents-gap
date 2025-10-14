@@ -4,8 +4,9 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { HintIcon } from "@/components/ui/hint"
 import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users } from "lucide-react"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
-type Audience = "all" | "hcp" | "patient" | "caregiver"
+//
 
 export default function DashboardPage() {
   const [concise, setConcise] = useState<boolean>(true)
@@ -53,6 +54,17 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-1">
         <h1>Dashboard</h1>
         <p className="lead">High‑level, scannable takeaways. Click any card to go deeper.</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+          <span className="opacity-80">Legend:</span>
+          <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />Attention</span>
+          <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />Engagement</span>
+          <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" />Conversation</span>
+          <span className="inline-flex items-center gap-1"><Smile className="h-3.5 w-3.5" />Tone</span>
+          <span className="inline-flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5" />Momentum</span>
+          <span className="inline-flex items-center gap-1"><Key className="h-3.5 w-3.5" />Access</span>
+          <span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Safety</span>
+          <span className="inline-flex items-center gap-1"><Activity className="h-3.5 w-3.5" />Durability</span>
+        </div>
       </div>
 
       {/* 1. Themes */}
@@ -503,6 +515,37 @@ function formatNum(n: number) {
   return String(n)
 }
 
+function microMetricForCard(data: { views: number; likes: number; replies: number; sentiment: number; title: string; summary: string }) {
+  // Prefer showing real counts when non-zero; otherwise choose a meaningful label
+  if (data.views > 0 || data.likes > 0 || data.replies > 0) {
+    return (
+      <>
+        <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{formatNum(data.views)} views</span>
+        <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />{formatNum(data.likes)}</span>
+        <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" />{formatNum(data.replies)}</span>
+      </>
+    )
+  }
+  const text = `${data.title} ${data.summary}`.toLowerCase()
+  if (/access|eligib|nice|ta947/.test(text)) {
+    return <span className="inline-flex items-center gap-1"><Key className="h-3.5 w-3.5" />Access‑driven</span>
+  }
+  if (/safety|crs|icans|rash|photosens|infection/.test(text)) {
+    return <span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Safety‑focused</span>
+  }
+  if (/durab|pfs|os|cr rate|remission/.test(text)) {
+    return <span className="inline-flex items-center gap-1"><Activity className="h-3.5 w-3.5" />Durability‑led</span>
+  }
+  if (/trend|spike|momentum|baseline/.test(text)) {
+    return <span className="inline-flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5" />Momentum</span>
+  }
+  // Fallback to tone label
+  const s = data.sentiment
+  const label = s > 0.1 ? 'Positive tone' : s < -0.1 ? 'Pressured tone' : 'Neutral tone'
+  const ToneIcon = s > 0.1 ? Smile : s < -0.1 ? Frown : Meh
+  return <span className="inline-flex items-center gap-1"><ToneIcon className="h-3.5 w-3.5" />{label}</span>
+}
+
 function TakeawayCard({ data, concise }: { data: { title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }; concise: boolean }) {
   const tone = data.sentiment > 0.1 ? 'pos' : data.sentiment < -0.1 ? 'neg' : 'neu'
   const ToneIcon = tone === 'pos' ? Smile : tone === 'neg' ? Frown : Meh
@@ -511,16 +554,21 @@ function TakeawayCard({ data, concise }: { data: { title: string; summary: strin
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="text-sm font-semibold tracking-tight">{data.title}</div>
         <div className="flex items-center gap-1 text-muted-foreground">
-          {data.icons.slice(0,3).map((Ic, i) => (<Ic key={i} className="h-4 w-4" />))}
+          {data.icons.slice(0,3).map((Ic, i) => (
+            <Tooltip key={i}>
+              <TooltipTrigger asChild>
+                <span className="inline-flex"><Ic className="h-4 w-4" /></span>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>{Ic===Activity?'Durability':Ic===Shield?'Safety':Ic===Key?'Access':Ic===HeartPulse?'QoL':Ic===TrendingUp?'Momentum':Ic===Eye?'Attention':Ic===ThumbsUp?'Engagement':Ic===MessageSquare?'Conversation':Ic===Smile?'Positive tone':Ic===Frown?'Negative tone':Ic===Meh?'Neutral tone':'Insight'}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
       </div>
       <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
         {data.summary}
       </p>
       <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{formatNum(data.views)} views</span>
-        <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />{formatNum(data.likes)}</span>
-        <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" />{formatNum(data.replies)}</span>
+        {microMetricForCard(data)}
         <span className={`inline-flex items-center gap-1 ml-auto ${tone==='pos'?'text-emerald-400':tone==='neg'?'text-rose-400':'text-muted-foreground'}`}>
           <ToneIcon className="h-3.5 w-3.5" /> {data.sentiment.toFixed(2)}
         </span>
