@@ -236,19 +236,19 @@ function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: strin
     let summary = ''
     switch (key) {
       case 'durability':
-        summary = `Bispecific durability is driving most conversation. Posts combine explainers with trial news. Keep Zynlonta in the 3L space and tie it to this durability story without making head‑to‑head claims. Use a clear visual summary.`
+        summary = `Bispecific durability is driving most conversation across the feed. People share short explainers alongside trial headlines, and that mix is shaping how efficacy is understood right now. The takeaway from the data is that durability is the lens through which many readers are judging treatments. Broadly, tie Zynlonta’s story to 3L use in the UK and refer to durability in simple, visual terms rather than positioning it as a head‑to‑head contest.`
         break
       case 'access':
-        summary = `People keep asking who qualifies and where to start. Share a single‑screen “who/when” with a simple referral path. The fewer steps there are, the more teams will use it.`
+        summary = `Questions about eligibility and first steps appear frequently: who qualifies, where to start, which route to refer, and what happens after referral. This tells us that process clarity is still a major friction point, especially outside specialist centres. The key takeaway is that audiences want a quick way to check “who/when” and then move forward confidently. Broadly, a single‑screen guide with a short referral path will reduce hesitations and keep activity moving.`
         break
       case 'safety':
-        summary = `Most safety talk is about competitors (for example CRS or ICANS), not Zynlonta. Provide a short checklist for recognising and managing issues, and show who to contact if there are concerns.`
+        summary = `Safety discussion is present but it mostly clusters around competitor issues such as CRS or ICANS; Zynlonta‑specific concerns are less prominent in the current slice. Readers look for clear, non‑alarmist advice they can act on quickly if needed. The takeaway is that calm, step‑by‑step information beats argument in this area. Broadly, a short recognition and management checklist with escalation contacts will meet the need without inflaming the conversation.`
         break
       case 'qol':
-        summary = `Patients want to know what daily life looks like during treatment. Explain it in plain language with short examples, and link to practical support tips.`
+        summary = `Patients and caregivers ask about the day‑to‑day: energy levels, appointments, side‑effects that affect routine, and how long things last. That pattern suggests they want expectations set in plain language and backed by simple examples. The takeaway is that practical guidance, not slogans, is what gets read and shared. Broadly, use clear descriptions of what to expect week‑by‑week and point to practical support tips they can use immediately.`
         break
       case 'cartContext':
-        summary = `CAR‑T is still the reference point. Position Zynlonta as a practical 3L option when CAR‑T is not suitable—focus on capacity and logistics rather than debating efficacy.`
+        summary = `CAR‑T remains the mental benchmark in many threads, and people use it to frame expectations for other options. In that context, the most effective comparisons in the data are not about raw efficacy claims but about real‑world delivery: who is suitable, capacity, and logistics. The takeaway is to show where Zynlonta fits when CAR‑T is not appropriate or available in 3L. Broadly, anchor the message in practical pathways rather than debating head‑to‑head outcomes.`
         break
       default:
         summary = `${defaultTitle}.`
