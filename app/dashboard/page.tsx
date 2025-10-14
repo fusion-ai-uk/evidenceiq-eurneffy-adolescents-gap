@@ -59,11 +59,16 @@ export default function DashboardPage() {
           <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />Attention</span>
           <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />Engagement</span>
           <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" />Conversation</span>
-          <span className="inline-flex items-center gap-1"><Smile className="h-3.5 w-3.5" />Tone</span>
+          <span className="inline-flex items-center gap-1"><Smile className="h-3.5 w-3.5" />Tone (positive)</span>
+          <span className="inline-flex items-center gap-1"><Meh className="h-3.5 w-3.5" />Tone (neutral)</span>
+          <span className="inline-flex items-center gap-1"><Frown className="h-3.5 w-3.5" />Tone (negative)</span>
           <span className="inline-flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5" />Momentum</span>
           <span className="inline-flex items-center gap-1"><Key className="h-3.5 w-3.5" />Access</span>
           <span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Safety</span>
           <span className="inline-flex items-center gap-1"><Activity className="h-3.5 w-3.5" />Durability</span>
+          <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />Audience</span>
+          <span className="inline-flex items-center gap-1"><HeartPulse className="h-3.5 w-3.5" />QoL</span>
+          <span className="inline-flex items-center gap-1"><ThermometerSnowflake className="h-3.5 w-3.5" />Cooling</span>
         </div>
       </div>
 
