@@ -241,7 +241,7 @@ export function ThemeExplorerViz() {
       <CardHeader>
         <div className="flex flex-col gap-4 relative z-10">
           <div className="flex items-center justify-between gap-4">
-            <CardTitle>General Themes</CardTitle>
+            <CardTitle>Theme Explorer</CardTitle>
             <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
               <TabsList>
                 <TabsTrigger value="treemap">Overview</TabsTrigger>
@@ -298,7 +298,18 @@ export function ThemeExplorerViz() {
                   legend: { show: false },
                   xaxis: { labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
                   yaxis: { show: false },
-                  dataLabels: { enabled: false },
+                  dataLabels: {
+                    enabled: true,
+                    style: {
+                      fontSize: "11px",
+                      fontWeight: 600,
+                    },
+                    formatter: (_val: string, opts: any) => {
+                      // Label only the top 10 tiles by the current metric
+                      const i = opts?.dataPointIndex ?? 0
+                      return i < 10 ? String(_val) : ""
+                    },
+                  },
                   tooltip: {
                     theme: "dark",
                     y: { formatter: (v: number) => v.toLocaleString() },
@@ -333,7 +344,7 @@ export function ThemeExplorerViz() {
                     data: filtered
                       .sort((a, b) => valueFor(b) - valueFor(a))
                       .slice(0, 80)
-                      .map((r) => ({ x: truncate(r.topicTitle, 42), full: r.topicTitle, y: valueFor(r), fillColor: groupColor(r.groupName || "Ungrouped"), raw: r })),
+                      .map((r) => ({ x: truncate(r.topicTitle, 36), full: r.topicTitle, y: valueFor(r), fillColor: groupColor(r.groupName || "Ungrouped"), raw: r })),
                   },
                 ]}
               />

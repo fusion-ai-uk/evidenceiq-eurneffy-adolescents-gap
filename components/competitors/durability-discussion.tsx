@@ -25,13 +25,13 @@ export function DurabilityDiscussion() {
     }))
   }, [rows])
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/50 col-span-2">
       <CardHeader>
         <CardTitle className="text-base font-medium">Durability Narrative Trends</CardTitle>
         <p className="text-sm text-muted-foreground">Mentions of long-term outcomes and durable responses over time</p>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={360}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
             <XAxis dataKey="month" stroke="#666" style={{ fontSize: "12px" }} />

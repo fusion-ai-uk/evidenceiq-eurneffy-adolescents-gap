@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard, comingSoon: true },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "General Themes", href: "/themes", icon: MessageCircle },
   { name: "Trends Explorer", href: "/trends", icon: TrendingUp },
   { name: "Audience Insights", href: "/audience", icon: Users },

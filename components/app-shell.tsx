@@ -15,7 +15,7 @@ type AppShellProps = {
 }
 
 const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard, comingSoon: true },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'General Themes', href: '/themes', icon: MessageCircle },
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
@@ -107,18 +107,10 @@ export function AppShell({ children }: AppShellProps) {
           <CommandList>
             <CommandGroup heading="Navigate">
               {nav.map((item) => (
-                item.comingSoon ? (
-                  <div key={item.href} className="flex items-center gap-2 px-2 py-3 text-sm text-muted-foreground/70">
-                    <item.icon className="h-4 w-4 opacity-60 animate-pulse" />
-                    <span>{item.name}</span>
-                    <span className="ml-auto text-[10px] rounded bg-muted px-1.5 py-0.5 text-muted-foreground">Coming soon</span>
-                  </div>
-                ) : (
-                  <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
-                    <item.icon className="h-4 w-4" />
-                    {item.name}
-                  </CommandItem>
-                )
+                <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </CommandItem>
               ))}
             </CommandGroup>
             <CommandGroup heading="Appearance">

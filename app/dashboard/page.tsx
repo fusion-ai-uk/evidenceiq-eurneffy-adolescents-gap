@@ -1,157 +1,559 @@
 "use client"
 
-import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
-import { ExecutiveSummary } from "@/components/dashboard/executive-summary"
-import { Prescribing } from "@/components/dashboard/prescribing"
-import { Patients } from "@/components/dashboard/patients"
-import { Access } from "@/components/dashboard/access"
-import { Trends } from "@/components/dashboard/trends"
-import { Mechanism } from "@/components/dashboard/mechanism"
-import { SideEffects } from "@/components/dashboard/side-effects"
+import { useEffect, useMemo, useState } from "react"
+import { HintIcon } from "@/components/ui/hint"
+import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users } from "lucide-react"
 
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("clinical-evidence")
+type Audience = "all" | "hcp" | "patient" | "caregiver"
+
+export default function DashboardPage() {
+	const [audience, setAudience] = useState<Audience>("all")
+  const [concise, setConcise] = useState<boolean>(true)
+  const [themes, setThemes] = useState<any[]>([])
+  const [themesLoading, setThemesLoading] = useState<boolean>(false)
+  const [alerts, setAlerts] = useState<any[]>([])
+  const [alertsLoading, setAlertsLoading] = useState<boolean>(false)
+  const [audRows, setAudRows] = useState<any[]>([])
+  const [audLoading, setAudLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    setThemesLoading(true)
+    fetch('/api/themes/query?limit=1000')
+      .then((r) => r.json())
+      .then((d) => setThemes(Array.isArray(d?.rows) ? d.rows : []))
+      .catch(() => setThemes([]))
+      .finally(() => setThemesLoading(false))
+  }, [])
+
+  const takeaways = useMemo(() => buildThemeTakeaways(themes), [themes])
+  const trendTakeaways = useMemo(() => buildTrendTakeaways(alerts), [alerts])
+  const audienceTakeaways = useMemo(() => buildAudienceTakeaways(audRows), [audRows])
+
+  useEffect(() => {
+    setAlertsLoading(true)
+    fetch('/api/timeseries/alerts?minBaseline=10&limit=12')
+      .then((r) => r.json())
+      .then((d) => setAlerts(Array.isArray(d?.rows) ? d.rows : []))
+      .catch(() => setAlerts([]))
+      .finally(() => setAlertsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    setAudLoading(true)
+    fetch('/api/audience/overview?site=all')
+      .then((r) => r.json())
+      .then((d) => setAudRows(Array.isArray(d?.rows) ? d.rows : []))
+      .catch(() => setAudRows([]))
+      .finally(() => setAudLoading(false))
+  }, [])
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-slate-900/30 to-black">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse-slow delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-sky-500/5 to-transparent rounded-full"></div>
-        <div className="absolute inset-0 bg-stars opacity-30"></div>
+    <div className="space-y-8">
+      {/* Header + quick filters */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1>Dashboard</h1>
+          <p className="lead">High‑level, scannable takeaways. Click any card to go deeper.</p>
       </div>
-
-      {/* Header */}
-      <header className="relative z-10 border-b border-sky-500/20 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <ArrowLeft className="h-5 w-5 text-sky-400 group-hover:translate-x-[-2px] transition-transform" />
-              <Image
-                src="/evidenceiq-logo.png"
-                alt="evidenceIQ"
-                width={140}
-                height={45}
-                className="brightness-0 invert drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
-              />
-            </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="text-[11px] text-muted-foreground">Density</div>
+          <div className="inline-flex rounded-md border border-border/60 bg-card/60 overflow-hidden">
+            {[[true,'Concise'],[false,'Detailed']].map(([v,label]) => (
+              <button
+                key={String(v)}
+                onClick={() => setConcise(Boolean(v))}
+                className={`px-3 py-1.5 text-xs transition-colors ${concise===Boolean(v)?"bg-primary/20 text-primary":"hover:bg-accent/40"}`}
+              >{label as string}</button>
+            ))}
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-sky-300/80 font-medium tracking-wide">
-              Clinical Evidence & Patient Insights
-            </div>
-            <div className="text-2xl font-bold text-white">Zynlonta</div>
+          <div className="ml-3 text-[11px] text-muted-foreground">Audience</div>
+          <div className="inline-flex rounded-md border border-border/60 bg-card/60 overflow-hidden">
+            {["all","hcp","patient","caregiver"].map(v => (
+              <button
+                key={v}
+                onClick={() => setAudience(v as Audience)}
+                className={`px-3 py-1.5 text-xs capitalize transition-colors ${audience===v?"bg-primary/20 text-primary":"hover:bg-accent/40"}`}
+              >{v}</button>
+            ))}
           </div>
         </div>
-      </header>
-
-      {/* Dashboard Content */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-gray-900/60 to-black/60 border border-sky-500/20 rounded-2xl backdrop-blur-xl shadow-[0_0_50px_rgba(56,189,248,0.1)]">
-            <div className="p-8">
-              <div className="flex items-center space-x-3 mb-8 p-4 rounded-xl bg-gradient-to-r from-sky-500/10 to-blue-600/10 border border-sky-500/20">
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  This dashboard provides a comprehensive overview of Zynlonta, the first-in-class CD19-directed
-                  antibody-drug conjugate. Explore the clinical evidence, patient experience data, and regulatory
-                  milestones that establish Zynlonta as a breakthrough therapy for relapsed/refractory DLBCL treatment
-                  across the NHS.
-                </p>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full bg-black/60 border border-sky-500/20 rounded-xl p-1 backdrop-blur-xl h-auto">
-                  <div className="grid grid-cols-7 gap-1 w-full">
-                    <TabsTrigger
-                      value="clinical-evidence"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Clinical Evidence</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">Efficacy & Trials</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="patient-experience"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Patient Experience</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">QoL & Preference</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="hcp-perspectives"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">HCP Perspectives</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">Adoption & Protocols</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="safety-stability"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Safety & Stability</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">Profile & Storage</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="market-access"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Market Access</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">Regulatory & Launch</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="scientific-foundation"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Scientific Foundation</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">MoA & Development</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="innovation-future"
-                      className="flex flex-col items-center justify-center p-3 text-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(56,189,248,0.3)] rounded-lg transition-all duration-300 h-16 w-full"
-                    >
-                      <span className="font-medium text-xs leading-none">Innovation & Future</span>
-                      <span className="text-[10px] opacity-60 mt-1 leading-none">Impact & Outlook</span>
-                    </TabsTrigger>
+      {/* 1. Themes */}
+      <Section title="General Themes" href="/themes" subtitle={`Theme Explorer · ${audience==='all'?'All audiences':audience.toUpperCase()}`}> 
+        {themesLoading && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading themes…</div>
+        )}
+        {!themesLoading && takeaways.length === 0 && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No theme data available.</div>
+        )}
+        {!themesLoading && takeaways.slice(0,6).map((tw, idx) => (
+          <TakeawayCard key={idx} data={tw} concise={concise} />
+        ))}
+      </Section>
+
+      {/* 2. Trends */}
+      <Section title="Trends Explorer" href="/trends" subtitle="Above‑baseline highlights">
+        {alertsLoading && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading trends…</div>
+        )}
+        {!alertsLoading && trendTakeaways.length === 0 && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No trend data available.</div>
+        )}
+        {!alertsLoading && trendTakeaways.slice(0,6).map((tw, idx) => (
+          <TakeawayCard key={`trend-${idx}`} data={tw} concise={concise} />
+        ))}
+      </Section>
+
+      {/* 3. Audience */}
+      <Section title="Audience Insights" href="/audience" subtitle="Who’s driving the narrative">
+        {audLoading && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading audience insights…</div>
+        )}
+        {!audLoading && audienceTakeaways.length === 0 && (
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No audience data available.</div>
+        )}
+        {!audLoading && audienceTakeaways.slice(0,6).map((tw, idx) => (
+          <TakeawayCard key={`aud-${idx}`} data={tw} concise={concise} />
+        ))}
+      </Section>
+
+      {/* Brief tray removed per request */}
+
+      {/* 4. Competitors */}
+      <Section title="Competitor Lens" href="/competitors" subtitle="Quick competitive posture">
+        <CompetitorLensTakeaways concise={concise} />
+      </Section>
+
+      {/* Sections temporarily removed: Entity Network, Events Tracker, Content Recommendations */}
                   </div>
-                </TabsList>
+  )
+}
 
-                <TabsContent value="clinical-evidence" className="mt-8">
-                  <ExecutiveSummary />
-                </TabsContent>
-                <TabsContent value="patient-experience" className="mt-8">
-                  <Patients />
-                </TabsContent>
-                <TabsContent value="hcp-perspectives" className="mt-8">
-                  <Prescribing />
-                </TabsContent>
-                <TabsContent value="safety-stability" className="mt-8">
-                  <SideEffects />
-                </TabsContent>
-                <TabsContent value="market-access" className="mt-8">
-                  <Access />
-                </TabsContent>
-                <TabsContent value="scientific-foundation" className="mt-8">
-                  <Mechanism />
-                </TabsContent>
-                <TabsContent value="innovation-future" className="mt-8">
-                  <Trends />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-        </div>
-      </section>
+/* ---------- Building blocks ---------- */
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-sky-500/20 bg-black/80 backdrop-blur-xl py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">© 2024 evidenceIQ. All rights reserved.</p>
+function Section({ title, subtitle, href, children }: { title: string; subtitle?: string; href: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          <HintIcon content="Pin cards to build a brief. Toggle density to switch between concise and detailed views." />
+          <Link
+            href={href}
+            className="ml-1 inline-flex items-center gap-1 rounded-md border border-border/60 bg-card/60 px-2.5 py-1 text-[11px] hover:bg-accent/40"
+            aria-label={`Open ${title}`}
+          >
+            Open <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
-      </footer>
+        {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
+      </div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {children}
+      </div>
     </div>
   )
 }
+
+function Card({ id, title, children, href, variant = "default", concise = true }: { id: string; title: string; children: React.ReactNode; href: string; variant?: "default" | "warning" | "positive"; concise?: boolean }) {
+  const v = variant === "warning" ? "ring-amber-400/30 bg-amber-500/10" : variant === "positive" ? "ring-emerald-400/30 bg-emerald-500/10" : "ring-primary/20 bg-card/60"
+  return (
+    <div className={`relative rounded-xl border border-border/60 ${v} p-4`}>
+      <div className="text-sm font-semibold tracking-tight mb-2">{title}</div>
+      <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
+        {children}
+      </p>
+    </div>
+  )
+}
+
+function StatCard({ label, value, tone = "up", href }: { label: string; value: string; tone?: "up" | "down"; href: string }) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-lg font-semibold ${tone === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>{value}</div>
+      <div className="text-[11px] text-muted-foreground mt-1">vs 6‑mo baseline</div>
+    </div>
+  )
+}
+
+function MiniBar({ title, items, href }: { title: string; items: { k: string; v: number }[]; href: string }) {
+  const norm = (v: number) => Math.max(0, Math.min(1, (v + 1) / 2))
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+      <div className="text-sm font-medium mb-2">{title}</div>
+      <div className="grid grid-cols-3 gap-2 items-end">
+        {items.map((it) => (
+          <div key={it.k} className="flex flex-col gap-1">
+            <div className="h-16 w-full rounded-md bg-muted/30 overflow-hidden">
+              <div className="h-full bg-primary/40" style={{ height: `${Math.round(10 + norm(it.v) * 90)}%` }} />
+            </div>
+            <div className="text-[11px] text-muted-foreground text-center">{it.k} {(it.v>=0?'+':'')}{it.v.toFixed(2)}</div>
+          </div>
+        ))}
+        </div>
+    </div>
+  )
+}
+
+/* Build 5–6 top-tier theme takeaways from raw theme rows */
+function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }> {
+  if (!Array.isArray(rows) || rows.length === 0) return []
+  const all = rows.map((r) => ({
+    title: String(r?.topicTitle || r?.category || ''),
+    summary: String(r?.topicSummary || ''),
+    group: String(r?.groupName || ''),
+    views: Number(r?.viewCount || 0),
+    likes: Number(r?.likeCount || 0),
+    replies: Number(r?.replyCount || 0) + Number(r?.retweetCount || 0),
+    sentiment: Number(r?.sentimentCompound ?? 0),
+  }))
+
+  const sum = (a: number, b: number) => a + b
+  const totalViews = all.map((x) => x.views).reduce(sum, 0) || 1
+
+  // Buckets
+  const buckets: Record<string, typeof all> = {
+    durability: all.filter((t) => /durab|fixed[-\s]?duration/i.test(`${t.title} ${t.summary}`)),
+    access: all.filter((t) => /access|nice|ta947|eligib|who\/?when/i.test(`${t.title} ${t.summary}`)),
+    safety: all.filter((t) => /safety|rash|photosens|crs|icans|infection/i.test(`${t.title} ${t.summary}`)),
+    qol: all.filter((t) => /qol|quality of life|patient/i.test(`${t.title} ${t.summary}`)),
+    cartContext: all.filter((t) => /car[-\s]?t|cell\s*therapy/i.test(`${t.title} ${t.summary}`)),
+  }
+
+  const make = (key: string, label: string, icons: any[], defaultTitle: string) => {
+    const arr = buckets[key] || []
+    if (arr.length === 0) return null
+    const views = arr.map((x) => x.views).reduce(sum, 0)
+    const likes = arr.map((x) => x.likes).reduce(sum, 0)
+    const replies = arr.map((x) => x.replies).reduce(sum, 0)
+    const sentiment = arr.length ? arr.map((x) => x.sentiment).reduce(sum, 0) / arr.length : 0
+    const top = [...arr].sort((a, b) => b.views - a.views)[0]
+    const share = views / totalViews
+    // Narrative tailored per bucket
+    let implication = ''
+    if (key === 'durability') {
+      implication = 'attach Zynlonta\'s 3L fit to the durability storyline (not a head‑to‑head claim). Keep it visual and simple.'
+    } else if (key === 'access') {
+      implication = 'publish a one‑screen “who/when” micro‑flow with referral steps. Reduce effort; cue action.'
+    } else if (key === 'safety') {
+      implication = 'keep a calm, checklist tone. Reassurance beats rebuttal; include escalation routes.'
+    } else if (key === 'qol') {
+      implication = 'set expectations early in patient lanes using plain language and day‑to‑day examples; link to practical tips.'
+    } else if (key === 'cartContext') {
+      implication = 'position Zynlonta as the practical 3L solution around CAR‑T constraints (capacity, logistics), not against efficacy.'
+    }
+    // Friendly share wording
+    const shareWord = share >= 0.35 ? 'dominates the feed' : share >= 0.2 ? 'sets the agenda' : 'is bubbling up'
+    const toneWord = sentiment > 0.1 ? 'with a warm tone' : sentiment < -0.1 ? 'but tone is spiky' : 'with mixed tone'
+    const likeRate = likes / Math.max(views, 1)
+    const talkWord = key === 'durability' ? 'posts mix explainers and trial mentions' :
+      key === 'access' ? 'questions keep circling around “who qualifies” and “where to start”' :
+      key === 'safety' ? 'most chatter points at competitor AEs rather than Zynlonta' :
+      key === 'qol' ? 'people look for day‑to‑day expectations and tips' :
+      'CAR‑T remains the mental anchor for comparisons'
+    const engageWord = likeRate > 0.01 ? 'engagement is strong' : likeRate > 0.002 ? 'engagement is steady' : 'engagement is modest'
+    const summary = `${defaultTitle} ${shareWord} ${toneWord}. We see that ${talkWord}, and ${engageWord} across related threads. Next move: ${implication}`
+    return { title: defaultTitle, summary, icons, views, likes, replies, sentiment }
+  }
+
+  const items = [
+    make('durability', 'Durability owns attention', [Activity, Eye, ThumbsUp], 'Bispecific durability sets the frame'),
+    make('access', 'Access questions are rising', [Key, Eye, MessageSquare], 'Eligibility clarity converts neutrals'),
+    make('safety', 'Safety discussion is prominent', [Shield, MessageSquare, Eye], 'Reassure with calm checklists'),
+    make('qol', 'QoL narratives want plain language', [HeartPulse, Smile, Meh], 'Set expectations early in patient lanes'),
+    make('cartContext', 'CAR‑T remains the reference anchor', [Eye, Activity, Meh], 'Position Zynlonta around 3L suitability'),
+  ].filter(Boolean) as any[]
+
+  // Add a roll‑up if enough data
+  if (all.length >= 5) {
+    const meanSent = all.map((x) => x.sentiment).reduce(sum, 0) / all.length
+    const rollupSummary = `Big picture: durability leads the story, access questions drive action, and safety chatter plays in the background. The read: ride the durability wave with a clear 3L fit, answer “who/when” in a single screen, and keep a calm checklist for safety.`
+    items.unshift({
+      title: 'What the market is really seeing',
+      summary: rollupSummary,
+      icons: [Eye, Activity, Key],
+      views: totalViews,
+      likes: all.map((x) => x.likes).reduce(sum, 0),
+      replies: all.map((x) => x.replies).reduce(sum, 0),
+      sentiment: meanSent,
+    })
+  }
+
+  return items
+}
+
+function sentimentText(s: number) {
+  if (s > 0.1) return 'Tone skews positive.'
+  if (s < -0.1) return 'Tone is pressured.'
+  return 'Tone is neutral.'
+}
+
+function strip(s: string) {
+  return String(s || '').replace(/\s+/g, ' ').trim()
+}
+
+/* Build trend takeaways from /api/timeseries/alerts results */
+function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }> {
+  if (!Array.isArray(rows) || rows.length === 0) return []
+  const up = rows.filter((r) => Number(r?.pct_change || 0) > 0)
+  const down = rows.filter((r) => Number(r?.pct_change || 0) < 0)
+
+  const rank = (arr: any[]) => [...arr].sort((a, b) => Number(b.pct_change || 0) - Number(a.pct_change || 0))
+  const topUps = rank(up).slice(0, 3)
+  const topDowns = rank(down).slice(0, 2)
+
+  const items: Array<{ title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }> = []
+
+  if (topUps.length) {
+    const cats = topUps.map((x) => String(x.category)).join(', ')
+    items.push({
+      title: 'Momentum spike',
+      summary: `Conversation lifted above baseline in ${cats}. Use this window to drop bite‑size 3L fit reminders and eligibility shortcuts so recall rides the wave. Keep tone measured; let the trend carry reach.`,
+      icons: [TrendingUp, Eye, ThumbsUp],
+      views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  if (topDowns.length) {
+    const cats = topDowns.map((x) => String(x.category)).join(', ')
+    items.push({
+      title: 'Cooling pockets',
+      summary: `Some themes quietened (${cats}). If these matter to the 3L story, re‑seed with one strong proof point and a clean visual. Otherwise, let them rest and focus where attention already flows.`,
+      icons: [ThermometerSnowflake, Eye, Meh],
+      views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  // Access nudge
+  if (rows.some((r) => /access|eligib|ta947|nice/i.test(String(r.category)))) {
+    items.push({
+      title: 'Access questions create action',
+      summary: `When eligibility or “who/where” trends, people are ready to move. Meet that intent with a one‑screen answer (who qualifies → refer → monitor). The simpler the step, the more it gets shared inside DGH teams.`,
+      icons: [Key, MessageSquare, Eye],
+      views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  // Safety reassurance
+  if (rows.some((r) => /safety|crs|icans|rash|photosens/i.test(String(r.category)))) {
+    items.push({
+      title: 'Safety reassurance beats rebuttal',
+      summary: `Spikes around safety are best handled with calm checklists and “what good looks like” examples, not arguments. It keeps tone stable and credibility high in patient and HCP lanes alike.`,
+      icons: [Shield, Smile, MessageSquare],
+      views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  // Ensure at least 4 cards with sensible fallbacks
+  const addFallback = (title: string, summary: string, icons: any[]) => {
+    items.push({ title, summary, icons, views: 0, likes: 0, replies: 0, sentiment: 0 })
+  }
+
+  if (items.length < 4) {
+    addFallback(
+      'Sequencing watch',
+      'Watch for posts that link bispecific momentum to earlier lines. When that happens, re‑state where Zynlonta fits in 3L and why it helps real patients today. Keep it practical, not theoretical.',
+      [Activity, Key, Eye],
+    )
+  }
+
+  if (items.length < 4) {
+    addFallback(
+      'Steady backdrop',
+      'If no single spike dominates, keep cadence: one helpful explainer a week beats one big splash. Anchor every post to a single step—who, how, or what next.',
+      [TrendingUp, Eye, ThumbsUp],
+    )
+  }
+
+  return items
+}
+
+/* Build audience takeaways from /api/audience/overview rows */
+function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }> {
+  if (!Array.isArray(rows) || rows.length === 0) return []
+  // Compute weighted tone by audience and surface practical guidance
+  const get = (name: string, vKey: string, sKey: string) => {
+    const v = rows.map((r) => Number((r as any)[vKey] || 0)).reduce((a, b) => a + b, 0)
+    const sNum = rows.map((r) => Number((r as any)[sKey] || 0) * Number((r as any)[vKey] || 0)).reduce((a, b) => a + b, 0)
+    const sDen = Math.max(v, 1)
+    return { name, v, s: sNum / sDen }
+  }
+
+  const hcp = get('HCP', 'hcp_volume', 'hcp_sentiment')
+  const patient = get('Patient', 'patient_volume', 'patient_sentiment')
+  const caregiver = get('Caregiver', 'caregiver_volume', 'caregiver_sentiment')
+
+  const items: any[] = []
+
+  // HCP takeaway
+  items.push({
+    title: 'What wins with HCPs',
+    summary: `HCP posts respond best to clarity and workflow. When we give a simple “who/when” and a practical next step, tone lifts and threads remain constructive. Keep it service‑oriented: eligibility cues, referral routes, and monitoring checklists.`,
+    icons: [Users, Key, Smile], views: 0, likes: 0, replies: 0, sentiment: hcp.s,
+  })
+
+  // Patient takeaway
+  items.push({
+    title: 'What lands with patients',
+    summary: `Patients read in plain language and remember examples. Start with what treatment means day‑to‑day (appointments, common side‑effects, what’s normal vs call the team). Then give one helpful link.`,
+    icons: [HeartPulse, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: patient.s,
+  })
+
+  // Caregiver takeaway (if volume exists or tone matters)
+  if (caregiver.v > 0 || Math.abs(caregiver.s) > 0.05) {
+    items.push({
+      title: 'Caregiver voice is small but important',
+      summary: `When caregivers speak, it’s usually about burden and “who to call”. A small tile with practical tips (transport, who to ring out‑of‑hours) buys a lot of goodwill and lowers anxiety.`,
+      icons: [Users, Meh, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: caregiver.s,
+    })
+  }
+
+  // Cross‑audience rule of thumb
+  items.push({
+    title: 'One job per post',
+    summary: `Across audiences, the most effective posts do one job well. Pick one: explain eligibility, set expectations, or give a next step. Then stop. Cadence beats complexity.`,
+    icons: [Eye, ThumbsUp, Smile], views: 0, likes: 0, replies: 0, sentiment: 0,
+  })
+
+  // Ensure we return 6 takeaways with helpful defaults
+  if (items.length < 6) {
+    items.push({
+      title: 'Tone before reach',
+      summary: `Fix comprehension before pushing for scale. If comments show confusion, simplify the message and tighten the next step—tone improves, and reach follows.`,
+      icons: [Smile, Eye, ThumbsUp], views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  if (items.length < 6) {
+    items.push({
+      title: 'Close with one action',
+      summary: `End every asset with one clear action—refer, book, or read a one‑screen guide. Choice overload reduces follow‑through; one link wins.`,
+      icons: [Key, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  return items
+}
+
+/* Competitor lens - fetch & synthesize 4–5 takeaways */
+function CompetitorLensTakeaways({ concise }: { concise: boolean }) {
+  const [rows, setRows] = useState<any[]>([])
+  const [psi, setPsi] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    setLoading(true)
+    Promise.all([
+      fetch('/api/competitors/durability').then((r) => r.json()).catch(() => ({ rows: [] })),
+      fetch('/api/competitors/sentiment').then((r) => r.json()).catch(() => ({ rows: [] })),
+    ])
+      .then(([dur, s]) => {
+        setRows(Array.isArray(dur?.rows) ? dur.rows : [])
+        setPsi(Array.isArray(s?.rows) ? s.rows : [])
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const cards = useMemo(() => buildCompetitorTakeaways(rows, psi), [rows, psi])
+
+  if (loading) return <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading competitor insights…</div>
+  if (!cards.length) return <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No competitor data available.</div>
+
+  return (
+    <>
+      {cards.slice(0,5).map((tw, idx) => (
+        <TakeawayCard key={`comp-${idx}`} data={tw} concise={concise} />
+      ))}
+    </>
+  )
+}
+
+function buildCompetitorTakeaways(durRows: any[], psiRows: any[]) {
+  const items: any[] = []
+  // Durability momentum by therapy
+  if (Array.isArray(durRows) && durRows.length) {
+    // take last month snapshot
+    const last = durRows.reduce((latest: any, r: any) => (!latest || r.ym > latest ? r.ym : latest), null)
+    const monthRows = durRows.filter((r: any) => r.ym === last)
+    const ranked = [...monthRows].sort((a: any, b: any) => Number(b.durability_weighted_mentions || 0) - Number(a.durability_weighted_mentions || 0))
+    if (ranked.length) {
+      const top = ranked[0]
+      items.push({
+        title: 'Durability story leadership',
+        summary: `${String(top.therapy)} currently leads durability chatter. Ride this narrative by anchoring Zynlonta to 3L fit and real‑world practicality—avoid head‑to‑head framings.`,
+        icons: [Activity, Eye, ThumbsUp], views: 0, likes: 0, replies: 0, sentiment: 0,
+      })
+    }
+  }
+
+  // Sentiment by aspect (PSI)
+  if (Array.isArray(psiRows) && psiRows.length) {
+    const byAspect = (asp: string) => psiRows.filter((r: any) => r.aspect === asp)
+    const pick = (asp: string, title: string, hint: string) => {
+      const r = byAspect(asp)
+      if (!r.length) return
+      const z = r.find((x: any) => x.therapy === 'Zynlonta')
+      const e = r.find((x: any) => x.therapy === 'Epcoritamab')
+      const g = r.find((x: any) => x.therapy === 'Glofitamab')
+      const leader = [z, e, g].filter(Boolean).sort((a: any, b: any) => Number(b.psi_0_100||0) - Number(a.psi_0_100||0))[0]
+      if (!leader) return
+      items.push({
+        title,
+        summary: `${leader.therapy} has the strongest ${asp} sentiment right now. ${hint}`,
+        icons: [Smile, Eye, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: 0,
+      })
+    }
+    pick('Efficacy', 'Efficacy sentiment leader', 'Respond by foregrounding Zynlonta’s practical 3L advantages—clarity, predictability, and serviceability.')
+    pick('Access', 'Access sentiment leader', 'Meet eligibility questions with one‑screen flows; remove effort to compete for action.')
+    pick('Safety', 'Safety sentiment leader', 'Keep calm checklists and escalation routes—it preserves credibility even when conversation heats up.')
+  }
+
+  if (items.length === 0) {
+    items.push({
+      title: 'Competitive posture',
+      summary: 'If no single competitor leads consistently, keep teaching the 3L fit in short, repeatable formats and attach it to trending storylines.',
+      icons: [Eye, Key, ThumbsUp], views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
+  return items
+}
+
+function formatNum(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+  return String(n)
+}
+
+function TakeawayCard({ data, concise }: { data: { title: string; summary: string; icons: any[]; views: number; likes: number; replies: number; sentiment: number }; concise: boolean }) {
+  const tone = data.sentiment > 0.1 ? 'pos' : data.sentiment < -0.1 ? 'neg' : 'neu'
+  const ToneIcon = tone === 'pos' ? Smile : tone === 'neg' ? Frown : Meh
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="text-sm font-semibold tracking-tight">{data.title}</div>
+        <div className="flex items-center gap-1 text-muted-foreground">
+          {data.icons.slice(0,3).map((Ic, i) => (<Ic key={i} className="h-4 w-4" />))}
+        </div>
+      </div>
+      <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
+        {data.summary}
+      </p>
+      <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{formatNum(data.views)} views</span>
+        <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />{formatNum(data.likes)}</span>
+        <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" />{formatNum(data.replies)}</span>
+        <span className={`inline-flex items-center gap-1 ml-auto ${tone==='pos'?'text-emerald-400':tone==='neg'?'text-rose-400':'text-muted-foreground'}`}>
+          <ToneIcon className="h-3.5 w-3.5" /> {data.sentiment.toFixed(2)}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+
+
+
