@@ -9,7 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 //
 
 export default function DashboardPage() {
-  const [concise, setConcise] = useState<boolean>(true)
+  const [concise, setConcise] = useState<boolean>(false)
   const [themes, setThemes] = useState<any[]>([])
   const [themesLoading, setThemesLoading] = useState<boolean>(false)
   const [alerts, setAlerts] = useState<any[]>([])
@@ -149,7 +149,7 @@ function Card({ id, title, children, href, variant = "default", concise = true }
   return (
     <div className={`relative rounded-xl border border-border/60 ${v} p-4`}>
       <div className="text-sm font-semibold tracking-tight mb-2">{title}</div>
-      <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
+      <p className="text-[13px] leading-6 text-muted-foreground">
         {children}
                 </p>
               </div>
@@ -308,7 +308,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
     const cats = topUps.map((x) => String(x.category)).join(', ')
     items.push({
       title: 'Momentum spike',
-      summary: `Conversation lifted above baseline in ${cats}. Drop short reminders about Zynlonta’s 3L fit and add clear eligibility links. Let the trend do the heavy lifting.`,
+      summary: `Conversation moved noticeably above its usual run‑rate in ${cats}. In practical terms, more people are browsing and sharing content in these areas right now. The takeaway from the data is simply that attention is already there—use the moment to restate the basics in plain language (for example Zynlonta’s 3L fit) and include a clear path for people who want to learn more. The trend itself will carry reach without hard selling.`,
       icons: [TrendingUp, Eye, ThumbsUp],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -318,7 +318,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
     const cats = topDowns.map((x) => String(x.category)).join(', ')
     items.push({
       title: 'Cooling pockets',
-      summary: `Some themes quietened (${cats}). Park them unless they matter to 3L. If they do, re‑seed with one proof point and a clean visual; otherwise focus where attention already is.`,
+      summary: `Some themes are quieter at the moment (${cats}). That usually means fewer readers will see or share content in these areas for a while. The takeaway is to park them unless they directly support the 3L story. If they do matter, re‑introduce them with a single clear proof point and a simple visual; otherwise, keep the focus where attention already flows.`,
       icons: [ThermometerSnowflake, Eye, Meh],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -328,7 +328,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (rows.some((r) => /access|eligib|ta947|nice/i.test(String(r.category)))) {
     items.push({
       title: 'Access questions create action',
-      summary: `When eligibility or “who/where” trends, people are ready to move. Give a one‑screen answer (who qualifies → refer → monitor). Simple steps spread inside DGH teams.`,
+      summary: `When eligibility or “who/where” topics start to trend, we typically see more people ready to act. The analysis points to a simple need: readers want to check who qualifies, where to start, and what happens next, without digging through long documents. A light recommendation is to offer a one‑screen answer that covers who qualifies → how to refer → how to monitor; simple steps are more likely to be shared in DGH teams.`,
       icons: [Key, MessageSquare, Eye],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -338,7 +338,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (rows.some((r) => /safety|crs|icans|rash|photosens/i.test(String(r.category)))) {
     items.push({
       title: 'Safety reassurance beats rebuttal',
-      summary: `For safety spikes, keep it calm: show checklists, “what good looks like”, and escalation routes. Avoid debate; it keeps tone steady and credible.`,
+      summary: `When safety threads heat up, argumentative posts tend to prolong the debate but do not resolve concerns. In contrast, calm information—what to watch for, what good practice looks like, and who to contact—usually steadies the tone. The takeaway is that reassurance supported by simple steps maintains credibility better than trying to win an argument.`,
       icons: [Shield, Smile, MessageSquare],
       views: 0, likes: 0, replies: 0, sentiment: 0,
     })
@@ -352,7 +352,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (items.length < 4) {
     addFallback(
       'Sequencing watch',
-      'Watch for posts that link bispecific momentum to earlier lines. When that happens, re‑state where Zynlonta fits in 3L and why it helps real patients today. Keep it practical, not theoretical.',
+      'Keep an eye on posts that connect growing bispecific use to earlier lines of therapy. When that shift is visible, it helps to restate—in simple terms—where Zynlonta sits in 3L and the kinds of patients who benefit in real settings. The analysis suggests practical explanations work better than theoretical debates.',
       [Activity, Key, Eye],
     )
   }
@@ -360,7 +360,7 @@ function buildTrendTakeaways(rows: any[]): Array<{ title: string; summary: strin
   if (items.length < 4) {
     addFallback(
       'Steady backdrop',
-      'If no single spike dominates, keep cadence: one helpful explainer a week beats one big splash. Anchor every post to a single step—who, how, or what next.',
+      'If there is no clear spike, the data points to consistency over bursts: one helpful explainer each week usually achieves more than a single big push. Keep each post anchored to one step—either who it is for, how it works, or what to do next—so readers understand it at a glance.',
       [TrendingUp, Eye, ThumbsUp],
     )
   }
@@ -574,7 +574,7 @@ function TakeawayCard({ data, concise }: { data: { title: string; summary: strin
           ))}
         </div>
       </div>
-      <p className="text-[13px] leading-6 text-muted-foreground" style={concise ? { display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' } : undefined}>
+      <p className="text-[13px] leading-6 text-muted-foreground">
         {data.summary}
       </p>
       <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
