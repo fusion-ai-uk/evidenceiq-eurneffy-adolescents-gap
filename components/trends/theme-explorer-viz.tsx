@@ -133,6 +133,18 @@ export function ThemeExplorerViz() {
   }
 
   const valueFor = (r: ThemeRow) => ((r as any)[metric] || 0) * audienceWeight(r)
+  // Conversation volume baseline: always use views for share calcs
+  const volumeValueFor = (r: ThemeRow) => (Number(r.viewCount || 0) * audienceWeight(r))
+
+  const volumeTotals = useMemo(() => {
+    const total = filtered.reduce((acc, r) => acc + volumeValueFor(r), 0)
+    const byGroup: Record<string, number> = {}
+    for (const r of filtered) {
+      const g = r.groupName || 'Ungrouped'
+      byGroup[g] = (byGroup[g] || 0) + volumeValueFor(r)
+    }
+    return { total, byGroup }
+  }, [filtered, audience])
 
   const categories = useMemo(() => {
     const set = new Set(rows.map((r) => r.category).filter(Boolean))
@@ -307,7 +319,16 @@ export function ThemeExplorerViz() {
                     formatter: (_val: string, opts: any) => {
                       // Label only the top 10 tiles by the current metric
                       const i = opts?.dataPointIndex ?? 0
-                      return i < 10 ? String(_val) : ""
+                      if (i >= 10) return ""
+                      const d = opts?.w?.config?.series?.[0]?.data?.[i]
+                      const name = String(d?.full || _val)
+                      const pctG = d?.shareGroup != null ? (d.shareGroup * 100).toFixed(2) : null
+                      const pctT = d?.shareTotal != null ? (d.shareTotal * 100).toFixed(2) : null
+                      const short = name.length > 34 ? name.slice(0, 33) + '…' : name
+                      if (pctG != null && pctT != null) {
+                        return `${short} · ${pctG}% grp · ${pctT}% all`
+                      }
+                      return short
                     },
                   },
                   tooltip: {
@@ -320,10 +341,32 @@ export function ThemeExplorerViz() {
                       const s = r.sentimentCompound?.toFixed?.(2) ?? "n/a"
                       const callout = textCalloutFor(r)
                       const risk = riskBadgeFor(r)
+                      const grp = r.groupName || 'Ungrouped'
+                      const tShare = d?.shareTotal != null ? `${(d.shareTotal*100).toFixed(2)}%` : '—'
+                      const gShare = d?.shareGroup != null ? `${(d.shareGroup*100).toFixed(2)}%` : '—'
+                      const likes = Number(r.likeCount || 0)
+                      const replies = Number(r.replyCount || 0)
+                      const retweets = Number(r.retweetCount || 0)
+                      const views = Number(r.viewCount || 0)
+                      const engageRate = views > 0 ? ((likes + replies + retweets) / views) : 0
+                      const leaderScore = [
+                        { k: 'HCP', v: Number(r.hcpScore || 0) },
+                        { k: 'Patient', v: Number(r.patientScore || 0) },
+                        { k: 'Caregiver', v: Number(r.caregiverScore || 0) },
+                        { k: 'Payer/NHS', v: Number(r.payerScore || 0) },
+                      ].sort((a,b)=>b.v-a.v)[0]
+                      const leader = leaderScore?.v ? leaderScore.k : 'Mixed'
                       return `<div class=\"px-3 py-2 text-xs\">`+
                              `<div class=\"font-medium\">${r.topicTitle}</div>`+
                              `<div class=\"text-slate-400\">${r.topicSummary || ""}</div>`+
-                             `<div class=\"mt-1\">Sentiment: ${s}</div>`+
+                             `<div class=\"mt-1 grid grid-cols-2 gap-x-4 gap-y-1\">`+
+                               `<div>Group</div><div class=\"text-right\">${grp}</div>`+
+                               `<div>Share of group</div><div class=\"text-right\">${gShare}</div>`+
+                               `<div>Share of total</div><div class=\"text-right\">${tShare}</div>`+
+                               `<div>Sentiment</div><div class=\"text-right\">${s}</div>`+
+                               `<div>Engagement rate</div><div class=\"text-right\">${engageRate.toFixed(2)}</div>`+
+                               `<div>Audience leader</div><div class=\"text-right\">${leader}</div>`+
+                             `</div>`+
                              `${callout ? `<div class=\\"mt-1 text-amber-300\\">${callout}</div>` : ''}`+
                              `${risk ? `<div class=\\"mt-1 text-red-300\\">${risk}</div>` : ''}`+
                              `</div>`
@@ -344,7 +387,13 @@ export function ThemeExplorerViz() {
                     data: filtered
                       .sort((a, b) => valueFor(b) - valueFor(a))
                       .slice(0, 80)
-                      .map((r) => ({ x: truncate(r.topicTitle, 36), full: r.topicTitle, y: valueFor(r), fillColor: groupColor(r.groupName || "Ungrouped"), raw: r })),
+                      .map((r) => {
+                        const g = r.groupName || 'Ungrouped'
+                        const vol = volumeValueFor(r)
+                        const shareTotal = volumeTotals.total > 0 ? vol / volumeTotals.total : 0
+                        const shareGroup = (volumeTotals.byGroup[g] || 0) > 0 ? vol / volumeTotals.byGroup[g] : 0
+                        return { x: truncate(r.topicTitle, 36), full: r.topicTitle, y: valueFor(r), fillColor: groupColor(g), raw: r, shareTotal, shareGroup }
+                      }),
                   },
                 ]}
               />
