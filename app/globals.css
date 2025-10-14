@@ -1,145 +1,205 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
-@layer base {
-  :root {
-    --background: 0 0% 3%;
-    --foreground: 0 0% 98%;
+@custom-variant dark (&:is(.dark *));
 
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 98%;
+/* Light theme tokens */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.205 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  /* Alias for tailwind.config.ts which expects --sidebar-background */
+  --sidebar-background: var(--sidebar);
+}
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+  /* Alias for tailwind.config.ts */
+  --sidebar-background: var(--sidebar);
+}
 
-    --primary: 326 100% 60%;
-    --primary-foreground: 0 0% 98%;
+@theme inline {
+  /* Color Palette - Dark pharmaceutical intelligence theme */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-    --secondary: 270 100% 60%;
-    --secondary-foreground: 0 0% 98%;
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-    --accent: 180 100% 40%;
-    --accent-foreground: 0 0% 98%;
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 0 0% 98%;
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-    --border: 326 60% 30%;
-    --input: 0 0% 15%;
-    --ring: 326 100% 60%;
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-    --radius: 0.5rem;
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
-    --font-sans: var(--font-montserrat);
-  }
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    /* Ambient grid + spotlight */
+    background-image:
+      radial-gradient(800px 400px at 20% -10%, color(display-p3 0.35 0.55 1 / 0.08), transparent 60%),
+      radial-gradient(600px 300px at 90% 0%, color(display-p3 0.35 0.55 1 / 0.07), transparent 60%),
+      linear-gradient(0deg, color-mix(in oklch, var(--background) 96%, transparent), color-mix(in oklch, var(--background) 96%, transparent)),
+      repeating-linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--border) 35%, transparent) 0px,
+        color-mix(in oklch, var(--border) 35%, transparent) 1px,
+        transparent 1px,
+        transparent 32px
+      ),
+      repeating-linear-gradient(
+        to right,
+        color-mix(in oklch, var(--border) 35%, transparent) 0px,
+        color-mix(in oklch, var(--border) 35%, transparent) 1px,
+        transparent 1px,
+        transparent 32px
+      );
+    background-attachment: fixed;
+    /* Prevent horizontal scrollbars from oversized tooltips/popovers */
+    overflow-x: hidden;
+  }
+
+  h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+  p.lead {
+    @apply text-muted-foreground mt-2;
   }
 }
 
-.glow-text {
-  text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+/* Ensure overlays like dropdowns render above chart canvases */
+.apexcharts-canvas,
+.chart-surface .apexcharts-canvas {
+  z-index: 0 !important;
+}
+.apexcharts-tooltip,
+.apexcharts-menu,
+.apexcharts-legend,
+.apexcharts-toolbar,
+[data-slot="select-content"] {
+  z-index: 100000 !important;
 }
 
-.glow-border {
-  box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+/* Keep ApexCharts tooltips within viewport without causing horizontal overflow */
+.apexcharts-tooltip {
+  max-width: clamp(240px, 40vw, 420px) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
+}
+.apexcharts-tooltip-title {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
 }
 
-.glow-button {
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
-  transition: box-shadow 0.3s ease;
-}
-
-.glow-button:hover {
-  box-shadow: 0 0 30px rgba(236, 72, 153, 0.6);
-}
-
-.bg-gradient-radial {
-  background-image: radial-gradient(var(--tw-gradient-stops));
-}
-
-.animate-pulse-slow {
-  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  25% {
-    transform: translateY(-10px);
-  }
-  50% {
-    transform: translateY(0px);
-  }
-  75% {
-    transform: translateY(10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.bg-stars {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-.tab-highlight {
-  position: relative;
-}
-
-.tab-highlight::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.8), transparent);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.tab-highlight[data-state="active"]::after {
-  transform: scaleX(1);
-}
-
-/* Framer Motion animations */
-.motion-safe {
-  animation-duration: 0.5s;
-  animation-fill-mode: both;
-}
-
-/* Enhanced glow effects */
-.glow-card {
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.1);
-  transition: box-shadow 0.3s ease;
-}
-
-.glow-card:hover {
-  box-shadow: 0 0 30px rgba(236, 72, 153, 0.2);
-}
-
-/* Podcast-specific styling */
-.podcast-badge {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(147, 51, 234, 0.1));
-  border: 1px solid rgba(236, 72, 153, 0.4);
-  color: rgb(236, 72, 153);
+/* Create visual gaps between treemap tiles */
+.apexcharts-treemap-rect {
+  stroke: var(--background) !important;
+  stroke-width: 4px !important;
 }

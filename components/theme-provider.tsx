@@ -1,24 +1,11 @@
-// Replace the entire file with a simpler theme provider that doesn't rely on next-themes
+'use client'
 
-"use client"
+import * as React from 'react'
+import {
+  ThemeProvider as NextThemesProvider,
+  type ThemeProviderProps,
+} from 'next-themes'
 
-import * as React from "react"
-
-type Theme = "dark" | "light" | "system"
-
-type ThemeProviderProps = {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  attribute?: string
-  enableSystem?: boolean
-  disableTransitionOnChange?: boolean
-}
-
-export function ThemeProvider({ children, defaultTheme = "dark", ...props }: ThemeProviderProps) {
-  // Since we're always using dark theme for this app, we can simplify this component
-  React.useEffect(() => {
-    document.documentElement.classList.add("dark")
-  }, [])
-
-  return <>{children}</>
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
 }

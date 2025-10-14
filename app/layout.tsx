@@ -1,28 +1,34 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Montserrat } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
+import { ThemeProvider } from "@/components/theme-provider"
+import { AppShell } from "@/components/app-shell"
 import "./globals.css"
-import { cn } from "@/lib/utils"
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-})
+const geistSans = GeistSans
 
-export const metadata: Metadata = {
-  title: "evidenceIQ | EURNeffy",
-  description: "Revolutionary needle-free epinephrine nasal spray for anaphylaxis treatment.",
-  generator: "v0.dev",
+const geistMono = GeistMono
+
+export const metadata = {
+  title: "evidenceIQ - Zynlonta Intelligence Platform",
+  description: "Pharmaceutical intelligence dashboard for Zynlonta treatment discourse analysis",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-black font-sans antialiased", montserrat.variable)}>{children}</body>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <AppShell>
+            {children}
+          </AppShell>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
