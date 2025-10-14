@@ -387,6 +387,7 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
   const hcp = get('HCP', 'hcp_volume', 'hcp_sentiment')
   const patient = get('Patient', 'patient_volume', 'patient_sentiment')
   const caregiver = get('Caregiver', 'caregiver_volume', 'caregiver_sentiment')
+  const payer = get('Payer/NHS', 'payer_volume', 'payer_sentiment')
 
   const items: any[] = []
 
@@ -420,6 +421,19 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
     icons: [Eye, ThumbsUp, Smile], views: 0, likes: 0, replies: 0, sentiment: 0,
   })
 
+  // Data-backed: who is driving volume now
+  {
+    const totals = [hcp, patient, caregiver, payer]
+    const totalV = Math.max(totals.map(t => t.v).reduce((a,b)=>a+b, 0), 1)
+    const leader = [...totals].sort((a,b)=>b.v-a.v)[0]
+    const sharePct = ((leader.v / totalV) * 100).toFixed(1)
+    items.push({
+      title: "Who's driving now",
+      summary: `${leader.name} account for the largest share of posts in this slice (${sharePct}%). This shapes the tone you see elsewhere. Patients, caregivers and Payer/NHS contribute the remainder in smaller, more focused threads.`,
+      icons: [Users, Eye, MessageSquare], views: 0, likes: 0, replies: 0, sentiment: 0,
+    })
+  }
+
   // Ensure we return 6 takeaways with helpful defaults
   if (items.length < 6) {
     items.push({
@@ -431,9 +445,9 @@ function buildAudienceTakeaways(rows: any[]): Array<{ title: string; summary: st
 
   if (items.length < 6) {
     items.push({
-      title: 'Close with one action',
-      summary: `In this dataset, assets that end with a single, unambiguous action are shared more often than those with multiple options. Too many choices tend to dilute follow‑through. The takeaway is simply that one clear action works best; the exact action can vary by audience.`,
-      icons: [Key, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: 0,
+      title: 'Patient voice in plain terms',
+      summary: `Patient and caregiver threads most often ask about day‑to‑day experience. Clear, non‑technical language correlates with higher response and sharing in these threads, whereas jargon slows interaction. Use short examples and one practical link to keep the flow going.`,
+      icons: [HeartPulse, MessageSquare, Eye], views: 0, likes: 0, replies: 0, sentiment: 0,
     })
   }
 
