@@ -102,15 +102,23 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         {/* Command Palette */}
-        <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+            <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
           <CommandInput placeholder="Search pages and actions..." />
           <CommandList>
             <CommandGroup heading="Navigate">
               {nav.map((item) => (
-                <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
-                  <item.icon className="h-4 w-4" />
-                  {item.name}
-                </CommandItem>
+                item.comingSoon ? (
+                  <CommandItem key={item.href} disabled aria-disabled className="opacity-60 pointer-events-none">
+                    <item.icon className="h-4 w-4 opacity-60" />
+                    <span>{item.name}</span>
+                    <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
+                  </CommandItem>
+                ) : (
+                  <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </CommandItem>
+                )
               ))}
             </CommandGroup>
             <CommandGroup heading="Appearance">
