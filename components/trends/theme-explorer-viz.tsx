@@ -428,6 +428,7 @@ export function ThemeExplorerViz() {
                 const ranked = [...filtered].sort((a, b) => valueFor(b) - valueFor(a))
                 const barChartHeight = Math.max(600, ranked.length * 36)
                 return (
+              <div className="apex-bar-wrap" style={{ paddingBottom: 120, overflow: 'visible' }}>
               <ReactApexChart
                 type="bar"
                 height={barChartHeight}
@@ -458,9 +459,11 @@ export function ThemeExplorerViz() {
                       },
                     },
                   },
-                  grid: { borderColor: gridBorderColor, strokeDashArray: 2, padding: { left: 16, right: 8, top: 8, bottom: 8 } },
+                  // Add extra bottom padding so the tooltip can render fully below the cursor
+                  grid: { borderColor: gridBorderColor, strokeDashArray: 2, padding: { left: 16, right: 8, top: 8, bottom: 80 } },
                   tooltip: {
                     theme: "dark",
+                    followCursor: true,
                     y: { formatter: (v: number) => v.toLocaleString() },
                     custom: ({ dataPointIndex, w }: any) => {
                       const r = ranked[dataPointIndex]
@@ -468,7 +471,8 @@ export function ThemeExplorerViz() {
                       const s = r.sentimentCompound?.toFixed?.(2) ?? "n/a"
                       const callout = textCalloutFor(r)
                       const risk = riskBadgeFor(r)
-                      return `<div class=\"px-3 py-2 text-xs\">`+
+                      // Match treemap tooltip styling; position below cursor
+                      return `<div class=\"px-3 py-2 text-xs\" style=\"transform: translateY(12px);\">`+
                              `<div class=\"font-medium\">${r.topicTitle}</div>`+
                              `<div class=\"text-slate-400\">${humanSummary(r)}</div>`+
                              `<div class=\"mt-1\">Sentiment: ${s}</div>`+
@@ -487,6 +491,7 @@ export function ThemeExplorerViz() {
                   },
                 ]}
               />
+              </div>
               )})()}
             </div>
           )}
@@ -566,6 +571,37 @@ export function ThemeExplorerViz() {
             </div>
           </div>
         )}
+
+        {/* Ensure bar chart tooltip can overflow below cursor */}
+        <style jsx global>{`
+          .apex-bar-wrap .apexcharts-canvas,
+          .apex-bar-wrap .apexcharts-inner,
+          .apex-bar-wrap .apexcharts-graphical {
+            overflow: visible !important;
+          }
+          .apex-bar-wrap .apexcharts-tooltip {
+            z-index: 60 !important;
+            pointer-events: none;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+          }
+          .apex-bar-wrap .apexcharts-tooltip-title { display:none !important; }
+          /* Make the tooltip content box solid and legible like treemap */
+          .apex-bar-wrap .apexcharts-tooltip .px-3 { 
+            background-color: rgba(17, 24, 39, 0.95) !important; /* dark solid */
+            border: 1px solid rgba(55, 65, 81, 0.9) !important;
+            border-radius: 10px;
+            box-shadow: 0 12px 24px rgba(0,0,0,.6);
+            color: #e5e7eb !important;
+          }
+          :root.light .apex-bar-wrap .apexcharts-tooltip .px-3 {
+            background-color: rgba(255, 255, 255, 0.98) !important;
+            border: 1px solid #e5e7eb !important;
+            color: #111827 !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,.15);
+          }
+        `}</style>
 
         {/* Bottom summary + insights layout */}
         <div className="grid md:grid-cols-5 gap-6 mt-6">

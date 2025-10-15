@@ -184,12 +184,6 @@
   z-index: 100000 !important;
 }
 
-/* Prevent tooltips from being clipped by scroll/overflow containers */
-.apexcharts-tooltip {
-  position: fixed !important; /* escape stacking/overflow contexts */
-  pointer-events: none !important;
-}
-
 /* Keep ApexCharts tooltips within viewport without causing horizontal overflow */
 .apexcharts-tooltip {
   max-width: clamp(240px, 40vw, 420px) !important;
