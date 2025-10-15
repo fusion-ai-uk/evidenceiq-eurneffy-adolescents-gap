@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts"
 import { useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useTheme } from "next-themes"
 import { Badge } from "@/components/ui/badge"
 
 type Row = { aspect: string; zynlonta: number; epcoritamab: number; glofitamab: number; cart: number }
 
 export function SentimentComparison() {
+  const { resolvedTheme } = useTheme()
   const [rows, setRows] = useState<Row[]>([])
   const [audiences, setAudiences] = useState<string[]>(["all"]) // multi-select
   const [aspectWeights, setAspectWeights] = useState<Record<string, Record<string, number>>>({})
@@ -143,13 +145,25 @@ export function SentimentComparison() {
     const deltaVsCart = Math.round((r.zynlonta || 0) - (r.cart || 0))
     const flags = aspectWeights[label] || {}
     return (
-      <div style={{ background: "#0b0b0b", border: "1px solid #333", borderRadius: 8, padding: 10 }}>
+      <div
+        style={{
+          background: resolvedTheme === 'dark' ? '#0b0b0b' : '#ffffff',
+          color: resolvedTheme === 'dark' ? '#e5e7eb' : '#111827',
+          border: `1px solid ${resolvedTheme === 'dark' ? '#333' : '#e5e7eb'}`,
+          borderRadius: 8,
+          padding: 10,
+          boxShadow: '0 8px 28px rgba(0,0,0,0.18)',
+          opacity: 1
+        }}
+      >
         <div style={{ fontWeight: 600, marginBottom: 6 }}>{label}</div>
         <div>Zynlonta: {(r.zynlonta || 0).toFixed(0)}{flags['zynlonta'] ? '' : ' (overall)'}</div>
         <div>Epcoritamab: {(r.epcoritamab || 0).toFixed(0)}{flags['epcoritamab'] ? '' : ' (overall)'}</div>
         <div>Glofitamab: {(r.glofitamab || 0).toFixed(0)}{flags['glofitamab'] ? '' : ' (overall)'}</div>
         <div>CAR‑T: {(r.cart || 0).toFixed(0)}{flags['cart'] ? '' : ' (overall)'}</div>
-        <div style={{ marginTop: 6, fontSize: 12, color: "#9CA3AF" }}>Δ vs bispecifics avg: {deltaVsBispecifics >= 0 ? "+" : ""}{deltaVsBispecifics} pts; Δ vs CAR‑T: {deltaVsCart >= 0 ? "+" : ""}{deltaVsCart} pts</div>
+        <div style={{ marginTop: 6, fontSize: 12, color: resolvedTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+          Δ vs bispecifics avg: {deltaVsBispecifics >= 0 ? "+" : ""}{deltaVsBispecifics} pts; Δ vs CAR‑T: {deltaVsCart >= 0 ? "+" : ""}{deltaVsCart} pts
+        </div>
       </div>
     )
   }
