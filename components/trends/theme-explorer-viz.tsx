@@ -248,6 +248,25 @@ export function ThemeExplorerViz() {
     if (s <= 0 && v >= medianValue) return "High reach, weak sentiment—prioritise education or reframing."
     return ""
   }
+
+  // Make raw topic summaries human‑readable. Remove noisy "Example:" tails and keep a single clean sentence.
+  const humanSummary = (r?: ThemeRow) => {
+    if (!r) return ""
+    let text = String(r.topicSummary || "").trim()
+    if (!text) return `Posts discuss ${r.topicTitle}.`
+    const lower = text.toLowerCase()
+    const ex = lower.indexOf("example:")
+    if (ex >= 0) text = text.slice(0, ex).trim()
+    // Collapse whitespace
+    text = text.replace(/\s+/g, " ")
+    // Prefer the first sentence; if none, synthesize a short statement
+    const sentences = text.split(/[.!?]/).map((s) => s.trim()).filter(Boolean)
+    let out = sentences[0] || text
+    if (!out) out = `Posts discuss ${r.topicTitle}`
+    if (!/[.!?]$/.test(out)) out += "."
+    if (out.length > 280) out = out.slice(0, 277).trimEnd() + "…"
+    return out
+  }
   return (
     <Card>
       <CardHeader>
@@ -358,7 +377,7 @@ export function ThemeExplorerViz() {
                       const leader = leaderScore?.v ? leaderScore.k : 'Mixed'
                       return `<div class=\"px-3 py-2 text-xs\">`+
                              `<div class=\"font-medium\">${r.topicTitle}</div>`+
-                             `<div class=\"text-slate-400\">${r.topicSummary || ""}</div>`+
+                             `<div class=\"text-slate-400\">${humanSummary(r)}</div>`+
                              `<div class=\"mt-1 grid grid-cols-2 gap-x-4 gap-y-1\">`+
                                `<div>Group</div><div class=\"text-right\">${grp}</div>`+
                                `<div>Share of group</div><div class=\"text-right\">${gShare}</div>`+
@@ -451,7 +470,7 @@ export function ThemeExplorerViz() {
                       const risk = riskBadgeFor(r)
                       return `<div class=\"px-3 py-2 text-xs\">`+
                              `<div class=\"font-medium\">${r.topicTitle}</div>`+
-                             `<div class=\"text-slate-400\">${r.topicSummary || ""}</div>`+
+                             `<div class=\"text-slate-400\">${humanSummary(r)}</div>`+
                              `<div class=\"mt-1\">Sentiment: ${s}</div>`+
                              `${callout ? `<div class=\\"mt-1 text-amber-300\\">${callout}</div>` : ''}`+
                              `${risk ? `<div class=\\"mt-1 text-red-300\\">${risk}</div>` : ''}`+
@@ -499,7 +518,7 @@ export function ThemeExplorerViz() {
                       const risk = riskBadgeFor(r)
                       return `<div class=\"px-3 py-2 text-xs\">`+
                              `<div class=\"font-medium\">${r.topicTitle}</div>`+
-                             `<div class=\"text-slate-400\">${r.topicSummary || ""}</div>`+
+                             `<div class=\"text-slate-400\">${humanSummary(r)}</div>`+
                              `<div class=\"mt-1\">Sentiment: ${s}</div>`+
                              `${callout ? `<div class=\\"mt-1 text-amber-300\\">${callout}</div>` : ''}`+
                              `${risk ? `<div class=\\"mt-1 text-red-300\\">${risk}</div>` : ''}`+

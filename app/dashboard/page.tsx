@@ -524,7 +524,7 @@ function buildCompetitorTakeaways(durRows: any[], psiRows: any[]) {
     }
     pick('Efficacy', 'Efficacy sentiment leader', 'Respond by foregrounding Zynlonta’s practical 3L advantages—clarity, predictability, and serviceability.')
     pick('Access', 'Access sentiment leader', 'Meet eligibility questions with one‑screen flows; remove effort to compete for action.')
-    pick('Safety', 'Safety sentiment leader', 'Keep calm checklists and escalation routes—it preserves credibility even when conversation heats up.')
+    pick('Safety', 'Safety sentiment leader', 'Share calm checklists and clear “who to contact” steps; this keeps you credible when discussions get heated.')
   }
 
   if (items.length === 0) {
