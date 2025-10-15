@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { HintIcon } from "@/components/ui/hint"
 
 const themes = [
   {
@@ -35,8 +36,11 @@ export function ThemeWheel() {
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base font-medium">Patient Theme Wheel</CardTitle>
-        <p className="text-sm text-muted-foreground">Distribution of key patient discussion topics</p>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-base font-medium">Patient Theme Wheel</CardTitle>
+          <HintIcon content={"Shows how patient discussions split across major themes. Pie size = share of patient mentions. Badges indicate tone for each theme. Use this to see what dominates patient talk and whether the mood is supportive or pressured."} />
+        </div>
+        <div className="text-xs text-muted-foreground">Total = all patient/caregiver mentions in this slice. Percentages are of patient volume only.</div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6 md:grid-cols-2">
@@ -88,6 +92,7 @@ export function ThemeWheel() {
                 <div
                   key={index}
                   className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                  title={`~${percentage}% of patient mentions; tone: ${item.sentiment}`}
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />

@@ -31,20 +31,18 @@ export function BaselineAlerts() {
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base font-medium">Above-Baseline Alerts</CardTitle>
-        <div className="text-sm text-muted-foreground space-y-1">
-          <p>
-            Highlights topics whose latest complete month is materially different from the recent run-rate.
-          </p>
-          <p className="flex items-start gap-2 text-xs">
-            <HintIcon content={"Alerts fire when current month deviates ≥±15% vs the previous 6‑month average with baseline ≥10 mentions. A practical signal‑over‑noise check."} />
-          </p>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-base font-medium">Above‑Baseline Alerts</CardTitle>
+          <HintIcon content={"A living watchlist of topics that moved meaningfully vs the recent norm. We compare the latest full month to the prior 6‑month average to surface real shifts, not noise."} />
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Each row explains: baseline (6‑month average), current month, absolute change (Δ), sentiment and the audience most involved.
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {rows.map((r, index) => {
-            const severity = r.pct_change >= 30 ? "high" : "medium"
+            const severity = Math.abs(r.pct_change) >= 30 ? "high" : "medium"
             const direction = r.pct_change >= 0 ? "up" : "down"
             const absChange = Math.round(Math.abs(r.pct_change))
             const delta = r.current_volume - r.baseline_volume
@@ -60,26 +58,36 @@ export function BaselineAlerts() {
                       {severity === "high" && <AlertCircle className="h-4 w-4 text-orange-500" />}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                      <span>Baseline (6‑mo avg): {Math.round(r.baseline_volume)}</span>
-                      <span>→ Current: {r.current_volume}</span>
-                      <span>Δ: {deltaDisplay}</span>
+                      <span className="inline-flex items-center gap-1" title="6‑month average volume">
+                        Baseline: {Math.round(r.baseline_volume)}
+                      </span>
+                      <span className="inline-flex items-center gap-1" title="Latest complete month">
+                        Current: {r.current_volume}
+                      </span>
+                      <span className="inline-flex items-center gap-1" title="Absolute change vs baseline">
+                        Δ {deltaDisplay}
+                      </span>
                       {typeof r.sentiment_current === 'number' && typeof r.sentiment_baseline === 'number' && (
-                        <span>Sentiment: {r.sentiment_current?.toFixed(2)} ({toneText})</span>
+                        <span className="inline-flex items-center gap-1" title="Average sentiment for the month (‑1 to +1)">
+                          Sentiment: {r.sentiment_current?.toFixed(2)} ({toneText})
+                        </span>
                       )}
                       {r.leader_audience && r.leader_audience !== 'mixed' && (
-                        <span>Driver: {r.leader_audience}</span>
+                        <span className="inline-flex items-center gap-1" title="Audience contributing most volume">
+                          Driver: {r.leader_audience}
+                        </span>
                       )}
                     </div>
                     <div className="mt-2 text-xs text-muted-foreground/90">
                       {direction === "up" ? (
                         <span>
-                          Rising interest — {r.leader_audience && r.leader_audience !== 'mixed' ? `${r.leader_audience.toUpperCase()}-led; ` : ''}
-                          {r.drivers && r.drivers.length ? `drivers: ${r.drivers.slice(0, 3).join(', ')}. ` : ''}
-                          {tone < -0.05 ? 'Tone deteriorating — address objections.' : 'Lean in with context; watch safety/access threads.'}
+                          Interest is rising {r.leader_audience && r.leader_audience !== 'mixed' ? `— mainly ${r.leader_audience.toUpperCase()} conversations` : ''}.
+                          {r.drivers && r.drivers.length ? ` The push comes from ${r.drivers.slice(0, 3).join(', ')}.` : ''}
+                          {tone < -0.05 ? ' Tone is slipping: address objections directly and keep safety/access facts close.' : ' Tone is stable to improving—add short context and point to practical next steps.'}
                         </span>
                       ) : (
                         <span>
-                          Cooling off — consider re‑seeding with proof points; {tone < -0.05 ? 'tone also softening.' : 'tone steady.'}
+                          Activity is cooling from recent peaks. Re‑seed with clear proof points and real‑world examples; {tone < -0.05 ? 'tone is softening, so prioritise reassurance.' : 'tone is steady, so a gentle refresh should suffice.'}
                         </span>
                       )}
                     </div>

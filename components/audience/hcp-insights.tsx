@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { HCPCarTCentres } from "@/components/audience/hcp-cart-centres"
+import { HCPDghInsights } from "@/components/audience/hcp-dgh-insights"
 import { HintIcon } from "@/components/ui/hint"
 import { Building2, Hospital, Users } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -297,38 +299,7 @@ export function HCPInsights() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle className="text-base font-medium">How this slice differs from All HCPs</CardTitle>
-              <div className="text-xs text-muted-foreground"><HintIcon content={"Compares shares of Efficacy, Access and QoL to the All‑HCP baseline. Positive delta = over‑indexed in this slice."} /></div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 md:grid-cols-3">
-                {deltas.map((d, i) => {
-                  const { label, variant } = sentimentBadge(d.sentiment)
-                  const sign = d.deltaPct > 0 ? '+' : ''
-                  return (
-                    <div key={i} className="p-3 rounded-lg bg-accent/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">{d.label}</span>
-                        <Badge variant={variant}>{label}</Badge>
-                      </div>
-                      <div className="mt-2 text-xs text-muted-foreground">Share: {d.sharePct}%</div>
-                      <div className="mt-1 text-xs">Δ vs All: {sign}{d.deltaPct}%</div>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="mt-3 grid gap-2">
-                {insightBullets.map((b, i) => (
-                  <div key={i} className="text-xs">
-                    <span className="font-medium">{b.title}</span>
-                    <span className="text-muted-foreground"> — {b.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Removed per request: baseline comparison vs All HCPs */}
 
           <Card className="border-border/50">
             <CardHeader>
@@ -403,6 +374,7 @@ export function HCPInsights() {
         <TabsContent value="cart" className="space-y-4 mt-4">
           {/* Re-fetch overview with CAR-T filter when this tab mounts via a tiny inline loader */}
           <div style={{ display: 'none' }}>{/* trigger fetch */}</div>
+          <HCPCarTCentres />
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="text-base font-medium">Theme focus (HCP-weighted)</CardTitle>
@@ -435,6 +407,7 @@ export function HCPInsights() {
         </TabsContent>
 
         <TabsContent value="dgh" className="space-y-4 mt-4">
+          <HCPDghInsights />
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="text-base font-medium">DGH Discussions</CardTitle>

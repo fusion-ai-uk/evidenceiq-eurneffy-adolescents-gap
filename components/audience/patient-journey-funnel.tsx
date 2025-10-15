@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { HintIcon } from "@/components/ui/hint"
 
 const funnelData = [
   {
@@ -42,10 +43,13 @@ export function PatientJourneyFunnel() {
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base font-medium">Patient Journey Funnel</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Tracking patient discourse volume and sentiment across treatment stages
-        </p>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-base font-medium">Patient Journey Funnel</CardTitle>
+          <HintIcon content={"Share of patient/caregiver conversation at each journey stage, indexed to Stage 1 = 100%. Bar length shows relative volume; badge shows overall tone detected for that stage. Chips list the most-discussed sub‑topics. Use this to see where attention concentrates and how the mood shifts across the path."} />
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Mentions = number of public posts detected for the stage. Percentage = volume vs Stage 1. Tone is derived from sentiment/emotion signals in the posts (−1..+1 mapped to human labels).
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -78,7 +82,7 @@ export function PatientJourneyFunnel() {
 
               {/* Funnel Bar */}
               <div className="ml-11">
-                <div className="relative h-16 bg-secondary/30 rounded-lg overflow-hidden">
+                <div className="relative h-16 bg-secondary/30 rounded-lg overflow-hidden" title="Bar length = share of volume vs Stage 1 (100%)">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center text-xs font-medium text-primary-foreground"
                     style={{ width: `${item.percentage}%` }}
@@ -89,7 +93,7 @@ export function PatientJourneyFunnel() {
               </div>
 
               {/* Key Topics */}
-              <div className="ml-11 flex flex-wrap gap-2">
+              <div className="ml-11 flex flex-wrap gap-2" title="Most common themes mentioned at this stage">
                 {item.keyTopics.map((topic, idx) => (
                   <span key={idx} className="text-xs px-2 py-1 rounded-md bg-accent text-accent-foreground">
                     {topic}

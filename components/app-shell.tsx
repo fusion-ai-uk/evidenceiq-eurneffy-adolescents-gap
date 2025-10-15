@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Command as CommandIcon, Moon, Sun, LayoutDashboard, TrendingUp, Users, Network, Calendar, MessageSquare, MessageCircle, Target } from 'lucide-react'
+import { Command as CommandIcon, Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { CommandDialog, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
@@ -20,7 +20,6 @@ const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
   { name: 'Competitor Lens', href: '/competitors', icon: Target },
-  { name: 'Entity Network', href: '/network', icon: Network, comingSoon: true },
   { name: 'Events Tracker', href: '/events', icon: Calendar, comingSoon: true },
   { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare, comingSoon: true },
 ]

@@ -97,9 +97,7 @@ export function TopBar() {
             <CommandItem asChild>
               <Link href="/competitors">Competitor Lens</Link>
             </CommandItem>
-            <CommandItem asChild>
-              <Link href="/network">Entity Network</Link>
-            </CommandItem>
+            
             <CommandItem asChild>
               <Link href="/events">Events Tracker</Link>
             </CommandItem>

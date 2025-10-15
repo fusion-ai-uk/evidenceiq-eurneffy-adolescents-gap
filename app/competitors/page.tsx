@@ -1,9 +1,14 @@
+"use client"
+
 import { SentimentComparison } from "@/components/competitors/sentiment-comparison"
 import { NarrativeAnalysis } from "@/components/competitors/narrative-analysis"
 import { DurabilityDiscussion } from "@/components/competitors/durability-discussion"
+import EmotionRadar from "@/app/insights/components/EmotionRadar"
+import { useState } from "react"
 import { WordCloud } from "@/components/competitors/word-cloud"
 
 export default function CompetitorsPage() {
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -19,11 +24,20 @@ export default function CompetitorsPage() {
 
       <WordCloud />
 
-      {/* Narrative Analysis and Durability */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <NarrativeAnalysis />
-        <DurabilityDiscussion />
+      {/* Combined card: Radar + Narratives with joined borders */}
+      <div className="rounded-xl border overflow-hidden bg-card/60">
+        <div className="p-4">
+          <h2 className="text-xl font-semibold">Emotional Tone Comparison</h2>
+          <p className="text-sm text-muted-foreground mb-2">Relative intensity of hope, trust, fear and frustration across brands.</p>
+          <EmotionRadar selected={selectedBrands} onChangeSelected={setSelectedBrands} frameless className="rounded-xl" />
+        </div>
+        <div className="p-4 pt-7">
+          <NarrativeAnalysis selected={selectedBrands} frameless />
+        </div>
       </div>
+
+      {/* Durability (full width) */}
+      <DurabilityDiscussion />
     </div>
   )
 }

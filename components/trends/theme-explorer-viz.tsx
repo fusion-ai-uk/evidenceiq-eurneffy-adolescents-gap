@@ -509,7 +509,15 @@ export function ThemeExplorerViz() {
                 options={{
                   theme: { mode: resolvedTheme === "dark" ? "dark" : "light" },
                   chart: { background: "transparent", toolbar: { show: false }, foreColor: axisColor, fontFamily: "Inter, ui-sans-serif, system-ui", zoom: { enabled: false } },
-                  xaxis: { min: -1, max: 1, title: { text: "Sentiment" } },
+                  xaxis: {
+                    min: -1,
+                    max: 1,
+                    title: { text: "Sentiment" },
+                    tooltip: { enabled: false },
+                    labels: {
+                      formatter: (val: number) => (val === 0 ? "" : String(val)),
+                    },
+                  },
                   yaxis: { title: { text: metricLabel } },
                   grid: { borderColor: gridBorderColor, strokeDashArray: 2 },
                   tooltip: {

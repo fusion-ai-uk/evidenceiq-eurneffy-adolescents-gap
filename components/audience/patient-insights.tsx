@@ -45,7 +45,11 @@ export function PatientInsights() {
 
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-base font-medium">Theme focus (Patient-weighted)</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-medium">Theme focus (Patient‑weighted)</CardTitle>
+            <span className="text-xs text-muted-foreground">How patient attention splits across Efficacy, Access and QoL.</span>
+          </div>
+          <div className="text-xs text-muted-foreground">Bars show share of patient mentions across pillars (normalised to 100%). Badge indicates overall tone for the pillar.</div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -57,11 +61,11 @@ export function PatientInsights() {
                     <Badge variant={p.variant}>{p.sentiment}</Badge>
                   </div>
                   <div className="flex items-center gap-4 mt-2">
-                    <span className="text-xs text-muted-foreground">{p.mentions} weighted mentions</span>
+                    <span className="text-xs text-muted-foreground" title="Volume of patient mentions in this pillar">{p.mentions} weighted mentions</span>
                     <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
                       <div className="h-full bg-primary" style={{ width: `${p.percentage}%` }} />
                     </div>
-                    <span className="text-xs text-muted-foreground">{p.percentage}%</span>
+                    <span className="text-xs text-muted-foreground" title="Share of patient volume across pillars">{p.percentage}%</span>
                   </div>
                 </div>
               </div>

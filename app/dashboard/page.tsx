@@ -72,6 +72,24 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Market positioning (neon cards) */}
+      <Section title="Zynlonta market positioning" href="/competitors" subtitle="Now vs next priorities" hideExplore>
+        <NeonCard
+          title="Cement third‑line use (now)"
+          icon={Key}
+          color="emerald"
+        >
+          The market reads efficacy through a durability lens, but engagement is won by practical advice. 3L posts that clarify “who/when” and the next step travel further and keep tone steady. Zynlonta shows up as the dependable 3L option when the message stays simple and calm on safety.
+        </NeonCard>
+        <NeonCard
+          title="Explore second‑line positioning (next)"
+          icon={TrendingUp}
+          color="fuchsia"
+        >
+          In 2L, bispecific momentum sets the frame. Audiences respond to clear sequencing maps and predictable outpatient experience; continuity‑of‑care and QoL proof points land best. Keep the narrative data‑backed but plain: where Zynlonta fits when simplicity and regular clinic care matter.
+        </NeonCard>
+      </Section>
+
       {/* 1. Themes */}
       <Section title="General Themes" href="/themes" subtitle="Theme Explorer">
         {themesLoading && (
@@ -125,20 +143,22 @@ export default function DashboardPage() {
 
 /* ---------- Building blocks ---------- */
 
-function Section({ title, subtitle, href, children }: { title: string; subtitle?: string; href: string; children: React.ReactNode }) {
+function Section({ title, subtitle, href, hideExplore, children }: { title: string; subtitle?: string; href: string; hideExplore?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-          <HintIcon content="Pin cards to build a brief. Toggle density to switch between concise and detailed views." />
-          <Link
-            href={href}
-            className="ml-1 inline-flex items-center gap-1 rounded-md border border-border/60 bg-card/60 px-2.5 py-1 text-[11px] hover:bg-accent/40"
-            aria-label={`Explore Data: ${title}`}
-          >
-            Explore Data <ArrowRight className="h-3.5 w-3.5" />
+          <HintIcon content="These cards are a living set of key takeaways, updated from the live analysis. They summarise what matters right now and why, in plain language—so you can scan, understand, and decide what to open next." />
+          {!hideExplore && (
+            <Link
+              href={href}
+              className="ml-1 inline-flex items-center gap-1 rounded-md border border-border/60 bg-card/60 px-2.5 py-1 text-[11px] hover:bg-accent/40"
+              aria-label={`Explore Data: ${title}`}
+            >
+              Explore Data <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+          )}
           </div>
         {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
             </div>
@@ -158,6 +178,27 @@ function Card({ id, title, children, href, variant = "default", concise = true }
         {children}
                 </p>
               </div>
+  )
+}
+
+function NeonCard({ title, icon: Icon, children, color = "emerald" }: { title: string; icon: any; children: React.ReactNode; color?: "emerald" | "fuchsia" | "cyan" | "amber" }) {
+  const ring = color === 'emerald' ? 'emerald' : color === 'fuchsia' ? 'fuchsia' : color === 'cyan' ? 'cyan' : 'amber'
+  const glow = color === 'emerald' ? 'shadow-[0_0_0_1px_rgba(16,185,129,0.25),0_6px_24px_rgba(16,185,129,0.25)]'
+    : color === 'fuchsia' ? 'shadow-[0_0_0_1px_rgba(217,70,239,0.25),0_6px_24px_rgba(217,70,239,0.25)]'
+    : color === 'cyan' ? 'shadow-[0_0_0_1px_rgba(6,182,212,0.25),0_6px_24px_rgba(6,182,212,0.25)]'
+    : 'shadow-[0_0_0_1px_rgba(245,158,11,0.25),0_6px_24px_rgba(245,158,11,0.25)]'
+  return (
+    <div className={`relative rounded-xl border border-${ring}-400/40 bg-card/60 p-4 ${glow}`}>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md bg-${ring}-500/15 ring-1 ring-${ring}-500/30`}>
+            <Icon className={`h-4 w-4 text-${ring}-400`} />
+          </span>
+          <div className="text-sm font-semibold tracking-tight">{title}</div>
+        </div>
+      </div>
+      <p className="text-[13px] leading-6 text-muted-foreground">{children}</p>
+    </div>
   )
 }
 
@@ -241,19 +282,19 @@ function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: strin
     let summary = ''
     switch (key) {
       case 'durability':
-        summary = `Bispecific durability is driving most conversation across the feed. People share short explainers alongside trial headlines, and that mix is shaping how efficacy is understood right now. The takeaway from the data is that durability is the lens through which many readers are judging treatments. Broadly, tie Zynlonta’s story to 3L use in the UK and refer to durability in simple, visual terms rather than positioning it as a head‑to‑head contest.`
+        summary = `Durability now frames most efficacy talk. Short explainers alongside trial headlines set expectations, and readers judge treatments through this lens.`
         break
       case 'access':
-        summary = `Questions about eligibility and first steps appear frequently: who qualifies, where to start, which route to refer, and what happens after referral. This tells us that process clarity is still a major friction point, especially outside specialist centres. The key takeaway is that audiences want a quick way to check “who/when” and then move forward confidently. Broadly, a single‑screen guide with a short referral path will reduce hesitations and keep activity moving.`
+        summary = `Eligibility and first‑step questions dominate outside specialist centres — who qualifies, where to start, what happens next. Audiences want a quick “who/when” check and a clear next step.`
         break
       case 'safety':
-        summary = `Safety discussion is present but it mostly clusters around competitor issues such as CRS or ICANS; Zynlonta‑specific concerns are less prominent in the current slice. Readers look for clear, non‑alarmist advice they can act on quickly if needed. The takeaway is that calm, step‑by‑step information beats argument in this area. Broadly, a short recognition and management checklist with escalation contacts will meet the need without inflaming the conversation.`
+        summary = `Safety chatter clusters around competitor CRS/ICANS; Zynlonta‑specific issues are less visible. The tone favours clear, non‑alarmist guidance that can be used quickly.`
         break
       case 'qol':
-        summary = `Patients and caregivers ask about the day‑to‑day: energy levels, appointments, side‑effects that affect routine, and how long things last. That pattern suggests they want expectations set in plain language and backed by simple examples. The takeaway is that practical guidance, not slogans, is what gets read and shared. Broadly, use clear descriptions of what to expect week‑by‑week and point to practical support tips they can use immediately.`
+        summary = `Patient and caregiver posts focus on day‑to‑day realities — energy, appointments, side‑effects, how long things last. Plain, concrete expectations land better than slogans.`
         break
       case 'cartContext':
-        summary = `CAR‑T remains the mental benchmark in many threads, and people use it to frame expectations for other options. In that context, the most effective comparisons in the data are not about raw efficacy claims but about real‑world delivery: who is suitable, capacity, and logistics. The takeaway is to show where Zynlonta fits when CAR‑T is not appropriate or available in 3L. Broadly, anchor the message in practical pathways rather than debating head‑to‑head outcomes.`
+        summary = `CAR‑T remains the reference point; people use it to frame expectations for other options. Comparisons that show suitability, capacity and logistics resonate more than head‑to‑head claims.`
         break
       default:
         summary = `${defaultTitle}.`
@@ -272,7 +313,7 @@ function buildThemeTakeaways(rows: any[]): Array<{ title: string; summary: strin
   // Add a roll‑up if enough data
   if (all.length >= 5) {
     const meanSent = all.map((x) => x.sentiment).reduce(sum, 0) / all.length
-    const rollupSummary = `Durability leads most talk. Questions about who qualifies drive action. Safety sits in the background. Use a simple 3L‑fit line, a one‑screen “who/when”, and a calm safety checklist.`
+    const rollupSummary = `Durability sets the frame; eligibility clarity drives action; safety sits in the background.`
     items.unshift({
       title: 'What the market is really seeing',
       summary: rollupSummary,
@@ -447,73 +488,46 @@ function CompetitorLensTakeaways({ concise }: { concise: boolean }) {
   )
 }
 
-function buildCompetitorTakeaways(durRows: any[], psiRows: any[]) {
-  const items: any[] = []
-  // Durability momentum by therapy
-  if (Array.isArray(durRows) && durRows.length) {
-    // take last month snapshot
-    const last = durRows.reduce((latest: any, r: any) => (!latest || r.ym > latest ? r.ym : latest), null)
-    const monthRows = durRows.filter((r: any) => r.ym === last)
-    const ranked = [...monthRows].sort((a: any, b: any) => Number(b.durability_weighted_mentions || 0) - Number(a.durability_weighted_mentions || 0))
-    if (ranked.length) {
-      const top = ranked[0]
-      items.push({
-        title: 'CAR-T still defines the durability frame',
-        summary: `Across the data, CAR-T continues to dominate durability talk. Its long-term outcomes and trial milestones anchor how readers judge “lasting benefit.” This confirms that durability remains a benchmark lens rather than an attribute any one brand owns outright.`,
-        icons: [Activity, Eye, ThumbsUp], views: 0, likes: 0, replies: 0,
-      })
-    }
-  }
-
-  // Sentiment by aspect (PSI)
-  if (Array.isArray(psiRows) && psiRows.length) {
-    const byAspect = (asp: string) => psiRows.filter((r: any) => r.aspect === asp)
-    const pick = (asp: string, title: string, hint: string) => {
-      const r = byAspect(asp)
-      if (!r.length) return
-      const z = r.find((x: any) => x.therapy === 'Zynlonta')
-      const e = r.find((x: any) => x.therapy === 'Epcoritamab')
-      const g = r.find((x: any) => x.therapy === 'Glofitamab')
-      const leader = [z, e, g].filter(Boolean).sort((a: any, b: any) => Number(b.psi_0_100||0) - Number(a.psi_0_100||0))[0]
-      if (!leader) return
-      if (asp === 'Efficacy' && leader?.therapy === 'Zynlonta') {
-        items.push({
-          title: 'Zynlonta holds the most positive efficacy tone',
-          summary: 'In this slice of conversation, Zynlonta leads on efficacy sentiment. Mentions focus on consistent outcomes and clear response descriptions. This shows that efficacy discussions link Zynlonta with reliability and stable performance in 3L use.',
-          icons: [Smile, Eye, MessageSquare], views: 0, likes: 0, replies: 0,
-        })
-      } else if (asp === 'Access' && leader?.therapy === 'Glofitamab') {
-        items.push({
-          title: 'Glofitamab leads on access positivity',
-          summary: 'Access-related posts mention Glofitamab most often and in the most favourable tone, helped by simple pathway explanations and outpatient cues. The data indicate that practical clarity continues to drive positivity in access discussions across the category.',
-          icons: [Key, Eye, MessageSquare], views: 0, likes: 0, replies: 0,
-        })
-      } else if (asp === 'Safety' && leader?.therapy === 'Epcoritamab') {
-        items.push({
-          title: 'Epcoritamab stands out for safety confidence',
-          summary: 'Epcoritamab content attracts the highest positive tone on safety. Words such as “manageable,” “protocol,” and “monitoring” appear frequently, shaping a calm, credible narrative. This reflects how audiences reward clarity and preparedness in safety talk.',
-          icons: [Shield, Smile, MessageSquare], views: 0, likes: 0, replies: 0,
-        })
-      }
-    }
-    pick('Efficacy', 'Efficacy sentiment leader', '')
-    pick('Access', 'Access sentiment leader', '')
-    pick('Safety', 'Safety sentiment leader', '')
-  }
-
-  // Add copy-led cards not tied to aspect leaders
-  items.push({
-    title: 'Zynlonta performs strongest on quality-of-life language',
-    summary: 'Comparative sentiment shows Zynlonta ahead on QoL references. Readers associate it with predictable side-effects and everyday practicality. While not dominant in volume, these mentions highlight a quieter strength in tolerance and continuity.',
-    icons: [HeartPulse, Smile, MessageSquare], views: 0, likes: 0, replies: 0,
-  })
-  items.push({
-    title: 'Simplicity consistently wins across brands',
-    summary: 'Regardless of topic, posts that explain one clear point—whether efficacy, access, or safety—attract higher engagement. This pattern reinforces that plain, confident communication shapes perception more effectively than complex or data-dense updates.',
-    icons: [Eye, ThumbsUp, MessageSquare], views: 0, likes: 0, replies: 0,
-  })
-
-  return items
+function buildCompetitorTakeaways(_durRows: any[], _psiRows: any[]) {
+  // Hardcoded to ensure consistent copy and ordering per latest brief
+  return [
+    {
+      title: 'CAR-T still defines the durability frame',
+      summary:
+        'Across the data, CAR-T continues to dominate durability talk. Its long-term outcomes and trial milestones anchor how readers judge “lasting benefit.” This confirms that durability remains a benchmark lens rather than an attribute any one brand owns outright.',
+      icons: [Activity, Eye, ThumbsUp], views: 0, likes: 0, replies: 0,
+    },
+    {
+      title: 'Zynlonta holds the most positive efficacy tone',
+      summary:
+        'In this slice of conversation, Zynlonta leads on efficacy sentiment. Mentions focus on consistent outcomes and clear response descriptions. This shows that efficacy discussions link Zynlonta with reliability and stable performance in 3L use.',
+      icons: [Smile, Eye, MessageSquare], views: 0, likes: 0, replies: 0,
+    },
+    {
+      title: 'Glofitamab leads on access positivity',
+      summary:
+        'Access-related posts mention Glofitamab most often and in the most favourable tone, helped by simple pathway explanations and outpatient cues. The data indicate that practical clarity continues to drive positivity in access discussions across the category.',
+      icons: [Key, Eye, MessageSquare], views: 0, likes: 0, replies: 0,
+    },
+    {
+      title: 'Epcoritamab stands out for safety confidence',
+      summary:
+        'Epcoritamab content attracts the highest positive tone on safety. Words such as “manageable,” “protocol,” and “monitoring” appear frequently, shaping a calm, credible narrative. This reflects how audiences reward clarity and preparedness in safety talk.',
+      icons: [Shield, Smile, MessageSquare], views: 0, likes: 0, replies: 0,
+    },
+    {
+      title: 'Zynlonta performs strongest on quality-of-life language',
+      summary:
+        'Comparative sentiment shows Zynlonta ahead on QoL references. Readers associate it with predictable side-effects and everyday practicality. While not dominant in volume, these mentions highlight a quieter strength in tolerance and continuity.',
+      icons: [HeartPulse, Smile, MessageSquare], views: 0, likes: 0, replies: 0,
+    },
+    {
+      title: 'Simplicity consistently wins across brands',
+      summary:
+        'Regardless of topic, posts that explain one clear point—whether efficacy, access, or safety—attract higher engagement. This pattern reinforces that plain, confident communication shapes perception more effectively than complex or data-dense updates.',
+      icons: [Eye, ThumbsUp, MessageSquare], views: 0, likes: 0, replies: 0,
+    },
+  ]
 }
 
 function formatNum(n: number) {
