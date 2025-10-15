@@ -195,15 +195,37 @@ export function SentimentComparison() {
         ) : (
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={rows.filter((r) => r.aspect.toLowerCase() !== "safety")}> {/** exclude safety permanently */}
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis dataKey="aspect" stroke="#666" style={{ fontSize: "12px" }} />
-            <YAxis stroke="#666" style={{ fontSize: "12px" }} domain={[0, 100]} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar dataKey="zynlonta" fill="#3b82f6" name="Zynlonta" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="epcoritamab" fill="#10b981" name="Epcoritamab" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="glofitamab" fill="#f59e0b" name="Glofitamab" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="cart" fill="#8b5cf6" name="CAR-T" radius={[4, 4, 0, 0]} />
+            <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
+            <XAxis dataKey="aspect" stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px", letterSpacing: 0.2 }} tickLine={false} axisLine={{ stroke: 'hsl(var(--border))' }} />
+            <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: "12px" }} domain={[0, 100]} tickLine={false} axisLine={{ stroke: 'hsl(var(--border))' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.08 }} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            {/* Sleek bars with subtle gradients, rounded tops, and consistent theme colours */}
+            <defs>
+              <linearGradient id="barZ" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="barEpc" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="barGlo" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="barCart" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.65} />
+              </linearGradient>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" floodOpacity="0.25" />
+              </filter>
+            </defs>
+            <Bar dataKey="zynlonta" fill="url(#barZ)" name="Zynlonta" radius={[6, 6, 0, 0]} barSize={26} style={{ filter: 'url(#softShadow)' }} />
+            <Bar dataKey="epcoritamab" fill="url(#barEpc)" name="Epcoritamab" radius={[6, 6, 0, 0]} barSize={26} style={{ filter: 'url(#softShadow)' }} />
+            <Bar dataKey="glofitamab" fill="url(#barGlo)" name="Glofitamab" radius={[6, 6, 0, 0]} barSize={26} style={{ filter: 'url(#softShadow)' }} />
+            <Bar dataKey="cart" fill="url(#barCart)" name="CAR-T" radius={[6, 6, 0, 0]} barSize={26} style={{ filter: 'url(#softShadow)' }} />
           </BarChart>
         </ResponsiveContainer>
         )}
