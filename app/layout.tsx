@@ -2,6 +2,7 @@ import type React from "react"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "@/components/theme-provider"
+import { CookieBanner, AnalyticsScriptsExample } from "@/components/cookie-consent"
 import { AppShell } from "@/components/app-shell"
 import "./globals.css"
 
@@ -27,6 +28,8 @@ export default function RootLayout({
           <AppShell>
             {children}
           </AppShell>
+          <AnalyticsScriptsExample />
+          <CookieBanner />
         </ThemeProvider>
       </body>
     </html>

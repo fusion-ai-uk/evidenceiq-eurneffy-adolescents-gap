@@ -42,6 +42,15 @@ export function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Render bare content on public routes like /login
+  if (pathname?.startsWith('/login')) {
+    return (
+      <div className="min-h-svh">
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-svh">
       {/* Fixed header */}
@@ -96,6 +105,20 @@ export function AppShell({ children }: AppShellProps) {
               ) : (
                 <Moon className="h-5 w-5" />
               )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-background/40"
+              onClick={async () => {
+                try {
+                  await fetch('/api/auth/logout', { method: 'DELETE' })
+                } finally {
+                  window.location.href = '/login'
+                }
+              }}
+            >
+              Logout
             </Button>
           </div>
         </div>
@@ -169,7 +192,11 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Copyright ribbon */}
       <footer className="fixed bottom-0 left-60 right-0 z-20 border-t border-border/60 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/50 text-[11px] text-muted-foreground px-4 md:px-6 py-1.5">
-        © {new Date().getFullYear()} evidenceIQ · All rights reserved
+        <div className="flex items-center gap-3">
+          <span>© {new Date().getFullYear()} evidenceIQ · All rights reserved</span>
+          <span className="opacity-60">·</span>
+          <Link href="/privacy" className="hover:underline">Privacy</Link>
+        </div>
       </footer>
     </div>
   )
