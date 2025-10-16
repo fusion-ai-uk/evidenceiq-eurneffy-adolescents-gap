@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff, Sun, Moon } from "lucide-react"
 import { useTheme } from "next-themes"
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
@@ -188,6 +188,14 @@ export default function LoginPage() {
 
       <Toaster richColors closeButton />
     </div>
+    </Suspense>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
     </Suspense>
   )
 }
