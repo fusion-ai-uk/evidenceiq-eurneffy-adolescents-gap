@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -51,6 +51,7 @@ export default function LoginPage() {
   }
 
   return (
+    <Suspense fallback={null}>
     <div className="relative min-h-svh w-full overflow-hidden flex items-center">
       {/* Theme toggle */}
       <div className="absolute right-3 top-3 md:right-6 md:top-6 z-10">
@@ -187,6 +188,7 @@ export default function LoginPage() {
 
       <Toaster richColors closeButton />
     </div>
+    </Suspense>
   )
 }
 
