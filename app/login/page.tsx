@@ -122,7 +122,7 @@ function LoginContent() {
                   type="email"
                   autoComplete="email"
                   autoFocus
-                  placeholder="you@company.com"
+                  placeholder="you@evidenceiq.io"
                   className="pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
