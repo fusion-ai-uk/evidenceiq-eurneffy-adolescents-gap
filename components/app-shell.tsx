@@ -21,7 +21,7 @@ const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
   { name: 'Audience Insights', href: '/audience', icon: Users },
   { name: 'Competitor Lens', href: '/competitors', icon: Target },
   { name: 'Events Tracker', href: '/events', icon: Calendar, comingSoon: true },
-  { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare, comingSoon: true },
+  { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare },
 ]
 
 export function AppShell({ children }: AppShellProps) {

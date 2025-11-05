@@ -107,7 +107,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
   const annotations = useMemo(() => {
     const xaxis: any[] = []
     const points: any[] = []
-    const maxY = series.reduce((m, p) => Math.max(m, p.count || 0), 0) || 1
+    const maxY = series.reduce((m, p) => Math.max(m, p.viewSum || 0), 0) || 1
     const nearestY = (xms: number) => {
       let best = series[0]
       let bestDiff = Math.abs(new Date(series[0]?.periodStart || 0).getTime() - xms)
@@ -115,7 +115,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
         const d = Math.abs(new Date(p.periodStart).getTime() - xms)
         if (d < bestDiff) { best = p; bestDiff = d }
       }
-      return Math.max(0, (best?.count ?? 0))
+      return Math.max(0, (best?.viewSum ?? 0))
     }
     spikes.forEach((s) => {
       xaxis.push({ x: pointToX(s.periodStart), strokeDashArray: 2, borderColor: '#22c55e', label: { style: { colors: '#22c55e', background: 'transparent' }, text: `+${Math.round(s.pctChange * 100)}%` } })
@@ -164,7 +164,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
         const lines = [
           `<div class="px-3 py-2 text-xs" style="color:${tooltipTextColor}">`,
           `<div class="font-medium">${iso.slice(0, 10)}</div>`,
-          `<div><strong>${point.count.toLocaleString()}</strong> posts this period</div>`,
+          `<div><strong>${Math.round(point.viewSum || 0).toLocaleString()}</strong> views this period</div>`,
         ]
         if (anomaly) {
           const pct = Math.round(anomaly.pctChange * 100)
@@ -187,8 +187,8 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
 
   const apexSeries = [
     {
-      name: 'Volume',
-      data: series.map((p) => [pointToX(p.periodStart), Math.max(0, p.count)]),
+      name: 'Views',
+      data: series.map((p) => [pointToX(p.periodStart), Math.max(0, p.viewSum)]),
     },
   ]
 
@@ -197,7 +197,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base font-medium">Conversation Volume Over Time</CardTitle>
+        <CardTitle className="text-base font-medium">Conversation Views Over Time</CardTitle>
       </CardHeader>
       <CardContent suppressHydrationWarning>
         {error && (

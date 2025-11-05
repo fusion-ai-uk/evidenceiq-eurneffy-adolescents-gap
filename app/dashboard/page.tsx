@@ -5,11 +5,14 @@ import { useEffect, useMemo, useState } from "react"
 import { HintIcon } from "@/components/ui/hint"
 import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Switch } from "@/components/ui/switch"
+import { weekOneTakeaways } from "@/data/week-one-takeaways"
 
 //
 
 export default function DashboardPage() {
   const [concise, setConcise] = useState<boolean>(false)
+  const [weekOne, setWeekOne] = useState<boolean>(false)
   const [themes, setThemes] = useState<any[]>([])
   const [themesLoading, setThemesLoading] = useState<boolean>(false)
   const [alerts, setAlerts] = useState<any[]>([])
@@ -52,8 +55,15 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header + quick filters */}
       <div className="flex flex-col gap-1">
-        <h1>Executive Summary</h1>
+        <h1>{weekOne ? 'Week‑One Takeaways' : 'Executive Summary'}</h1>
         <p className="lead">High‑level, scannable takeaways.</p>
+        <div className="mt-1 flex items-center gap-3">
+          <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <Switch checked={weekOne} onCheckedChange={(v) => setWeekOne(Boolean(v))} />
+            Week‑One Update
+          </label>
+          <button onClick={() => setConcise((c) => !c)} className="ml-2 inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-accent/40" aria-pressed={concise}>Concise</button>
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           <span className="opacity-80">Legend:</span>
           <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" />Attention</span>
@@ -91,19 +101,20 @@ export default function DashboardPage() {
       </Section>
 
       {/* 1. Themes */}
-      <Section title="General Themes" href="/themes" subtitle="Theme Explorer">
+      <Section title={weekOne ? "Week‑One Takeaways" : "General Themes"} href="/themes" subtitle={weekOne ? undefined : "Theme Explorer"}>
         {themesLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading themes…</div>
         )}
-        {!themesLoading && takeaways.length === 0 && (
+        {!themesLoading && (weekOne ? weekOneTakeaways : takeaways).length === 0 && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No theme data available.</div>
         )}
-        {!themesLoading && takeaways.slice(0,6).map((tw, idx) => (
+        {!themesLoading && (weekOne ? weekOneTakeaways : takeaways).slice(0,6).map((tw, idx) => (
           <TakeawayCard key={idx} data={tw} concise={concise} />
         ))}
       </Section>
 
       {/* 2. Trends */}
+      {!weekOne && (
       <Section title="Trends Explorer" href="/trends" subtitle="Above‑baseline highlights">
         {alertsLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading trends…</div>
@@ -115,8 +126,10 @@ export default function DashboardPage() {
           <TakeawayCard key={`trend-${idx}`} data={tw} concise={concise} />
         ))}
       </Section>
+      )}
 
       {/* 3. Audience */}
+      {!weekOne && (
       <Section title="Audience Insights" href="/audience" subtitle="Who’s driving the narrative">
         {audLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading audience insights…</div>
@@ -128,13 +141,14 @@ export default function DashboardPage() {
           <TakeawayCard key={`aud-${idx}`} data={tw} concise={concise} />
         ))}
       </Section>
-
-      {/* Brief tray removed per request */}
+      )}
 
       {/* 4. Competitors */}
+      {!weekOne && (
       <Section title="Competitor Lens" href="/competitors" subtitle="Quick competitive posture">
         <CompetitorLensTakeaways concise={concise} />
       </Section>
+      )}
 
       {/* Sections temporarily removed: Entity Network, Events Tracker, Content Recommendations */}
                   </div>

@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { runQuery } from '@/lib/bigquery'
 
-export const revalidate = 300
+export const revalidate = 0
+export const dynamic = 'force-dynamic'
 
 type Granularity = 'day' | 'week' | 'month'
 
@@ -63,6 +64,11 @@ function parseDate(s?: string, fallbackDays = 365): string {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
+  const labelledTable = process.env.LABELLED_TABLE || 'fusion-424109.evidenceiq_zynlonta.topic_labelled_dataset'
+  const usingTimeSeries = /topic_data_time_series/i.test(labelledTable)
+  const fulltextExpr = usingTimeSeries
+    ? "CONCAT(IFNULL(\`Topic Title\`, ''), ' ', IFNULL(\`Topic Summary\`, ''))"
+    : "CONCAT(IFNULL(text,''), ' ', IFNULL(combined_text_translated,''))"
   const startDate = parseDate(searchParams.get('startDate'))
   const endDate = parseDate(searchParams.get('endDate') || new Date().toISOString())
   const granularity = (searchParams.get('granularity') as Granularity) || 'week'
@@ -107,15 +113,15 @@ export async function GET(req: NextRequest) {
         retweetCount, replyCount, likeCount, viewCount,
         LOWER(TRIM(Category)) AS category,
         HCP_score, Patient_score, Caregiver_score, \`Payer _ NHS Trust_score\` AS payerScore,
-        CONCAT(IFNULL(text,''), ' ', IFNULL(combined_text_translated,'')) AS fulltext
-      FROM \`fusion-424109.evidenceiq_zynlonta.topic_labelled_dataset\`
+        ${fulltextExpr} AS fulltext
+      FROM \`${labelledTable}\`
       WHERE COALESCE(
           SAFE_CAST(createdAt AS TIMESTAMP),
           SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%E*S', createdAt),
           SAFE.PARSE_TIMESTAMP('%Y-%m-%d', createdAt),
           SAFE.PARSE_TIMESTAMP('%d/%m/%Y', createdAt),
           SAFE.PARSE_TIMESTAMP('%m/%d/%Y', createdAt)
-        ) BETWEEN TIMESTAMP(@startDate) AND TIMESTAMP(@endDate)
+        ) BETWEEN TIMESTAMP(@startDate) AND TIMESTAMP_ADD(TIMESTAMP(@endDate), INTERVAL 1 DAY)
         AND likeCount >= @minLikes
         AND retweetCount >= @minRetweets
         AND viewCount >= @minViews
@@ -210,13 +216,14 @@ export async function GET(req: NextRequest) {
     retweetSum: Number(r.retweetSum || 0),
   }))
 
-  const anomalies = computeAnomalies(series)
+  // Compute anomalies using views so spike/trough markers align with the chart metric
+  const anomalies = computeAnomalies(series.map((p) => ({ ...p, count: p.viewSum } as any)))
   const spikes = anomalies.filter((a) => a.type === 'spike')
   const troughs = anomalies.filter((a) => a.type === 'trough')
 
   return new Response(
     JSON.stringify({ series, spikes, troughs, meta: { granularity, startDate, endDate } }),
-    { headers: { 'Content-Type': 'application/json', 'Cache-Control': 's-maxage=300, stale-while-revalidate=600' } }
+    { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
   )
 }
 
