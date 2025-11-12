@@ -34,16 +34,6 @@ export const weekTwoTakeaways: ExecTakeaway[] = [
     sentiment: 0.06,
   },
   {
-    title: "Safety & tolerability talk remains calm and routine",
-    summary:
-      "Safety phrasing across therapies stayed matter‑of‑fact (e.g., ‘manageable’, ‘monitor per protocol’). For Zynlonta, AEs surfaced inside neutral checklists and reminders—no tonal volatility. The audience responds best to calm, factual safety language between peaks. Signal: Safety tone stable · Trust sustained · Checklist language resonates.",
-    icons: [Activity, Eye, ThumbsUp],
-    views: 0,
-    likes: 0,
-    replies: 0,
-    sentiment: 0.04,
-  },
-  {
     title: "Therapy conversation is more joined‑up and balanced",
     summary:
       "Threads increasingly present BsAbs, ADCs, and CAR‑T together as a complementary toolbox. Glofitamab, Epcoritamab, Pola, and Zynlonta appear side‑by‑side in treatment overviews and eligibility explainers. Zynlonta now sits naturally inside sequencing ‘pathways’ without relying on new data. Signal: Category integration · Steady attention · Positive association maintained.",
