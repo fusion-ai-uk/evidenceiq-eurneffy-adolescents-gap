@@ -5,14 +5,12 @@ import { useEffect, useMemo, useState } from "react"
 import { HintIcon } from "@/components/ui/hint"
 import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Switch } from "@/components/ui/switch"
 import { weekOneTakeaways } from "@/data/week-one-takeaways"
 import { weekTwoTakeaways } from "@/data/week-two-takeaways"
 
 //
 
 export default function DashboardPage() {
-  const [concise, setConcise] = useState<boolean>(false)
   const [weekMode, setWeekMode] = useState<"off" | "week1" | "week2">("off")
   const [themes, setThemes] = useState<any[]>([])
   const [themesLoading, setThemesLoading] = useState<boolean>(false)
@@ -58,20 +56,23 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-1">
         <h1>{weekMode === 'off' ? 'Executive Summary' : weekMode === 'week1' ? 'Week‑One Takeaways' : 'Week‑Two Takeaways'}</h1>
         <p className="lead">High‑level, scannable takeaways.</p>
-        <div className="mt-1 flex items-center gap-3">
-          <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Executive view</span>
+        <div className="mt-2">
+          <div className="inline-flex items-center gap-3 rounded-lg border border-primary/30 bg-card/70 px-3 py-2 ring-1 ring-primary/20 shadow-[0_0_0_1px_rgba(59,130,246,0.15),0_6px_24px_rgba(59,130,246,0.15)]">
+            <div className="text-xs">
+              <div className="font-medium leading-none">Weekly Updates</div>
+              <div className="text-muted-foreground">Select a week to view executive key takeaways</div>
+            </div>
             <select
               value={weekMode}
               onChange={(e) => setWeekMode(e.target.value as any)}
-              className="h-7 rounded-md border bg-background px-2"
+              className="h-9 rounded-md border border-primary/30 bg-background px-3 text-sm font-medium"
+              aria-label="Select weekly executive update"
             >
               <option value="off">Live (default)</option>
               <option value="week1">Week‑One</option>
               <option value="week2">Week‑Two</option>
             </select>
           </div>
-          <button onClick={() => setConcise((c) => !c)} className="ml-2 inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-accent/40" aria-pressed={concise}>Concise</button>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           <span className="opacity-80">Legend:</span>
@@ -118,7 +119,7 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No theme data available.</div>
         )}
         {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : takeaways)).slice(0,6).map((tw, idx) => (
-          <TakeawayCard key={idx} data={tw} concise={concise} />
+          <TakeawayCard key={idx} data={tw} concise={false} />
         ))}
       </Section>
 
@@ -132,7 +133,7 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No trend data available.</div>
         )}
         {!alertsLoading && trendTakeaways.slice(0,6).map((tw, idx) => (
-          <TakeawayCard key={`trend-${idx}`} data={tw} concise={concise} />
+          <TakeawayCard key={`trend-${idx}`} data={tw} concise={false} />
         ))}
       </Section>
       )}
@@ -147,7 +148,7 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No audience data available.</div>
         )}
         {!audLoading && audienceTakeaways.slice(0,6).map((tw, idx) => (
-          <TakeawayCard key={`aud-${idx}`} data={tw} concise={concise} />
+          <TakeawayCard key={`aud-${idx}`} data={tw} concise={false} />
         ))}
       </Section>
       )}
@@ -155,7 +156,7 @@ export default function DashboardPage() {
       {/* 4. Competitors */}
       {weekMode === 'off' && (
       <Section title="Competitor Lens" href="/competitors" subtitle="Quick competitive posture">
-        <CompetitorLensTakeaways concise={concise} />
+        <CompetitorLensTakeaways concise={false} />
       </Section>
       )}
 
