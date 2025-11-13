@@ -23,7 +23,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'hcp-1a',
         title: '3L after a CD20 bispecific: what to do next',
-        rationale: 'Make one simple “next‑step” card the team can post or print.',
+        rationale: 'Do this because the data shows CD20 loss and short durability after CD20 bispecifics in real‑world use. That makes target‑switch guidance useful now for HCPs in community and centre settings. Use it immediately after congress/data peaks and in routine clinic weeks.',
         actions: [
           'Say plainly: “Re‑biopsy first to check CD20.”',
           'If CD20 is lost or durability was short, switch target to a CD19 ADC (Zynlonta).',
@@ -39,7 +39,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'hcp-1b',
         title: 'Clinic script you can paste into the EHR',
-        rationale: 'Give staff one ready‑to‑use sentence.',
+        rationale: 'Do this because clinic teams move faster with one approved line. For APPs/front desk. Use every time a patient progresses on a CD20 bispecific.',
         actions: [
           'Text to paste: “After a CD20 bispecific, re‑biopsy CD20. If CD20 is lost or durability was short, switch target to a CD19 ADC. Use standard premed + monitoring. Book the 3‑week review today.”',
         ],
@@ -51,13 +51,10 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'hcp-1c',
         title: '30‑second explainer video (captioned)',
-        rationale: 'Create a short video that shows the pathway in four plain steps.',
+        rationale: 'Do this because short captioned videos are saved and re‑watched more than long clips. For HCP social/email embeds. Use within 24–48h after comparator/data spikes (“shadow the comparator”).',
         actions: [
-          'Open with the problem: “Short durability after BsAb.”',
-          'Step 1: “Re‑biopsy CD20.”',
-          'Step 2: “If CD20 is lost or durability was short, switch target to a CD19 ADC.”',
-          'Step 3: “Outpatient care with premed + routine monitoring.”',
-          'Close with the action: “Book the 3‑week review today.”',
+          'Show four scenes with captions: Problem (short durability after BsAb) → Re‑biopsy CD20 → Change target to CD19 ADC if CD20−/short durability → Outpatient care + book 3‑week review.',
+          'End screen: “Order biopsy” and “Premed checklist.”',
         ],
         language: ['Order', 'Switch', 'Monitor', 'Review'],
         kpis: ['Completion rate ≥70%'],
@@ -67,7 +64,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'hcp-1d',
         title: 'Why re‑biopsy first?',
-        rationale: 'Add a small “why it matters” tile the team can point to.',
+        rationale: 'Do this because HCPs ask “why” before they act. Point to evidence without head‑to‑head claims. For all HCP channels; pin beside the algorithm card.',
         actions: [
           'Say: “Real‑world evidence shows CD20 loss can follow CD20 bispecifics.”',
           'Then: “If CD20 is absent, changing target is the clean next step.”',
@@ -86,7 +83,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'patient-1a',
         title: 'Your next 4 weeks',
-        rationale: 'A single card that explains what happens and when.',
+        rationale: 'Do this because patients engage with simple timelines and one link, not many. For later‑line patients and carers. Use at consent and in follow‑up messages.',
         actions: [
           'Week 0: Treatment day — how long it takes and what to expect.',
           'Week 1–2: At home — sun care, light swelling check, simple energy note.',
@@ -101,7 +98,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'patient-1b',
         title: 'When to call us',
-        rationale: 'Make the “call now” rules crystal‑clear with big icons.',
+        rationale: 'Do this because hard thresholds reduce anxious calls and improve right‑time calls. For patients and carers. Use on day 0 and resend at 48h.',
         actions: [
           'Fever 38 °C or higher — call now.',
           'New or worse swelling — call now.',
@@ -116,7 +113,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'patient-1c',
         title: 'Dosing‑day checklist',
-        rationale: 'What to bring and how to plan your visit.',
+        rationale: 'Do this because checklists improve preparedness and reduce last‑minute questions. For patients and carers. Send the day before treatment.',
         actions: [
           'Any food/meds notes from your team. Hat and sunscreen.',
           'Bring ID, water/snacks, and a phone charger.',
@@ -135,7 +132,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'care-1a',
         title: 'Quick plan for carers',
-        rationale: 'One card with dates, daily checks and who to call.',
+        rationale: 'Do this because carers want dates, tasks and a number to call. For family members. Share at the first visit.',
         actions: [
           'Dates and rides: treatment on [DATE/TIME]; review about 3 weeks later.',
           'Daily checks: skin, ankle/leg swelling, temperature and energy.',
@@ -150,7 +147,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'care-1b',
         title: 'Weekly checklist (download)',
-        rationale: 'Simple Mon/Wed/Fri tick‑boxes.',
+        rationale: 'Do this because a simple routine builds confidence. For carers at home. Print or save once; reuse weekly.',
         actions: [
           'Tick skin, edema, temperature, fatigue.',
           'Add a strip at the bottom: “If X then call”.',
@@ -163,7 +160,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'care-1c',
         title: 'Dosing‑day pack list',
-        rationale: 'What to bring so the day runs smoothly.',
+        rationale: 'Do this because packing guidance reduces delays and stress. For carers arranging transport. Send the day before.',
         actions: [
           'ID, medicines list, snacks or water, and a phone charger.',
           'Note parking or valet info and plan a return ride time.',
@@ -181,7 +178,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'payer-1a',
         title: '3L pathway on one page',
-        rationale: 'A simple referral page that shows triggers, decision and setting.',
+        rationale: 'Do this because access teams respond to clear criteria and predictable flows. For referrers and service leads. Use in referral packs and partner emails.',
         actions: [
           'Trigger: progression after a CD20 bispecific or post‑CAR‑T relapse → re‑biopsy.',
           'Decision: CD20 loss or short durability → CD19 ADC (Zynlonta).',
@@ -196,7 +193,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'payer-1b',
         title: 'Outpatient flow (predictable care)',
-        rationale: 'Show the steps without claims or comparisons.',
+        rationale: 'Do this because predictable steps reduce friction for services. For pathway owners. Share on intranet or as a one‑pager.',
         actions: [
           'Standard premed and monitoring check‑points.',
           'Calendarised visits to reduce unplanned contacts.',
@@ -210,7 +207,7 @@ export const messagingRecommendations: AudienceRecommendations[] = [
       {
         id: 'payer-1c',
         title: 'Planning for earlier exposure',
-        rationale: 'Position a neutral “future” note.',
+        rationale: 'Do this because BsAb use is moving earlier; teams need a neutral note that keeps re‑biopsy + target‑switch as the fallback. For policy and education decks.',
         actions: [
           'If BsAbs move earlier, re‑biopsy + target‑switch remains the built‑in fallback.',
           'Link to a neutral, non‑H2H sequencing map.',
