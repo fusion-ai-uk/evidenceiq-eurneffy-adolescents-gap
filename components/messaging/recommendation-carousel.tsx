@@ -31,7 +31,7 @@ export function RecommendationCarousel({ title, subtitle, items }: { title: stri
             const Icon = rec.icon as any
             return (
               <CarouselItem key={rec.id} className={isSingle ? "basis-[96%] md:basis-[76%] xl:basis-[52%]" : "md:basis-1/2 xl:basis-1/3"}>
-                <Card className={`relative overflow-hidden bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-700/30 dark:border-cyan-400/30 p-0 shadow-[0_0_0_1px_rgba(6,182,212,0.12),0_10px_28px_rgba(6,182,212,0.06)] dark:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_12px_36px_rgba(6,182,212,0.08)] hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_14px_44px_rgba(6,182,212,0.1)] dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.3),0_18px_60px_rgba(6,182,212,0.12)] transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:scale-[1.01]`}> 
+                <Card className={`relative overflow-hidden bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-700/30 dark:border-cyan-400/30 p-0 shadow-[0_0_0_1px_rgba(6,182,212,0.12),0_10px_28px_rgba(6,182,212,0.06)] dark:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_12px_36px_rgba(6,182,212,0.08)] hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_14px_44px_rgba(6,182,212,0.1)] dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.3),0_18px_60px_rgba(6,182,212,0.12)] transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:scale-[1.01] min-h-[260px]`}> 
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
                   <div className="p-4">
                     <div className="flex items-start gap-3 mb-2">
