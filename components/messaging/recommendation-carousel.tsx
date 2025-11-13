@@ -44,7 +44,7 @@ export function RecommendationCarousel({ title, subtitle, items }: { title: stri
       </div>
 
       <div className="relative">
-        <Carousel opts={{ align: isSingle ? "center" : "start", loop: true, containScroll: 'trimSnaps' }} className="[--carousel-nav-offset:theme(spacing.4)]">
+        <Carousel opts={{ align: "center", loop: false, containScroll: 'keepSnaps', slidesToScroll: 1 }} className="[--carousel-nav-offset:theme(spacing.4)]">
           <CarouselContent className={isSingle ? "justify-center" : undefined}>
           {slides.map((rec) => {
             const Icon = rec.icon as any
