@@ -8,7 +8,7 @@ const TEST_PASSWORD = "zynlonta.evidenceiq"
 
 // Added static login
 const MARY_EMAIL = "mary@fusionscientific.io"
-const MARY_PASSWORD = "Andorra01!"
+const MARY_PASSWORD = "Andorra01!123"
 
 function signSession(payload: object) {
   const secret = process.env.AUTH_SECRET || "dev-secret-change-me"
