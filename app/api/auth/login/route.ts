@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import crypto from "crypto"
 
-// Simple in-memory credential check for demo/testing
+// Static credentials
 const TEST_EMAIL = "zynlonta@evidenceiq.io"
 const TEST_PASSWORD = "zynlonta.evidenceiq"
 
-// Sign a minimal session payload
+// Added static login
+const MARY_EMAIL = "mary@fusionscientific.io"
+const MARY_PASSWORD = "Andorra01!"
+
 function signSession(payload: object) {
   const secret = process.env.AUTH_SECRET || "dev-secret-change-me"
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url")
@@ -20,15 +23,22 @@ function signSession(payload: object) {
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()
-    if (email !== TEST_EMAIL || password !== TEST_PASSWORD) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
+
+    // Allow either credential pair
+    const isTestUser = email === TEST_EMAIL && password === TEST_PASSWORD
+    const isMaryUser = email === MARY_EMAIL && password === MARY_PASSWORD
+
+    if (!isTestUser && !isMaryUser) {
+      return NextResponse.json(
+        { message: "Invalid email or password" },
+        { status: 401 }
+      )
     }
 
     const session = signSession({ email, ts: Date.now() })
     const res = NextResponse.json({ ok: true })
     const isProd = process.env.NODE_ENV === "production"
 
-    // Set httpOnly cookie
     res.cookies.set({
       name: "evidenceiq_session",
       value: session,
@@ -38,10 +48,9 @@ export async function POST(req: NextRequest) {
       path: "/",
       maxAge: 60 * 60 * 24 * 3, // 3 days
     })
+
     return res
   } catch (e) {
     return NextResponse.json({ message: "Bad request" }, { status: 400 })
   }
 }
-
-
