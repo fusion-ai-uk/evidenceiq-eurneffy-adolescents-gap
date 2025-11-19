@@ -4,9 +4,9 @@ import type { ExecTakeaway } from "./week-one-takeaways"
 // Week Three (Nov 12–18, 2025) – Executive Summary tiles
 export const weekThreeTakeaways: ExecTakeaway[] = [
   {
-    title: "NICE moves Glofitamab to 2L; access momentum outpaces US",
+    title: "UK moves Glofitamab earlier; access grows faster than in US",
     summary:
-      "UK approval of Glofitamab + GemOx after one prior therapy broadened real‑world access and set an earlier‑line bispecific frame, while US access remains limited pending confirmatory data. Patient stories amplified optimism and practical ‘sooner, outpatient’ cues. Signal: Access wins · Earlier‑line shift · Positive tone and momentum.",
+      "NICE approved Glofitamab + GemOx after one prior therapy. That means more people in the UK can get a bispecific sooner, often in regular clinics. In the US, this use is still not approved, so access moves slower. Patient stories this week reinforced the simple message: earlier access and an easier outpatient path. Signal: Access wins · Earlier‑line shift · Positive momentum.",
     icons: [Key, TrendingUp, Eye],
     views: 0,
     likes: 0,
@@ -14,9 +14,9 @@ export const weekThreeTakeaways: ExecTakeaway[] = [
     sentiment: 0.10,
   },
   {
-    title: "Epcoritamab combo approval in FL boosts class confidence",
+    title: "Epcoritamab combo wins OK in FL; confidence in bispecifics grows",
     summary:
-      "FDA cleared Epkinly + R² in FL, the first bispecific combo and in 2L. Though outside DLBCL, it strengthens the class story (durable CRs, outpatient feasibility) and renews the fixed‑duration vs continuous dosing debate likely to spill into DLBCL. Signal: Class momentum · Durability focus · Cost/duration conversation returns.",
+      "The FDA approved Epkinly with rituximab + lenalidomide for follicular lymphoma in second line. It is the first bispecific combination approval and it uses a time‑limited schedule. While not DLBCL, it boosts trust in the whole class and restarts a clear comparison: fixed‑duration courses versus continuous dosing that goes on until progression. Expect that discussion to shape DLBCL use too. Signal: Class momentum · Durability focus · Cost/duration debate returns.",
     icons: [ThumbsUp, Activity, MessageSquare],
     views: 0,
     likes: 0,
@@ -24,9 +24,9 @@ export const weekThreeTakeaways: ExecTakeaway[] = [
     sentiment: 0.12,
   },
   {
-    title: "Zynlonta holds 3L niche; combinations set the next chapter",
+    title: "Zynlonta stays a steady 3L option; combos point to what’s next",
     summary:
-      "ADC Therapeutics reiterated Zynlonta’s dependable 3L role in community settings (simple infusion; no CRS/ICANS) with familiar, manageable toxicities. Combination programmes (LOTIS‑5 confirmatory; LOTIS‑7 with Glofitamab showing high CRs) shape the path to earlier, broader use. Signal: Reliable 3L · Combination‑driven upside · Calm safety tone.",
+      "Zynlonta remains a dependable third‑line choice, especially in community clinics. It is a short infusion every three weeks and does not cause CRS or ICANS. Side effects like photosensitivity and fluid retention are known and manageable with precautions. Combination studies are the growth story: LOTIS‑5 (with rituximab) and LOTIS‑7 (with Glofitamab, high CRs) outline how use could broaden over time. Signal: Reliable 3L · Combination upside · Calm safety tone.",
     icons: [Shield, Key, Activity],
     views: 0,
     likes: 0,
@@ -34,9 +34,9 @@ export const weekThreeTakeaways: ExecTakeaway[] = [
     sentiment: 0.08,
   },
   {
-    title: "CAR‑T vs bispecifics: access and ‘time toxicity’ frame choice",
+    title: "Choosing CAR‑T or a bispecific: access and clinic time matter",
     summary:
-      "Long‑term CAR‑T data keep cure potential front‑of‑mind, but referral gaps and logistics leave many patients on off‑the‑shelf options. New analyses weigh one‑time intensity against ongoing clinic time for bispecifics; patient preference and QoL trade‑offs are central. Signal: Shared decision‑making · Access constraints · QoL/time balance.",
+      "Long‑term results keep CAR‑T’s cure potential in view. But some patients cannot reach a CAR‑T center in time, so off‑the‑shelf bispecifics remain the practical choice. New work compares a one‑time, intense treatment (CAR‑T) with ongoing visits over many months (bispecifics). The best option often comes down to access, care setting, and the patient’s preference about time in clinic. Signal: Shared decision‑making · Access constraints · QoL/time balance.",
     icons: [HeartPulse, Key, TrendingUp],
     views: 0,
     likes: 0,
