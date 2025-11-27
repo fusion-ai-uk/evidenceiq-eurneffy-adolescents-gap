@@ -24,14 +24,14 @@ export const weekFourTakeaways: ExecTakeaway[] = [
     sentiment: 0.09,
   },
   {
-    title: "Safety posts stay calm; CRS monitoring routines look standardised",
+    title: "Sequencing guidance looks more consistent across 2L/3L threads",
     summary:
-      "Safety conversation remained steady and matter‑of‑fact. Clinics reiterated step‑up dosing, tocilizumab availability, and simple ‘when to call’ cues. Few adversarial threads; most posts reinforced protocol confidence. Signal: Safety‑focused · Instructional tone · Light positive skew.",
-    icons: [Shield, MessageSquare, Smile],
+      "Posts converged on a few simple rules: re‑biopsy when CD20 status is unclear, avoid back‑to‑back CD20 bispecifics, and use bispecifics to bridge or consolidate when CAR‑T timing is uncertain. Flow‑chart graphics and one‑screen checklists drew most sharing. Signal: Sequencing clarity · Conversation‑led · Light positive skew.",
+    icons: [Key, MessageSquare, TrendingUp],
     views: 0,
     likes: 0,
     replies: 0,
-    sentiment: 0.04,
+    sentiment: 0.05,
   },
   {
     title: "Zynlonta visibility holds in community use with predictable delivery",
