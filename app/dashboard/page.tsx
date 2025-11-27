@@ -8,11 +8,12 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { weekOneTakeaways } from "@/data/week-one-takeaways"
 import { weekTwoTakeaways } from "@/data/week-two-takeaways"
 import { weekThreeTakeaways } from "@/data/week-three-takeaways"
+import { weekFourTakeaways } from "@/data/week-four-takeaways"
 
 //
 
 export default function DashboardPage() {
-  const [weekMode, setWeekMode] = useState<"off" | "week1" | "week2" | "week3">("off")
+  const [weekMode, setWeekMode] = useState<"off" | "week1" | "week2" | "week3" | "week4">("off")
   const [themes, setThemes] = useState<any[]>([])
   const [themesLoading, setThemesLoading] = useState<boolean>(false)
   const [alerts, setAlerts] = useState<any[]>([])
@@ -55,7 +56,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header + quick filters */}
       <div className="flex flex-col gap-1">
-        <h1>{weekMode === 'off' ? 'Executive Summary' : weekMode === 'week1' ? 'Week‑One Takeaways' : weekMode === 'week2' ? 'Week‑Two Takeaways' : 'Week‑Three Takeaways'}</h1>
+        <h1>{weekMode === 'off' ? 'Executive Summary' : weekMode === 'week1' ? 'Week‑One Takeaways' : weekMode === 'week2' ? 'Week‑Two Takeaways' : weekMode === 'week3' ? 'Week‑Three Takeaways' : 'Week‑Four Takeaways'}</h1>
         <p className="lead">High‑level, scannable takeaways.</p>
         <div className="mt-2">
           <div className="inline-flex items-center gap-3 rounded-lg border border-primary/30 bg-card/70 px-3 py-2 ring-1 ring-primary/20 shadow-[0_0_0_1px_rgba(59,130,246,0.15),0_6px_24px_rgba(59,130,246,0.15)]">
@@ -73,6 +74,7 @@ export default function DashboardPage() {
               <option value="week1">Week‑One</option>
               <option value="week2">Week‑Two</option>
               <option value="week3">Week‑Three</option>
+              <option value="week4">Week‑Four</option>
             </select>
           </div>
         </div>
@@ -113,14 +115,14 @@ export default function DashboardPage() {
       </Section>
 
       {/* 1. Themes */}
-      <Section title={weekMode === 'off' ? "General Themes" : (weekMode === 'week1' ? "Week‑One Takeaways" : weekMode === 'week2' ? "Week‑Two Takeaways" : "Week‑Three Takeaways")} href="/themes" subtitle={weekMode === 'off' ? "Theme Explorer" : undefined}>
+      <Section title={weekMode === 'off' ? "General Themes" : (weekMode === 'week1' ? "Week‑One Takeaways" : weekMode === 'week2' ? "Week‑Two Takeaways" : weekMode === 'week3' ? "Week‑Three Takeaways" : "Week‑Four Takeaways")} href="/themes" subtitle={weekMode === 'off' ? "Theme Explorer" : undefined}>
         {themesLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading themes…</div>
         )}
-        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : takeaways)).length === 0 && (
+        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : takeaways)).length === 0 && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No theme data available.</div>
         )}
-        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : takeaways)).slice(0,6).map((tw, idx) => (
+        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : takeaways)).slice(0,6).map((tw, idx) => (
           <TakeawayCard key={idx} data={tw} concise={false} />
         ))}
       </Section>
