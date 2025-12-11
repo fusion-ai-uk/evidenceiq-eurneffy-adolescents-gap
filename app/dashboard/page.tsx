@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { HintIcon } from "@/components/ui/hint"
-import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users } from "lucide-react"
+import { ArrowRight, Activity, Shield, Key, HeartPulse, Eye, ThumbsUp, MessageSquare, Smile, Meh, Frown, TrendingUp, ThermometerSnowflake, Users, Sparkles } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { weekOneTakeaways } from "@/data/week-one-takeaways"
 import { weekTwoTakeaways } from "@/data/week-two-takeaways"
@@ -615,9 +615,9 @@ function TakeawayCard({ data, concise }: { data: { title: string; summary: strin
           {data.icons.slice(0,3).map((Ic, i) => (
             <Tooltip key={i}>
               <TooltipTrigger asChild>
-                <span className="inline-flex"><Ic className="h-4 w-4" /></span>
+                <span className="inline-flex"><Ic className={`h-4 w-4 ${Ic===Sparkles?'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.75)]':''}`} /></span>
               </TooltipTrigger>
-              <TooltipContent sideOffset={6}>{Ic===Activity?'Durability':Ic===Shield?'Safety':Ic===Key?'Access':Ic===HeartPulse?'QoL':Ic===TrendingUp?'Momentum':Ic===Eye?'Attention':Ic===ThumbsUp?'Engagement':Ic===MessageSquare?'Conversation':Ic===Smile?'Positive tone':Ic===Frown?'Negative tone':Ic===Meh?'Neutral tone':'Insight'}</TooltipContent>
+              <TooltipContent sideOffset={6}>{Ic===Activity?'Durability':Ic===Shield?'Safety':Ic===Key?'Access':Ic===HeartPulse?'QoL':Ic===TrendingUp?'Momentum':Ic===Eye?'Attention':Ic===ThumbsUp?'Engagement':Ic===MessageSquare?'Conversation':Ic===Smile?'Positive tone':Ic===Frown?'Negative tone':Ic===Meh?'Neutral tone':Ic===Sparkles?'ASH highlight':'Insight'}</TooltipContent>
             </Tooltip>
           ))}
         </div>
