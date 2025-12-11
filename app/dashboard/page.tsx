@@ -10,7 +10,7 @@ import { weekTwoTakeaways } from "@/data/week-two-takeaways"
 import { weekThreeTakeaways } from "@/data/week-three-takeaways"
 import { weekFourTakeaways } from "@/data/week-four-takeaways"
 import { weekFiveTakeaways } from "@/data/week-five-takeaways"
-import { weekSixTakeaways } from "@/data/week-six-takeaways"
+import { weekSixTakeaways, weekSixGeneral } from "@/data/week-six-takeaways"
 
 //
 
@@ -123,10 +123,10 @@ export default function DashboardPage() {
         {themesLoading && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">Loading themes…</div>
         )}
-        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : weekMode === 'week5' ? weekFiveTakeaways : weekMode === 'week6' ? weekSixTakeaways : takeaways)).length === 0 && (
+        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : weekMode === 'week5' ? weekFiveTakeaways : weekMode === 'week6' ? [...weekSixTakeaways, ...weekSixGeneral] : takeaways)).length === 0 && (
           <div className="rounded-xl border border-border/60 bg-card/60 p-4 text-xs text-muted-foreground">No theme data available.</div>
         )}
-        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : weekMode === 'week5' ? weekFiveTakeaways : weekMode === 'week6' ? weekSixTakeaways : takeaways)).slice(0,6).map((tw, idx) => (
+        {!themesLoading && ((weekMode === 'week1' ? weekOneTakeaways : weekMode === 'week2' ? weekTwoTakeaways : weekMode === 'week3' ? weekThreeTakeaways : weekMode === 'week4' ? weekFourTakeaways : weekMode === 'week5' ? weekFiveTakeaways : weekMode === 'week6' ? [...weekSixTakeaways, ...weekSixGeneral] : takeaways)).slice(0, weekMode==='week6'?12:6).map((tw, idx) => (
           <TakeawayCard key={idx} data={tw} concise={false} />
         ))}
       </Section>
