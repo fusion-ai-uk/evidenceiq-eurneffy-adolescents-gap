@@ -1,4 +1,4 @@
-import { Activity, TrendingUp, Key, Shield, HeartPulse, Eye, MessageSquare, Sparkles } from "lucide-react"
+import { Activity, TrendingUp, Key, Shield, HeartPulse, Eye, MessageSquare, Sparkles, Smile } from "lucide-react"
 import type { ExecTakeaway } from "./week-one-takeaways"
 
 // Week Six (Dec 3–9, 2025) – ASH‑specific Executive Summary tiles
