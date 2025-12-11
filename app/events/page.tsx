@@ -4,6 +4,12 @@ import { KOLMentions } from "@/components/events/kol-mentions"
 import { AshShareOfVoice } from "@/components/events/ash-sov"
 import { TimelineChart } from "@/components/timeline-chart"
 import { AshTimeline } from "@/components/events/ash-timeline"
+import { TCMI } from "@/components/events/tcmi"
+import { HotZones } from "@/components/events/hot-zones"
+import { RiskOpportunity } from "@/components/events/risk-op"
+import { RisingTerms } from "@/components/events/rising-terms"
+import { MicroKPIs } from "@/components/events/micro-kpis"
+import { AudienceSplit } from "@/components/events/audience-split"
 
 export default function EventsPage() {
   return (
@@ -20,12 +26,26 @@ export default function EventsPage() {
         <MiniStat label="#ASH25 posts sampled" value="142"></MiniStat>
       </div>
 
+      <MicroKPIs />
+
       <AshTimeline />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AshShareOfVoice />
         <CongressSessions />
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TCMI />
+        <HotZones />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RiskOpportunity />
+        <RisingTerms />
+      </div>
+
+      <AudienceSplit />
 
       <KOLMentions />
 
