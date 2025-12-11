@@ -2,7 +2,6 @@ import Link from "next/link"
 import { CongressSessions } from "@/components/events/congress-sessions"
 import { KOLMentions } from "@/components/events/kol-mentions"
 import { AshShareOfVoice } from "@/components/events/ash-sov"
-import { TimelineChart } from "@/components/timeline-chart"
 import { AshTimeline } from "@/components/events/ash-timeline"
 import { TCMI } from "@/components/events/tcmi"
 import { HotZones } from "@/components/events/hot-zones"
@@ -48,8 +47,6 @@ export default function EventsPage() {
       <AudienceSplit />
 
       <KOLMentions />
-
-      <TimelineChart />
 
       <div className="text-xs text-muted-foreground">
         Source context: ASH Annual Meeting —{" "}
