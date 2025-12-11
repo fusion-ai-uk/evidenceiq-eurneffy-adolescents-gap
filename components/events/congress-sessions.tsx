@@ -40,7 +40,7 @@ export function CongressSessions() {
     <Card className="border-border/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">Congress Sessions Monitored</CardTitle>
-        <p className="text-sm text-muted-foreground">ASH 2024 sessions generating the most discussion</p>
+        <p className="text-sm text-muted-foreground">ASH 2025 sessions generating the most discussion</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

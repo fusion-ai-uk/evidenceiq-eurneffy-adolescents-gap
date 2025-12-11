@@ -30,8 +30,8 @@ export function CongressTracker() {
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base font-medium">ASH 2024 Congress Impact</CardTitle>
-        <p className="text-sm text-muted-foreground">Pre vs post-congress discourse analysis</p>
+        <CardTitle className="text-base font-medium">ASH 2025 Congress Impact</CardTitle>
+        <p className="text-sm text-muted-foreground">Pre vs post‑congress discourse analysis</p>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="comparison" className="w-full">
@@ -43,7 +43,7 @@ export function CongressTracker() {
           <TabsContent value="comparison" className="mt-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Pre-Congress (Nov 2024)</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">Pre‑Congress (Dec 4–5, 2025)</h4>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={ashPreData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -61,7 +61,7 @@ export function CongressTracker() {
                 </ResponsiveContainer>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Post-Congress (Dec 2024)</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">Core + Post (Dec 6–11, 2025)</h4>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={ashPostData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />

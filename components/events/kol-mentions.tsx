@@ -15,7 +15,7 @@ export function KOLMentions() {
     <Card className="border-border/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">Key Opinion Leader Activity</CardTitle>
-        <p className="text-sm text-muted-foreground">Most mentioned HCP influencers at ASH 2024</p>
+        <p className="text-sm text-muted-foreground">Most mentioned HCP influencers at ASH 2025</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
