@@ -20,7 +20,7 @@ const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
   { name: 'Competitor Lens', href: '/competitors', icon: Target },
-  { name: 'Events Tracker', href: '/events', icon: Calendar, comingSoon: true },
+  { name: 'Events Tracker', href: '/events', icon: Calendar },
   { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare },
 ]
 
