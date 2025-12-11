@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { CongressTracker } from "@/components/events/congress-tracker"
 import { CongressSessions } from "@/components/events/congress-sessions"
 import { KOLMentions } from "@/components/events/kol-mentions"
 import { AshShareOfVoice } from "@/components/events/ash-sov"
 import { TimelineChart } from "@/components/timeline-chart"
+import { AshTimeline } from "@/components/events/ash-timeline"
 
 export default function EventsPage() {
   return (
@@ -20,15 +20,14 @@ export default function EventsPage() {
         <MiniStat label="#ASH25 posts sampled" value="142"></MiniStat>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <CongressTracker />
-        <AshShareOfVoice />
-      </div>
+      <AshTimeline />
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <AshShareOfVoice />
         <CongressSessions />
-        <KOLMentions />
       </div>
+
+      <KOLMentions />
 
       <TimelineChart />
 

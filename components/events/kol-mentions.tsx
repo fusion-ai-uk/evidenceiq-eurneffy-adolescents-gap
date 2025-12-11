@@ -2,12 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp } from "lucide-react"
 
+// ASH25 sample: higher‑authority accounts that drove interaction
 const kols = [
-  { name: "Dr. Sarah Mitchell", institution: "Royal Marsden Hospital", mentions: 47, focus: "Bispecific efficacy" },
-  { name: "Prof. James Chen", institution: "Christie Hospital", mentions: 38, focus: "CAR-T sequencing" },
-  { name: "Dr. Emma Thompson", institution: "UCL Cancer Institute", mentions: 32, focus: "ADC safety profiles" },
-  { name: "Prof. David Williams", institution: "Oxford Cancer Centre", mentions: 28, focus: "Real-world evidence" },
-  { name: "Dr. Lisa Anderson", institution: "Edinburgh Cancer Centre", mentions: 24, focus: "Patient QoL outcomes" },
+  { name: "@RoswellPark", institution: "Roswell Park", mentions: 12, focus: "Loncastuximab combinations / awards" },
+  { name: "@DanaFarber", institution: "Dana‑Farber", mentions: 10, focus: "WM‑NET1 / B‑cell malignancies" },
+  { name: "@MoffittNews", institution: "Moffitt Cancer Center", mentions: 8, focus: "DLBCL orals / practice context" },
+  { name: "@VJHemOnc", institution: "VJHemOnc (media)", mentions: 15, focus: "Session highlights / recap threads" },
+  { name: "@HemOncToday", institution: "HemOnc Today (media)", mentions: 9, focus: "Bispecific real‑world outcomes" },
 ]
 
 export function KOLMentions() {
