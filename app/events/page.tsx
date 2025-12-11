@@ -127,4 +127,3 @@ function MiniStat({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
-export default function EventsPage() { return null }
