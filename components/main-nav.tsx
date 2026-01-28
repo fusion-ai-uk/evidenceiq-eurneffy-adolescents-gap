@@ -1,9 +1,9 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target } from "lucide-react"
+import { LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target, Shuffle } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -22,8 +22,9 @@ const navigation = [
   { name: "Trends Explorer", href: "/trends", icon: TrendingUp },
   { name: "Audience Insights", href: "/audience", icon: Users },
   { name: "Competitor Lens", href: "/competitors", icon: Target },
-  { name: "Events Tracker", href: "/events", icon: Calendar },
-  { name: "Content Recommendations", href: "/messaging", icon: MessageSquare },
+  { name: "Sequencing & Pathways", href: "/sequencing", icon: Shuffle },
+  { name: "Events Tracker", href: "/events", icon: Calendar, comingSoon: true },
+  { name: "Content Recommendations", href: "/messaging", icon: MessageSquare, comingSoon: true },
 ]
 
 export function MainNav() {

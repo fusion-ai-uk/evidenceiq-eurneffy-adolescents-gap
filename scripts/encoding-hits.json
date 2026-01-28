@@ -1,0 +1,50 @@
+[
+  {
+    "file": "app\\evidence-iq-home.tsx",
+    "marker": "U+00E2",
+    "idx": 5107,
+    "snippet": " heavily pretreated DLBCL patients with â‰¥2 prior therapies in the pivotal LOTIS-2\\r\\n              t"
+  },
+  {
+    "file": "app\\login\\page.tsx",
+    "marker": "U+00E2",
+    "idx": 1570,
+    "snippet": "   }\\r\\n      toast.success(\"Welcome back âœ¨\")\\r\\n      const from = searchParams.get('from') || '/dash"
+  },
+  {
+    "file": "scripts\\encoding-hits.json",
+    "marker": "U+00C2",
+    "idx": 2538,
+    "snippet": ";\\\\nconst needles=['Ã‚·','Ã¢â€ '','Ã¢â‚¬Â¦','Ã¢â‚¬\"','Ãƒ—','Ã¢â‚¬Å“','Ã¢â‚¬\"\\n  }\\n]"
+  },
+  {
+    "file": "scripts\\find-bad-chars.js",
+    "marker": "U+00C3",
+    "idx": 483,
+    "snippet": ", ch: String.fromCharCode(0x00C2) }, // Ã‚\\n  { name: 'U+00E2', ch: String.fromCharCode(0x00E2) }, //"
+  },
+  {
+    "file": "scripts\\fix-encoding-all.js",
+    "marker": "U+00C2",
+    "idx": 896,
+    "snippet": "0xFFFD);\\n\\nconst OUT_DOT = s(0x00B7); // Â·\\nconst OUT_COPY = s(0x00A9); // Â©\\nconst OUT_ARROW = s(0x2"
+  },
+  {
+    "file": "scripts\\fix-encoding.js",
+    "marker": "U+00C2",
+    "idx": 1413,
+    "snippet": ", 0x20AC, 0x00A6), to: '...' }, // Ã¢â‚¬Â¦ (ellipsis)\\n  { from: s(0x00E2, 0x20AC, 0x201D), to: OUT_E"
+  },
+  {
+    "file": "scripts\\scan-encoding-all.js",
+    "marker": "U+00C3",
+    "idx": 593,
+    "snippet": ", ch: String.fromCharCode(0x00C2) }, // Ã‚\\n  { name: 'U+00E2', ch: String.fromCharCode(0x00E2) }, //"
+  },
+  {
+    "file": "scripts\\scan-encoding.js",
+    "marker": "U+00C2",
+    "idx": 528,
+    "snippet": "\\n];\\nconst needles=['Ã‚·','Ã¢â€ '','Ã¢â‚¬Â¦','Ã¢â‚¬\"','Ãƒ—','Ã¢â‚¬Å“','Ã¢â‚¬Â','Ã‚©'];\\nfor (const f "
+  }
+]

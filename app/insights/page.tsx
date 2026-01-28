@@ -1,15 +1,15 @@
-import EmotionRadar from "./components/EmotionRadar";
-
-export default function InsightsPage() {
+﻿export default function InsightsPage() {
   return (
-    <main className="p-6 space-y-10">
-      <h1 className="text-2xl font-bold">Zynlonta Competitive NLP Insights</h1>
-      <section>
-        <h2 className="text-xl font-semibold mb-3">Emotional Tone Comparison</h2>
-        <EmotionRadar />
-      </section>
-    </main>
+    <div className="space-y-6">
+      <div>
+        <h1>Insights</h1>
+        <p className="lead">
+          This section is being migrated to the Alunbrig (brigatinib) ALK+ metastatic NSCLC dataset.
+        </p>
+      </div>
+      <div className="rounded-xl border border-border/60 bg-card/60 p-5 text-sm text-muted-foreground">
+        NLP/insight widgets will be re-enabled once Alunbrig-specific NLP artifacts are generated from social media data.
+      </div>
+    </div>
   )
 }
-
-

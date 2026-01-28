@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,7 @@ export default function EvidenceIQHomeClient() {
               className="brightness-0 invert drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
             />
           </div>
-          <div className="text-sm text-sky-300/80 font-medium tracking-wide">DLBCL Treatment Content Strategy</div>
+          <div className="text-sm text-sky-300/80 font-medium tracking-wide">ALK+ metastatic NSCLC Intelligence</div>
         </div>
       </header>
 
@@ -49,7 +49,7 @@ export default function EvidenceIQHomeClient() {
             />
             <div className="flex items-center justify-center space-x-4 mb-8">
               <div className="h-px w-20 bg-gradient-to-r from-transparent to-sky-500/50"></div>
-              <div className="text-6xl font-bold text-white mb-2 animate-float">Zynlonta</div>
+              <div className="text-6xl font-bold text-white mb-2 animate-float">Alunbrig</div>
               <div className="h-px w-20 bg-gradient-to-l from-transparent to-sky-500/50"></div>
             </div>
           </div>
@@ -57,7 +57,7 @@ export default function EvidenceIQHomeClient() {
           <div className="mb-8 relative">
             <div className="relative inline-block mb-6">
               <h1 className="text-4xl font-bold text-white mb-4">
-                Breakthrough ADC Therapy for Relapsed/Refractory DLBCL in the UK
+                Intelligence for ALK+ metastatic NSCLC in the UK
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
                 First-in-class CD19-directed antibody-drug conjugate delivering targeted treatment for heavily
@@ -93,7 +93,7 @@ export default function EvidenceIQHomeClient() {
               <h3 className="text-lg font-semibold text-white">48% Overall Response Rate</h3>
             </div>
             <p className="text-gray-300 text-sm">
-              Demonstrated efficacy in heavily pretreated DLBCL patients with ≥2 prior therapies in the pivotal LOTIS-2
+              Demonstrated efficacy in heavily pretreated DLBCL patients with â‰¥2 prior therapies in the pivotal LOTIS-2
               trial.
             </p>
           </div>
@@ -128,9 +128,11 @@ export default function EvidenceIQHomeClient() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-sky-500/20 bg-black/80 backdrop-blur-xl py-8 mt-8">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">© 2024 evidenceIQ. All rights reserved.</p>
+          <p className="text-gray-500 text-sm">(c) 2024 evidenceIQ. All rights reserved.</p>
         </div>
       </footer>
     </main>
   )
 }
+
+

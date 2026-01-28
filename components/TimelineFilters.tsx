@@ -74,13 +74,13 @@ export function TimelineFilters({ onApply }: { onApply: (f: TimelineFilterState)
           </span>
           <div className="flex items-center gap-1.5 w-full max-w-[420px] justify-center">
             <input value={f.startDate} onChange={(e) => setF({ ...f, startDate: e.target.value })} type="date" className="h-8 rounded-md bg-background border px-2 text-sm" />
-            <span className="text-xs">→</span>
+            <span className="text-xs">-></span>
             <input value={f.endDate} onChange={(e) => setF({ ...f, endDate: e.target.value })} type="date" className="h-8 rounded-md bg-background border px-2 text-sm" />
           </div>
         </div>
         <div id="stakeholder-toggles" className="flex flex-col items-center gap-1 md:col-span-1">
           <span className="text-xs text-muted-foreground">Stakeholders
-            <HintIcon className="ml-2 align-middle" content={"Filters weight curves by posts likely from each audience (HCP, patient, caregiver, payer). Probabilistic—compare viewpoints, not identity."} />
+            <HintIcon className="ml-2 align-middle" content={"Filters weight curves by posts likely from each audience (HCP, patient, caregiver, payer). Probabilistic-compare viewpoints, not identity."} />
           </span>
           <div className="flex items-center justify-center gap-3 text-xs">
             <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={f.hcp} onChange={(e) => setF({ ...f, hcp: e.target.checked })} />HCP</label>

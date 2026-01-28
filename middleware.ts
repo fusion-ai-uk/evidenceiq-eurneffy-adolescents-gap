@@ -1,12 +1,21 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 
-const PUBLIC_PATHS = ["/login", "/privacy", "/api/auth/login", "/api/auth/logout", "/_next", "/favicon.ico"]
+const PUBLIC_PATHS = [
+  "/login",
+  "/privacy",
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/debug/build",
+  "/api/debug/source",
+  "/_next",
+  "/favicon.ico",
+]
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))
   // Allow static assets from /public (e.g., /logo.png, /icons/*.svg) and any file-like path
-  const isAsset = pathname.startsWith('/_next') || pathname === '/favicon.ico' || /\.[a-zA-Z0-9]+$/.test(pathname)
+  const isAsset = pathname.startsWith("/_next") || pathname === "/favicon.ico" || /\.[a-zA-Z0-9]+$/.test(pathname)
 
   if (isPublic || isAsset) return NextResponse.next()
 
@@ -17,13 +26,17 @@ export function middleware(req: NextRequest) {
     url.searchParams.set("from", pathname)
     return NextResponse.redirect(url)
   }
-  return NextResponse.next()
+
+  // Lightweight response caching for authenticated Alunbrig GET APIs.
+  // Helps repeated loads/navigation without changing UI or reducing data.
+  const res = NextResponse.next()
+  if (req.method === "GET" && pathname.startsWith("/api/alunbrig/")) {
+    // Private: don't allow shared caches to store authenticated analytics responses.
+    res.headers.set("Cache-Control", "private, max-age=30, stale-while-revalidate=60")
+  }
+  return res
 }
 
 export const config = {
-  matcher: [
-    "/((?!api/auth/login|api/auth/logout|login|privacy|_next|favicon.ico|public).*)",
-  ],
+  matcher: ["/((?!api/auth/login|api/auth/logout|login|privacy|_next|favicon.ico|public).*)"],
 }
-
-

@@ -13,7 +13,7 @@ export function EventDrawer({ open, onClose, milestone }: { open: boolean; onClo
         <Card className="rounded-none border-0">
           <CardHeader>
             <CardTitle className="text-base">{milestone.title}</CardTitle>
-            <p className="text-xs text-muted-foreground">{milestone.date} · Impact: {milestone.impact}</p>
+            <p className="text-xs text-muted-foreground">{milestone.date} | Impact: {milestone.impact}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground whitespace-pre-wrap">{milestone.narrative}</div>

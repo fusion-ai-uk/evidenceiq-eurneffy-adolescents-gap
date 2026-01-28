@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import * as React from 'react'
 import Link from 'next/link'
@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Command as CommandIcon, Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target } from 'lucide-react'
+import { Command as CommandIcon, Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target, Shuffle } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { CommandDialog, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
@@ -20,8 +20,9 @@ const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
   { name: 'Competitor Lens', href: '/competitors', icon: Target },
-  { name: 'Events Tracker', href: '/events', icon: Calendar },
-  { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare },
+  { name: 'Sequencing & Pathways', href: '/sequencing', icon: Shuffle },
+  { name: 'Events Tracker', href: '/events', icon: Calendar, comingSoon: true },
+  { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare, comingSoon: true },
 ]
 
 export function AppShell({ children }: AppShellProps) {
@@ -72,7 +73,7 @@ export function AppShell({ children }: AppShellProps) {
             <span className="sr-only">evidenceIQ Home</span>
           </Link>
           <div className="hidden lg:block text-sm text-muted-foreground truncate">
-            Zynlonta Marketing Intelligence
+            Alunbrig Marketing Intelligence
           </div>
           <div className="ml-auto flex items-center gap-2 pr-4 md:pr-6">
             <Button
@@ -85,7 +86,7 @@ export function AppShell({ children }: AppShellProps) {
               <CommandIcon className="mr-2 h-4 w-4" />
               Search
               <span className="ml-2 hidden md:inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] leading-none text-muted-foreground">
-                ⌘K
+                CtrlK
               </span>
             </Button>
             <div className="hidden sm:flex items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground">
@@ -193,13 +194,14 @@ export function AppShell({ children }: AppShellProps) {
       {/* Copyright ribbon */}
       <footer className="fixed bottom-0 left-60 right-0 z-20 border-t border-border/60 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/50 text-[11px] text-muted-foreground px-4 md:px-6 py-1.5">
         <div className="flex items-center gap-3">
-          <span>© {new Date().getFullYear()} evidenceIQ · All rights reserved</span>
-          <span className="opacity-60">·</span>
+          <span>(c) {new Date().getFullYear()} evidenceIQ | All rights reserved</span>
+          <span className="opacity-60">|</span>
           <Link href="/privacy" className="hover:underline">Privacy</Link>
         </div>
       </footer>
     </div>
   )
 }
+
 
 

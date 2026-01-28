@@ -1,28 +1,15 @@
-"use client"
-
-import { RecommendationCarousel } from "@/components/messaging/recommendation-carousel"
-import { messagingRecommendations } from "@/data/messaging-recommendations"
-import { Container } from "@/components/ui/container"
-
-export default function MessagingPage() {
-  const hcp = messagingRecommendations.find((g) => g.audience === 'HCP')!
-  const patient = messagingRecommendations.find((g) => g.audience === 'Patient')!
-  const caregiver = messagingRecommendations.find((g) => g.audience === 'Caregiver')!
-  const payer = messagingRecommendations.find((g) => g.audience === 'Payer')!
+﻿export default function MessagingPage() {
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-1">
-        <h1>Messaging Recommendations</h1>
-        <p className="lead">Audience‑specific creative guidance you can ship today. Designed to add new cards over time.</p>
+    <div className="space-y-6">
+      <div>
+        <h1>Content Recommendations</h1>
+        <p className="lead">
+          This section is being migrated to the Alunbrig (brigatinib) ALK+ metastatic NSCLC dataset.
+        </p>
       </div>
-
-      <RecommendationCarousel title="HCP – Clinic Rules & Sequencing" subtitle="Operational clarity that converts" items={hcp.items} />
-      <RecommendationCarousel title="Patients – Safety & Routine" subtitle="Calm, checklist‑first assets" items={patient.items} />
-      <RecommendationCarousel title="Caregivers – Weekly Support" subtitle="Concrete tasks and reassurance" items={caregiver.items} />
-      <RecommendationCarousel title="Payers – Eligibility & Pathway" subtitle="Make referral predictable" items={payer.items} />
-
-      {/* bottom spacer for comfortable scroll finish */}
-      <div className="h-24 md:h-32" />
+      <div className="rounded-xl border border-border/60 bg-card/60 p-5 text-sm text-muted-foreground">
+        Content and messaging recommendations will be re-enabled once Alunbrig-specific insights and creative tags are connected to the social media data source.
+      </div>
     </div>
   )
 }

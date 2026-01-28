@@ -101,7 +101,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
     if (set.has('2l') || t.includes('2l') || t.includes('practice')) return '🏥'
     if (set.has('bispecifics') || t.includes('bispecific')) return '🧬'
     if (t.includes('buzz') || t.includes('news')) return '📈'
-    return '•'
+    return '*'
   }
 
   const annotations = useMemo(() => {
@@ -175,7 +175,7 @@ export function ConversationTimeline({ filters }: { filters: TimelineFilterState
         if (near) {
           lines.push(`<div class="mt-1">Event: ${near.title} <span class="opacity-70">(${near.impact})</span></div>`)
           if (near.narrative) {
-            const snippet = near.narrative.length > 140 ? near.narrative.slice(0, 140) + '…' : near.narrative
+            const snippet = near.narrative.length > 140 ? near.narrative.slice(0, 140) + '...' : near.narrative
             lines.push(`<div class="opacity-80">${snippet}</div>`)
           }
         }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Button } from "@/components/ui/button"
 import { Calendar, Command, Moon, Sun } from "lucide-react"
@@ -42,7 +42,7 @@ export function TopBar() {
               suppressHydrationWarning
             />
           )}
-          <div className="hidden md:block text-sm text-muted-foreground">Zynlonta Marketing Intelligence</div>
+          <div className="hidden md:block text-sm text-muted-foreground">Alunbrig Marketing Intelligence</div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
@@ -96,13 +96,18 @@ export function TopBar() {
             </CommandItem>
             <CommandItem asChild>
               <Link href="/competitors">Competitor Lens</Link>
+            <CommandItem asChild>
+              <Link href="/sequencing">Sequencing &amp; Pathways</Link>
+            </CommandItem>
             </CommandItem>
             
-            <CommandItem asChild>
-              <Link href="/events">Events Tracker</Link>
+            <CommandItem disabled aria-disabled className="opacity-60 pointer-events-none">
+              <span>Events Tracker</span>
+              <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
             </CommandItem>
-            <CommandItem asChild>
-              <Link href="/messaging">Content Recommendations</Link>
+            <CommandItem disabled aria-disabled className="opacity-60 pointer-events-none">
+              <span>Content Recommendations</span>
+              <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
             </CommandItem>
             <CommandItem asChild>
               <Link href="/settings">Settings</Link>
@@ -118,3 +123,4 @@ export function TopBar() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -38,7 +38,7 @@ function LoginContent() {
         const data = await res.json().catch(() => ({ message: "Login failed" }))
         throw new Error(data?.message || "Invalid credentials")
       }
-      toast.success("Welcome back ✨")
+      toast.success("Welcome back âœ¨")
       const from = searchParams.get('from') || '/dashboard'
       const isSafe = typeof from === 'string' && from.startsWith('/') && !from.startsWith('/login') && !/\.[a-zA-Z0-9]+$/.test(from)
       router.replace(isSafe ? from : '/dashboard')
@@ -91,13 +91,13 @@ function LoginContent() {
                 suppressHydrationWarning
               />
             )}
-            <span className="text-sm text-muted-foreground">Zynlonta Intelligence</span>
+            <span className="text-sm text-muted-foreground">Alunbrig Intelligence</span>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Sign in to your intelligence workspace
           </h1>
           <p className="max-w-prose text-balance text-muted-foreground">
-            Access executive insights, competitor signals, and audience narratives — all in one place.
+            Access executive insights, competitor signals, and audience narratives - all in one place.
           </p>
           <div className="hidden md:flex items-center gap-3 text-xs text-muted-foreground/90">
             <div className="h-2 w-2 rounded-full bg-emerald-500/80" />
@@ -139,7 +139,7 @@ function LoginContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   className="pl-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -199,5 +199,6 @@ export default function LoginPage() {
     </Suspense>
   )
 }
+
 
 

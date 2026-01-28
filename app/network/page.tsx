@@ -1,32 +1,14 @@
-import { EntityNetworkViz } from "@/components/network/entity-network-viz"
-import { EntityList } from "@/components/network/entity-list"
-import { MisspellingsTracker } from "@/components/network/misspellings-tracker"
-import { TrialReferences } from "@/components/network/trial-references"
-
-export default function NetworkPage() {
+﻿export default function NetworkPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1>Entity Network</h1>
         <p className="lead">
-          Explore connections between drugs, institutions, trials, payers, and events
+          This section is being migrated to the Alunbrig (brigatinib) ALK+ metastatic NSCLC dataset.
         </p>
       </div>
-
-      {/* Network Visualization and Entity List */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <EntityNetworkViz />
-        </div>
-        <div>
-          <EntityList />
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <MisspellingsTracker />
-        <TrialReferences />
+      <div className="rounded-xl border border-border/60 bg-card/60 p-5 text-sm text-muted-foreground">
+        Network views will be re-enabled once entity extraction and graph endpoints are connected for the Alunbrig social media dataset.
       </div>
     </div>
   )

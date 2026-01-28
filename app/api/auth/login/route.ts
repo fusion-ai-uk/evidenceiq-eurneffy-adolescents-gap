@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import crypto from "crypto"
 
 // Static credentials
-const TEST_EMAIL = "zynlonta@evidenceiq.io"
-const TEST_PASSWORD = "zynlonta.evidenceiq"
+const TEST_EMAIL = process.env.TEST_LOGIN_EMAIL || "alunbrig@evidenceiq.io"
+const TEST_PASSWORD = process.env.TEST_LOGIN_PASSWORD || "alunbrig.evidenceiq"
 
-// Added static login
-const MARY_EMAIL = "mary@fusionscientific.io"
-const MARY_PASSWORD = "Andorra01!123"
 
 function signSession(payload: object) {
   const secret = process.env.AUTH_SECRET || "dev-secret-change-me"
@@ -26,9 +23,8 @@ export async function POST(req: NextRequest) {
 
     // Allow either credential pair
     const isTestUser = email === TEST_EMAIL && password === TEST_PASSWORD
-    const isMaryUser = email === MARY_EMAIL && password === MARY_PASSWORD
-
-    if (!isTestUser && !isMaryUser) {
+    
+    if (!isTestUser) {
       return NextResponse.json(
         { message: "Invalid email or password" },
         { status: 401 }
@@ -54,3 +50,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Bad request" }, { status: 400 })
   }
 }
+
