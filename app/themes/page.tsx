@@ -1,5 +1,9 @@
-﻿import { GeneralThemesExplorer } from "@/components/alunbrig/themes/GeneralThemesExplorer"
+import { GeneralThemesExplorer } from "@/components/alunbrig/themes/GeneralThemesExplorer"
 import { Card, CardContent } from "@/components/ui/card"
+
+// This page is fully interactive and data is loaded client-side.
+// Force dynamic rendering to avoid build-time prerender failures on Vercel.
+export const dynamic = "force-dynamic"
 
 export default function ThemesPage() {
   return (
