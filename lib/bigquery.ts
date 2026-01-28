@@ -42,6 +42,38 @@ function makeCacheKey(sql: string, params?: Record<string, unknown>, types?: Que
   return `${sql}\n--params:${stableStringify(params || {})}\n--types:${stableStringify(types || {})}`
 }
 
+function fixMojibake(input: string): string {
+  // Common UTF-8 -> Win-1252 mojibake sequences we’ve seen in the UI.
+  let s = input
+  // Punctuation
+  s = s.replace(/â€˜/g, "‘").replace(/â€™/g, "’")
+  s = s.replace(/â€œ/g, "“").replace(/â€/g, "”")
+  s = s.replace(/â€”/g, "—").replace(/â€“/g, "–")
+  s = s.replace(/â€¦/g, "…")
+  s = s.replace(/â†’/g, "→")
+  s = s.replace(/â€¢/g, "•")
+  // Common symbols
+  s = s.replace(/Â·/g, "·")
+  s = s.replace(/Â©/g, "©").replace(/Â®/g, "®")
+  s = s.replace(/â‰¥/g, "≥").replace(/â‰¤/g, "≤")
+  s = s.replace(/âˆ’/g, "−")
+  // Remove stray Â that often precedes punctuation/whitespace
+  s = s.replace(/Â(?=\\s|[.,;:)\\]])/g, "")
+  return s
+}
+
+function deepFixMojibake<T>(value: T): T {
+  if (value === null || value === undefined) return value
+  if (typeof value === "string") return fixMojibake(value) as any
+  if (Array.isArray(value)) return value.map((v) => deepFixMojibake(v)) as any
+  if (typeof value === "object") {
+    const obj = value as any
+    for (const k of Object.keys(obj)) obj[k] = deepFixMojibake(obj[k])
+    return obj
+  }
+  return value
+}
+
 export function getBigQueryClient() {
   // Prefer inline JSON creds in Vercel env
   const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.BIGQUERY_PROJECT_ID
@@ -148,5 +180,6 @@ export async function runQuery<T = unknown>(
     cache.set(cacheKey, { expiresAt: now + ttlMs, rows: rows as unknown[] })
   }
 
-  return rows as T[]
+  // Normalize any mojibake coming from upstream data sources.
+  return deepFixMojibake(rows) as T[]
 }
