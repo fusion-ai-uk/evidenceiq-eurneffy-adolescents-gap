@@ -507,7 +507,15 @@ export function TrendsExplorer() {
                 <XAxis dataKey="period" stroke="#666" style={{ fontSize: "12px" }} />
                 <YAxis stroke="#666" style={{ fontSize: "12px" }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333", borderRadius: "8px" }}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "12px",
+                    color: "hsl(var(--popover-foreground))",
+                    boxShadow: "0 12px 36px rgba(0,0,0,0.22)",
+                  }}
+                  labelStyle={{ color: "hsl(var(--popover-foreground))", fontWeight: 600 }}
+                  itemStyle={{ color: "hsl(var(--popover-foreground))" }}
                   formatter={(value: any, name: any, props: any) => {
                     if (name === "baselineSharePct") return [value == null ? "n/a" : `${Number(value).toFixed(1)}%`, "Baseline share"]
                     if (name === "sharePct") return [`${Number(value).toFixed(1)}%`, "Share of range"]
