@@ -4,8 +4,8 @@ import dynamic from "next/dynamic"
 import { useMemo } from "react"
 import { useTheme } from "next-themes"
 
-// Ensure we resolve the actual component (default export) across module formats.
-const ReactApexChart = dynamic(() => import("react-apexcharts").then((m) => m.default), { ssr: false })
+// Ensure we resolve the actual component across module formats (CJS/ESM).
+const ReactApexChart = dynamic(() => import("react-apexcharts").then((m: any) => m?.default ?? m), { ssr: false })
 
 export function SexyRadar({
   title,

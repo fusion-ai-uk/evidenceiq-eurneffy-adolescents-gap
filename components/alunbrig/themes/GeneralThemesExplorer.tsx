@@ -19,8 +19,8 @@ import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/f
 import { InfoTip } from "@/components/alunbrig/InfoTip"
 import { cachedJson } from "@/lib/client-cache"
 
-// Ensure we resolve the actual component (default export) across module formats.
-const ReactApexChart = dynamic(() => import("react-apexcharts").then((m) => m.default), { ssr: false })
+// Ensure we resolve the actual component across module formats (CJS/ESM).
+const ReactApexChart = dynamic(() => import("react-apexcharts").then((m: any) => m?.default ?? m), { ssr: false })
 
 type GroupBy = "card_bucket" | "topics_top_topics" | "clinical_context_biomarker" | "competitive_context"
 
