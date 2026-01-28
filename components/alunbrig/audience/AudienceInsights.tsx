@@ -380,31 +380,34 @@ export function AudienceInsights() {
             {summaryLoading || !summary ? (
               <div className="text-sm text-muted-foreground">Loading audience split...</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie data={shareData} dataKey="value" nameKey="label" innerRadius={60} outerRadius={90}>
-                      {shareData.map((_, i) => (
-                        <Cell key={i} fill={colors[i % colors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: any) => pct(Number(v))} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="space-y-2">
-                  {shareData.map((d, i) => (
-                    <div key={`${String(d.label)}-${i}`} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-block h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />
-                        {d.label}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie data={shareData} dataKey="value" nameKey="label" innerRadius={60} outerRadius={90}>
+                        {shareData.map((_, i) => (
+                          <Cell key={i} fill={colors[i % colors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: any) => pct(Number(v))} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-2">
+                    {shareData.map((d, i) => (
+                      <div key={`${String(d.label)}-${i}`} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />
+                          {d.label}
+                        </div>
+                        <div className="text-muted-foreground">{pct(d.value)}</div>
                       </div>
-                      <div className="text-muted-foreground">{pct(d.value)}</div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+
                 {summary ? (
-                  <div className="w-full md:justify-self-end">
+                  <div className="w-full">
                     <SexyRadar
                       title="Signal mix (overall)"
                       categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}

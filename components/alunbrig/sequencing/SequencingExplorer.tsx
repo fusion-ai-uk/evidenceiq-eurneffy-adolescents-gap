@@ -470,11 +470,11 @@ export function SequencingExplorer() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
           <CardHeader><CardTitle className="text-base font-medium">Sequencing over time</CardTitle></CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col">
             {timeseriesLoading || !timeseries ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
             ) : (
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={timeseriesChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                   <XAxis dataKey="period" hide />
@@ -485,7 +485,7 @@ export function SequencingExplorer() {
                 </LineChart>
               </ResponsiveContainer>
             )}
-            <div className="mt-2 max-h-[180px] overflow-auto space-y-2">
+            <div className="mt-3 flex-1 min-h-[260px] max-h-[420px] overflow-auto space-y-2">
               {timeseriesChartData.slice(-12).reverse().map((p: any, i: number) => (
                 <button key={`${p.period}-${i}`} className="w-full text-left rounded-md border p-2 hover:bg-accent/30" onClick={() => openExamples("period", `Period | ${p.period}`, { period: String(p.period) })}>
                   <div className="text-xs text-muted-foreground">
@@ -520,43 +520,60 @@ export function SequencingExplorer() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Line of therapy</CardTitle></CardHeader>
-          <CardContent>
-            {overviewLoading || !overview ? (
-              <div className="text-sm text-muted-foreground">Loading...</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={lotData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                  <XAxis dataKey="lot" hide />
-                  <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
-                  <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
-                  <Bar dataKey="sharePct" fill="#10b981" onClick={(d: any) => openExamples("lot", `LoT | ${String(d?.lot)}`, { lotValue: String(d?.lot) })} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+          <CardHeader>
+            <CardTitle className="text-base font-medium">Pathway breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <div className="text-sm font-medium">Line of therapy</div>
+              <div className="mt-2">
+                {overviewLoading || !overview ? (
+                  <div className="text-sm text-muted-foreground">Loading...</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={lotData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis dataKey="lot" hide />
+                      <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                      <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                      <Bar
+                        dataKey="sharePct"
+                        fill="#10b981"
+                        onClick={(d: any) => openExamples("lot", `LoT | ${String(d?.lot)}`, { lotValue: String(d?.lot) })}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm font-medium">Sequence direction</div>
+              <div className="mt-2">
+                {overviewLoading || !overview ? (
+                  <div className="text-sm text-muted-foreground">Loading...</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={directionData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis dataKey="direction" hide />
+                      <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                      <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                      <Bar
+                        dataKey="sharePct"
+                        fill="#f59e0b"
+                        onClick={(d: any) => openExamples("direction", `Direction | ${String(d?.direction)}`, { directionValue: String(d?.direction) })}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Sequence direction</CardTitle></CardHeader>
-          <CardContent>
-            {overviewLoading || !overview ? (
-              <div className="text-sm text-muted-foreground">Loading...</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={directionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                  <XAxis dataKey="direction" hide />
-                  <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
-                  <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
-                  <Bar dataKey="sharePct" fill="#f59e0b" onClick={(d: any) => openExamples("direction", `Direction | ${String(d?.direction)}`, { directionValue: String(d?.direction) })} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+
         <Card className="border-border/50">
           <CardHeader><CardTitle className="text-base font-medium">Top rationales</CardTitle></CardHeader>
           <CardContent>

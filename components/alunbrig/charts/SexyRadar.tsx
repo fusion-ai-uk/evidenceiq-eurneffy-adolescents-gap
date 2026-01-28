@@ -26,6 +26,10 @@ export function SexyRadar({
 
   const { options, series } = useMemo(() => {
     const vals = values.map((v) => Math.max(0, Math.min(100, Number(v || 0))))
+    const maxVal = vals.reduce((m, v) => (v > m ? v : m), 0)
+    // If everything is low-signal (e.g. single digits), keep the plot readable by shrinking the axis max.
+    // We keep data values in true % units; only the axis range changes.
+    const axisMax = maxVal > 25 ? 100 : Math.min(100, Math.max(10, Math.ceil(maxVal / 5) * 5))
     const primary = isDark ? "#38bdf8" : "#0284c7" // sky-400 / sky-600
     const glow = isDark ? "rgba(56,189,248,0.35)" : "rgba(2,132,199,0.22)"
     const grid = isDark ? "rgba(148,163,184,0.18)" : "rgba(15,23,42,0.12)"
@@ -79,7 +83,7 @@ export function SexyRadar({
             style: { colors: categories.map(() => label), fontSize: "11px", fontWeight: 600 },
           },
         },
-        yaxis: { show: false, min: 0, max: 100, tickAmount: 4 },
+        yaxis: { show: false, min: 0, max: axisMax, tickAmount: 4 },
         plotOptions: {
           radar: {
             size: 98,
