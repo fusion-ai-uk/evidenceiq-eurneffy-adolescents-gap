@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import { MultiSelect } from "@/components/alunbrig/filters/MultiSelect"
 import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/filters/ActiveFiltersBar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
+import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { parseISO, subMonths } from "date-fns"
 
@@ -128,6 +129,10 @@ function buildParams(obj: Record<string, any>) {
 }
 
 const pct = (v: number) => `${Math.round(Number(v || 0) * 1000) / 10}%`
+const toPct100 = (v: number) => {
+  const n = Number(v || 0)
+  return n <= 1 ? n * 100 : n
+}
 
 const FLAG_OPTIONS = [
   { key: "efficacy", label: "Efficacy" },
@@ -638,6 +643,36 @@ export function CompetitorLens() {
                   <div>%CNS: <span className="text-foreground">{pct(summary.kpis.pctCNS)}</span></div>
                   <div>%UK access: <span className="text-foreground">{pct(summary.kpis.pctUKAccess)}</span></div>
                   <div>%Sequencing: <span className="text-foreground">{pct(summary.kpis.pctSequencing)}</span></div>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-[1fr,320px] items-start">
+                  <div className="rounded-md border p-3">
+                    <div className="text-sm font-medium">Signal mix</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      The share of competitive conversation carrying each analysis tag (based on the current filters).
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <span className="rounded-full border px-2 py-1">Seq: {pct(summary.kpis.pctSequencing)}</span>
+                      <span className="rounded-full border px-2 py-1">QoL: {pct(summary.kpis.pctQoL)}</span>
+                      <span className="rounded-full border px-2 py-1">Neurotox: {pct(summary.kpis.pctNeurotox)}</span>
+                      <span className="rounded-full border px-2 py-1">CNS: {pct(summary.kpis.pctCNS)}</span>
+                      <span className="rounded-full border px-2 py-1">UK: {pct(summary.kpis.pctUKAccess)}</span>
+                    </div>
+                  </div>
+                  <div className="sm:justify-self-end w-full">
+                    <SexyRadar
+                      title="Competitive signal mix"
+                      categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
+                      values={[
+                        toPct100(summary.kpis.pctSequencing),
+                        toPct100(summary.kpis.pctQoL),
+                        toPct100(summary.kpis.pctNeurotox),
+                        toPct100(summary.kpis.pctCNS),
+                        toPct100(summary.kpis.pctUKAccess),
+                      ]}
+                      height={210}
+                    />
+                  </div>
                 </div>
 
                 <div className="rounded-md border p-3">

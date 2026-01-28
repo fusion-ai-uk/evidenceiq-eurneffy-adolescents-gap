@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { FilterPane } from "@/components/alunbrig/filters/FilterPane"
 import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/filters/ActiveFiltersBar"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
+import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { parseISO, subMonths } from "date-fns"
 
@@ -110,6 +111,11 @@ function buildParams(obj: Record<string, any>) {
 
 function pct(v: number) {
   return `${Math.round(v * 100)}%`
+}
+
+function toPct100(v: number) {
+  const n = Number(v || 0)
+  return n <= 1 ? n * 100 : n
 }
 
 const AUDIENCES: AudienceKey[] = ["HCP", "Patient", "Caregiver", "Payer", "Other"]
@@ -362,7 +368,7 @@ export function AudienceInsights() {
             {summaryLoading || !summary ? (
               <div className="text-sm text-muted-foreground">Loading audience split...</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <ResponsiveContainer width="100%" height={240}>
                   <PieChart>
                     <Pie data={shareData} dataKey="value" nameKey="label" innerRadius={60} outerRadius={90}>
@@ -385,6 +391,22 @@ export function AudienceInsights() {
                     </div>
                   ))}
                 </div>
+                {summary ? (
+                  <div className="w-full md:justify-self-end">
+                    <SexyRadar
+                      title="Signal mix (overall)"
+                      categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
+                      values={[
+                        toPct100(summary.flagRatesOverall.pctSequencing),
+                        toPct100(summary.flagRatesOverall.pctQoL),
+                        toPct100(summary.flagRatesOverall.pctNeurotox),
+                        toPct100(summary.flagRatesOverall.pctCNS),
+                        toPct100(summary.flagRatesOverall.pctUKAccess),
+                      ]}
+                      height={210}
+                    />
+                  </div>
+                ) : null}
               </div>
             )}
 
