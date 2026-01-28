@@ -135,7 +135,7 @@ export function ExamplePostsDrawer({
               <div className="sm:justify-self-end w-full">
                 <SexyRadar
                   title="Signal mix"
-                  categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
+                  categories={["Sequencing", "QoL", "Neurotox", "CNS", "UK"]}
                   values={[
                     Number(summary.pctSequencing || 0) * 100,
                     Number(summary.pctQoL || 0) * 100,

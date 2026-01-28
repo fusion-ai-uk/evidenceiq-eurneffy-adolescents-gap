@@ -549,7 +549,6 @@ export function CompetitorLens() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Competitor</TableHead>
-                    <TableHead>Mentions</TableHead>
                     <TableHead>Share</TableHead>
                     <TableHead>Sentiment</TableHead>
                     <TableHead>Favor Alunbrig</TableHead>
@@ -575,7 +574,6 @@ export function CompetitorLens() {
                       }}
                     >
                       <TableCell className="font-medium">{r.competitor}</TableCell>
-                      <TableCell>{Number(r.mentions || 0).toLocaleString()}</TableCell>
                       <TableCell>{pct(r.shareCompetitive)}</TableCell>
                       <TableCell>{Math.round(Number(r.sentimentIndex || 0))}</TableCell>
                       <TableCell>{pct(r.stanceFavorAlunbrig || 0)}</TableCell>
