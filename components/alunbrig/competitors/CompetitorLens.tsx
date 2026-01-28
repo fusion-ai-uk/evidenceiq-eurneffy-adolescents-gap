@@ -128,11 +128,12 @@ function buildParams(obj: Record<string, any>) {
   return sp.toString()
 }
 
-const pct = (v: number) => `${Math.round(Number(v || 0) * 1000) / 10}%`
+  const pct = (v: number) => `${Math.round(Number(v || 0) * 1000) / 10}%`
 const toPct100 = (v: number) => {
   const n = Number(v || 0)
   return n <= 1 ? n * 100 : n
 }
+  const pct100 = (v: number) => `${Math.round(Number(v || 0) * 10) / 10}%`
 
 const FLAG_OPTIONS = [
   { key: "efficacy", label: "Efficacy" },
@@ -393,15 +394,33 @@ export function CompetitorLens() {
 
     const data = trendsCompetitor.series.map((p) => {
       const row: any = { period: p.period }
-      const stanceMap = new Map<string, number>((p.stance || []).map((s) => [String(s.stance), Number(s.posts || 0)]))
+      const stanceShareMap = new Map<string, number>((p.stance || []).map((s) => [String(s.stance), Number(s.share || 0) * 100]))
       top.forEach((stance, idx) => {
-        row[`s${idx}`] = stanceMap.get(stance) || 0
+        row[`s${idx}`] = stanceShareMap.get(stance) || 0
       })
       return row
     })
 
     return { top, data }
   }, [trendsCompetitor])
+
+  const competitorTrendShare = useMemo(() => {
+    const series = trendsCompetitor?.series || []
+    const total = series.reduce((acc, p) => acc + Number(p.posts || 0), 0)
+    return series.map((p) => ({
+      ...p,
+      shareOfRangePct: total > 0 ? (Number(p.posts || 0) / total) * 100 : 0,
+    }))
+  }, [trendsCompetitor])
+
+  const overallCompetitiveShare = useMemo(() => {
+    const series = trendsOverall?.series || []
+    const total = series.reduce((acc, p) => acc + Number(p.totalCompetitivePosts || 0), 0)
+    return series.map((p) => ({
+      ...p,
+      shareOfRangePct: total > 0 ? (Number(p.totalCompetitivePosts || 0) / total) * 100 : 0,
+    }))
+  }, [trendsOverall])
 
   return (
     <div className="space-y-6">
@@ -436,7 +455,7 @@ export function CompetitorLens() {
               <span>Loading filter options...</span>
             ) : options?.meta ? (
               <span>
-                <span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts in range | {options.meta.minDate} -> {options.meta.maxDate}
+                {options.meta.minDate} -> {options.meta.maxDate}
               </span>
             ) : null}
             {applied ? <Badge variant="secondary">Applied</Badge> : null}
@@ -620,14 +639,6 @@ export function CompetitorLens() {
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-md border p-3">
-                    <div className="text-xs text-muted-foreground">Posts</div>
-                    <div className="mt-1 text-sm font-medium">{summary.kpis.posts.toLocaleString()}</div>
-                  </div>
-                  <div className="rounded-md border p-3">
-                    <div className="text-xs text-muted-foreground">Competitive posts</div>
-                    <div className="mt-1 text-sm font-medium">{summary.kpis.competitivePosts.toLocaleString()}</div>
-                  </div>
-                  <div className="rounded-md border p-3">
                     <div className="text-xs text-muted-foreground">Sentiment index</div>
                     <div className="mt-1 text-sm font-medium">{Math.round(summary.kpis.sentimentIndex)}</div>
                   </div>
@@ -802,8 +813,8 @@ export function CompetitorLens() {
                   <BarChart data={stanceStack?.data || []}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                     <XAxis dataKey="period" stroke="#666" hide />
-                    <YAxis stroke="#666" />
-                    <Tooltip />
+                    <YAxis stroke="#666" tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                    <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
                     <Legend />
                     {(stanceStack?.top || []).map((stance, idx) => (
                       <Bar
@@ -823,7 +834,7 @@ export function CompetitorLens() {
                       className="w-full text-left rounded-md border p-2 hover:bg-accent/30"
                       onClick={() => openExamples("competitor", draft.competitor || trendsCompetitor.competitor, draft.competitor || trendsCompetitor.competitor, { period: p.period, granularity: draft.granularity })}
                     >
-                      <div className="text-xs text-muted-foreground">{p.period} | {p.posts.toLocaleString()} posts</div>
+                      <div className="text-xs text-muted-foreground">{p.period} | Share of range: {pct100(Number((competitorTrendShare.find((x: any) => x.period === p.period) as any)?.shareOfRangePct || 0))}</div>
                       <div className="mt-1 flex flex-wrap gap-2">
                         {(p.stance || []).slice(0, 4).map((s, j) => (
                           <span key={`${p.period}-${String(s.stance)}-${j}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
@@ -839,14 +850,14 @@ export function CompetitorLens() {
           ) : trendsOverall ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-md border p-3">
-                <div className="text-sm font-medium">Total competitive posts</div>
+                <div className="text-sm font-medium">Competitive activity share over time</div>
                 <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={trendsOverall.series}>
+                  <LineChart data={overallCompetitiveShare}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                     <XAxis dataKey="period" stroke="#666" hide />
-                    <YAxis stroke="#666" />
-                    <Tooltip />
-                    <Line dataKey="totalCompetitivePosts" stroke="#10b981" dot={false} />
+                    <YAxis stroke="#666" tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                    <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                    <Line dataKey="shareOfRangePct" stroke="#10b981" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -855,7 +866,7 @@ export function CompetitorLens() {
                 <div className="mt-2 space-y-2 max-h-[260px] overflow-auto">
                   {trendsOverall.series.slice(-12).reverse().map((p, i) => (
                     <div key={`${p.period}-${i}`} className="rounded-md border p-2">
-                      <div className="text-xs text-muted-foreground">{p.period} | {p.totalCompetitivePosts.toLocaleString()} posts</div>
+                      <div className="text-xs text-muted-foreground">{p.period} | Share of range: {pct100(Number((overallCompetitiveShare.find((x: any) => x.period === p.period) as any)?.shareOfRangePct || 0))}</div>
                       <div className="mt-1 flex flex-wrap gap-2">
                         {p.topCompetitors.slice(0, 5).map((c, j) => (
                           <button

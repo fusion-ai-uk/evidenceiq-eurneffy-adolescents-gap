@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -91,7 +91,7 @@ export function SequencingExplorer() {
 
     xDim: "stakeholder",
     yDim: "sequence_direction",
-    metric: "posts",
+    metric: "pct",
   })
 
   const [applied, setApplied] = useState<DraftFilters | null>(null)
@@ -294,9 +294,34 @@ export function SequencingExplorer() {
 
   const timeseriesChartData = useMemo(() => {
     const series = timeseries?.series || []
-    const baselineMap = new Map<string, number | null>((timeseries?.baseline?.values || []).map((x: any) => [String(x.period), x.baselineSequencingPosts]))
-    return series.map((p: any) => ({ ...p, baselineSequencingPosts: baselineMap.get(String(p.period)) ?? null }))
+    const baselineMap = new Map<string, number | null>(
+      (timeseries?.baseline?.values || []).map((x: any) => [String(x.period), x.baselineSequencingPosts]),
+    )
+
+    return series.map((p: any) => {
+      const baselineSequencingPosts = baselineMap.get(String(p.period)) ?? null
+      const seq = Number(p.sequencingPosts || 0)
+      const base = baselineSequencingPosts == null ? null : Number(baselineSequencingPosts || 0)
+      const seqIndex = base && base > 0 ? (seq / base) * 100 : null
+      return { ...p, baselineSequencingPosts, seqIndex, baselineIndex: base && base > 0 ? 100 : null }
+    })
   }, [timeseries])
+
+  const flowTotal = useMemo(() => (flow?.links || []).reduce((acc: number, l: any) => acc + Number(l.value || 0), 0) || 0, [flow])
+  const rationaleTotal = useMemo(() => (overview?.topRationales || []).reduce((acc: number, r: any) => acc + Number(r.count || 0), 0) || 0, [overview])
+  const ukNationTotal = useMemo(() => (ukOverlay?.nations || []).reduce((acc: number, n: any) => acc + Number(n.posts || 0), 0) || 0, [ukOverlay])
+
+  const lotData = useMemo(() => {
+    const arr = (overview?.lineOfTherapy || []).slice(0, 12)
+    const total = arr.reduce((acc: number, x: any) => acc + Number(x.posts || 0), 0) || 0
+    return arr.map((x: any) => ({ ...x, sharePct: total > 0 ? (Number(x.posts || 0) / total) * 100 : 0 }))
+  }, [overview])
+
+  const directionData = useMemo(() => {
+    const arr = (overview?.sequenceDirections || []).slice(0, 12)
+    const total = arr.reduce((acc: number, x: any) => acc + Number(x.posts || 0), 0) || 0
+    return arr.map((x: any) => ({ ...x, sharePct: total > 0 ? (Number(x.posts || 0) / total) * 100 : 0 }))
+  }, [overview])
 
   const matrixCellMap = useMemo(() => {
     const m = new Map<string, { posts: number; value: number }>()
@@ -306,7 +331,7 @@ export function SequencingExplorer() {
 
   const matrixMax = useMemo(() => {
     let max = 0
-    for (const c of matrix?.cells || []) max = Math.max(max, Number(matrix?.metric === "pct" ? c.value : c.posts) || 0)
+    for (const c of matrix?.cells || []) max = Math.max(max, Number(c.value || 0) || 0)
     return max || 1
   }, [matrix])
 
@@ -343,7 +368,7 @@ export function SequencingExplorer() {
               <span>Loading filter options...</span>
             ) : options?.meta ? (
               <span>
-                <span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts in range | {options.meta.minDate} -> {options.meta.maxDate}
+                {options.meta.minDate} -> {options.meta.maxDate}
               </span>
             ) : null}
             {applied ? <Badge variant="secondary">Applied</Badge> : null}
@@ -424,10 +449,22 @@ export function SequencingExplorer() {
         </div>
       </FilterPane>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Posts</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{overview?.kpis?.posts?.toLocaleString?.() ?? "-"}</CardContent></Card>
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Sequencing</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{overview?.kpis?.sequencingPosts?.toLocaleString?.() ?? "-"}</div><div className="text-xs text-muted-foreground">{pct(overview?.kpis?.pctSequencing || 0)} of posts</div></CardContent></Card>
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">PFS/PFS2</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctPFS || 0)}</CardContent></Card>
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Attrition</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctAttrition || 0)}</CardContent></Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">Sequencing</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctSequencing || 0)}</CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">PFS/PFS2</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctPFS || 0)}</CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">Attrition</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctAttrition || 0)}</CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">UK access</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{pct(overview?.kpis?.pctUKAccess || 0)}</CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -441,18 +478,20 @@ export function SequencingExplorer() {
                 <LineChart data={timeseriesChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                   <XAxis dataKey="period" hide />
-                  <YAxis />
-                  <Tooltip />
-                  <Line dataKey="sequencingPosts" stroke="#3b82f6" dot={false} />
-                  <Line dataKey="baselineSequencingPosts" stroke="#94a3b8" strokeDasharray="4 4" dot={false} />
+                  <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                  <Tooltip formatter={(v: any) => (v == null ? "n/a" : `${Number(v || 0).toFixed(1)}%`)} />
+                  <Line dataKey="seqIndex" stroke="#3b82f6" dot={false} name="Index vs baseline" />
+                  <Line dataKey="baselineIndex" stroke="#94a3b8" strokeDasharray="4 4" dot={false} name="Baseline (100)" />
                 </LineChart>
               </ResponsiveContainer>
             )}
             <div className="mt-2 max-h-[180px] overflow-auto space-y-2">
-              {(timeseries?.series || []).slice(-12).reverse().map((p: any, i: number) => (
+              {timeseriesChartData.slice(-12).reverse().map((p: any, i: number) => (
                 <button key={`${p.period}-${i}`} className="w-full text-left rounded-md border p-2 hover:bg-accent/30" onClick={() => openExamples("period", `Period | ${p.period}`, { period: String(p.period) })}>
-                  <div className="text-xs text-muted-foreground">{p.period} | {Number(p.sequencingPosts || 0).toLocaleString()} sequencing posts</div>
-                  <div className="mt-1 text-xs text-muted-foreground">PFS: {pct(p.pctPFS)} | Attrition: {pct(p.pctAttrition)} | UK access: {pct(p.pctUKAccess)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {p.period} | Index vs baseline: {p.seqIndex == null ? "n/a" : `${Math.round(Number(p.seqIndex || 0))}%`}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">Sequencing share: {pct(p.pctSequencing)} | PFS: {pct(p.pctPFS)} | Attrition: {pct(p.pctAttrition)} | UK access: {pct(p.pctUKAccess)}</div>
                 </button>
               ))}
             </div>
@@ -471,7 +510,7 @@ export function SequencingExplorer() {
                 {(flow.links || []).slice(0, 12).map((l: any, i: number) => (
                   <button key={`${l.source}-${l.target}-${i}`} className="w-full text-left rounded-md border p-2 hover:bg-accent/30" onClick={() => openExamples("flow", `Flow | ${l.source} -> ${l.target}`, { sourceNode: String(l.source), targetNode: String(l.target) })}>
                     <div className="text-sm font-medium">{l.source} -> {l.target}</div>
-                    <div className="text-xs text-muted-foreground">{Number(l.value || 0).toLocaleString()} posts</div>
+                    <div className="text-xs text-muted-foreground">{flowTotal > 0 ? `${((Number(l.value || 0) / flowTotal) * 100).toFixed(1)}% share` : "—"}</div>
                   </button>
                 ))}
                 <div className="text-xs text-muted-foreground">{flow?.meta?.notes}</div>
@@ -482,9 +521,65 @@ export function SequencingExplorer() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Line of therapy</CardTitle></CardHeader><CardContent>{overviewLoading || !overview ? <div className="text-sm text-muted-foreground">Loading...</div> : (<ResponsiveContainer width="100%" height={240}><BarChart data={(overview.lineOfTherapy || []).slice(0, 12)}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="lot" hide /><YAxis /><Tooltip /><Bar dataKey="posts" fill="#10b981" onClick={(d: any) => openExamples("lot", `LoT | ${String(d?.lot)}`, { lotValue: String(d?.lot) })} /></BarChart></ResponsiveContainer>)}</CardContent></Card>
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Sequence direction</CardTitle></CardHeader><CardContent>{overviewLoading || !overview ? <div className="text-sm text-muted-foreground">Loading...</div> : (<ResponsiveContainer width="100%" height={240}><BarChart data={(overview.sequenceDirections || []).slice(0, 12)}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="direction" hide /><YAxis /><Tooltip /><Bar dataKey="posts" fill="#f59e0b" onClick={(d: any) => openExamples("direction", `Direction | ${String(d?.direction)}`, { directionValue: String(d?.direction) })} /></BarChart></ResponsiveContainer>)}</CardContent></Card>
-        <Card className="border-border/50"><CardHeader><CardTitle className="text-base font-medium">Top rationales</CardTitle></CardHeader><CardContent>{overviewLoading || !overview ? <div className="text-sm text-muted-foreground">Loading...</div> : (overview.topRationales || []).length === 0 ? <div className="text-sm text-muted-foreground">No rationales in this slice.</div> : (<div className="space-y-2">{(overview.topRationales || []).slice(0, 10).map((r: any, i: number) => (<button key={`${r.rationale}-${i}`} className="w-full text-left rounded-md border p-2 hover:bg-accent/30" onClick={() => openExamples("rationale", `Rationale | ${String(r.rationale)}`, { rationaleValue: String(r.rationale) })}><div className="text-sm font-medium">{r.rationale}</div><div className="text-xs text-muted-foreground">{Number(r.count || 0).toLocaleString()} posts</div></button>))}</div>)}</CardContent></Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">Line of therapy</CardTitle></CardHeader>
+          <CardContent>
+            {overviewLoading || !overview ? (
+              <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={lotData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                  <XAxis dataKey="lot" hide />
+                  <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                  <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                  <Bar dataKey="sharePct" fill="#10b981" onClick={(d: any) => openExamples("lot", `LoT | ${String(d?.lot)}`, { lotValue: String(d?.lot) })} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">Sequence direction</CardTitle></CardHeader>
+          <CardContent>
+            {overviewLoading || !overview ? (
+              <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={directionData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                  <XAxis dataKey="direction" hide />
+                  <YAxis tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
+                  <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                  <Bar dataKey="sharePct" fill="#f59e0b" onClick={(d: any) => openExamples("direction", `Direction | ${String(d?.direction)}`, { directionValue: String(d?.direction) })} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader><CardTitle className="text-base font-medium">Top rationales</CardTitle></CardHeader>
+          <CardContent>
+            {overviewLoading || !overview ? (
+              <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : (overview.topRationales || []).length === 0 ? (
+              <div className="text-sm text-muted-foreground">No rationales in this slice.</div>
+            ) : (
+              <div className="space-y-2">
+                {(overview.topRationales || []).slice(0, 10).map((r: any, i: number) => (
+                  <button
+                    key={`${r.rationale}-${i}`}
+                    className="w-full text-left rounded-md border p-2 hover:bg-accent/30"
+                    onClick={() => openExamples("rationale", `Rationale | ${String(r.rationale)}`, { rationaleValue: String(r.rationale) })}
+                  >
+                    <div className="text-sm font-medium">{r.rationale}</div>
+                    <div className="text-xs text-muted-foreground">{rationaleTotal > 0 ? `${((Number(r.count || 0) / rationaleTotal) * 100).toFixed(1)}% share` : "—"}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="border-border/50">
@@ -493,7 +588,7 @@ export function SequencingExplorer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1"><div className="text-xs text-muted-foreground">X dimension</div><Select value={draft.xDim} onValueChange={(v) => setDraft((d) => ({ ...d, xDim: v as any }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="stakeholder">Stakeholder</SelectItem><SelectItem value="line_of_therapy">Line of therapy</SelectItem><SelectItem value="biomarker">Biomarker</SelectItem><SelectItem value="uk_nation">UK nation</SelectItem></SelectContent></Select></div>
             <div className="space-y-1"><div className="text-xs text-muted-foreground">Y dimension</div><Select value={draft.yDim} onValueChange={(v) => setDraft((d) => ({ ...d, yDim: v as any }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="sequence_direction">Sequence direction</SelectItem><SelectItem value="attrition">Attrition</SelectItem><SelectItem value="pfs">PFS/PFS2</SelectItem><SelectItem value="cns_context">CNS context</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1"><div className="text-xs text-muted-foreground">Metric</div><Select value={draft.metric} onValueChange={(v) => setDraft((d) => ({ ...d, metric: v as any }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="posts">Posts</SelectItem><SelectItem value="pct">Row share</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1"><div className="text-xs text-muted-foreground">Metric</div><Select value="pct" onValueChange={() => setDraft((d) => ({ ...d, metric: "pct" }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pct">Row share</SelectItem></SelectContent></Select></div>
           </div>
 
           {matrixLoading || !matrix ? (
@@ -515,7 +610,7 @@ export function SequencingExplorer() {
                       <td className="p-2 font-medium whitespace-nowrap">{y}</td>
                       {(matrix.xValues || []).slice(0, 12).map((x: string) => {
                         const cell = matrixCellMap.get(`${y}|||${x}`)
-                        const val = cell ? (matrix.metric === "pct" ? cell.value : cell.posts) : 0
+                        const val = cell ? cell.value : 0
                         const intensity = Math.round((val / matrixMax) * 60)
                         return (
                           <td key={`${y}-${x}`} className="p-2">
@@ -524,7 +619,7 @@ export function SequencingExplorer() {
                               style={{ backgroundColor: `rgba(59,130,246,${Math.min(0.6, intensity / 100)})` }}
                               onClick={() => openExamples("matrix", `Matrix | ${x} x ${y}`, { xDim: draft.xDim, yDim: draft.yDim, xValue: x, yValue: y })}
                             >
-                              {matrix.metric === "pct" ? pct(val) : Number(val || 0).toLocaleString()}
+                              {pct(val)}
                             </button>
                           </td>
                         )
@@ -549,7 +644,10 @@ export function SequencingExplorer() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {(ukOverlay.nations || []).slice(0, 6).map((n: any) => (
                 <div key={n.nation} className="rounded-md border p-3">
-                  <div className="flex items-center justify-between"><div className="text-sm font-medium">{n.nation}</div><div className="text-xs text-muted-foreground">{Number(n.posts || 0).toLocaleString()} posts</div></div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium">{n.nation}</div>
+                    <div className="text-xs text-muted-foreground">{ukNationTotal > 0 ? `${((Number(n.posts || 0) / ukNationTotal) * 100).toFixed(1)}% share` : "—"}</div>
+                  </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                     <div>PFS: <span className="text-foreground">{pct(n.pctPFS)}</span></div>
                     <div>Attrition: <span className="text-foreground">{pct(n.pctAttrition)}</span></div>

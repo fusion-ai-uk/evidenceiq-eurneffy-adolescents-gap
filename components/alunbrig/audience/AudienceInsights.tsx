@@ -268,6 +268,18 @@ export function AudienceInsights() {
     [baseParams, tab, drawerMode, drawerValue],
   )
 
+  const leaderTopicsDenom = useMemo(() => {
+    return (leader?.topics || []).reduce((acc, t) => acc + Number(t.posts || 0), 0) || 0
+  }, [leader])
+
+  const leaderBucketsDenom = useMemo(() => {
+    return (leader?.buckets || []).reduce((acc, b) => acc + Number(b.posts || 0), 0) || 0
+  }, [leader])
+
+  const shareOfListPct = useCallback((posts: number, denom: number) => {
+    return denom > 0 ? (Number(posts || 0) / denom) * 100 : 0
+  }, [])
+
   const comparatorRows = useMemo(() => {
     const rows: { key: string; label: string; get: (r: LeaderboardResponse) => number }[] = [
       { key: "pctSequencing", label: "Sequencing", get: (r) => r.flagRates.pctSequencing },
@@ -498,7 +510,7 @@ export function AudienceInsights() {
                           <div className="font-medium truncate" title={t.topic}>
                             {t.topic}
                           </div>
-                          <div className="text-xs text-muted-foreground">{t.posts.toLocaleString()} posts</div>
+                          <div className="text-xs text-muted-foreground">{shareOfListPct(t.posts, leaderTopicsDenom).toFixed(1)}% share</div>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">Sentiment index: {Math.round(t.sentimentIndex)} | Sequencing: {pct(t.pctSequencing)} | UK access: {pct(t.pctUKAccess)}</div>
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -532,7 +544,7 @@ export function AudienceInsights() {
                           <div className="font-medium truncate" title={b.bucket}>
                             {b.bucket}
                           </div>
-                          <div className="text-xs text-muted-foreground">{b.posts.toLocaleString()} posts</div>
+                          <div className="text-xs text-muted-foreground">{shareOfListPct(b.posts, leaderBucketsDenom).toFixed(1)}% share</div>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">Drivers: {(b.topDrivers || []).slice(0, 3).map((d) => d.driver).filter(Boolean).join(" | ") || "n/a"}</div>
                         <div className="mt-2 flex flex-wrap gap-2">

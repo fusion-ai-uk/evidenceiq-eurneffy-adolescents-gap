@@ -71,7 +71,7 @@ function polarityToColor(p?: number) {
 }
 
 function metricLabel(m: Metric) {
-  if (m === "volume") return "Posts"
+  if (m === "volume") return "Share"
   if (m === "engagement") return "Engagement"
   return "Views"
 }
@@ -261,6 +261,7 @@ export function GeneralThemesExplorer() {
   }, [overviewFiltered])
 
   const treemapOptions = useMemo(() => {
+    const sliceTotalPosts = Number(options?.meta?.totalPosts || 0)
     return {
       theme: { mode: resolvedTheme === "dark" ? "dark" : "light" },
       chart: {
@@ -284,14 +285,14 @@ export function GeneralThemesExplorer() {
           const r: OverviewItem | undefined = d?.raw
           if (!r) return undefined
           const pct = (x: number) => `${Math.round(Number(x || 0) * 1000) / 10}%`
+          const sharePct = sliceTotalPosts > 0 ? (Number(r.posts || 0) / sliceTotalPosts) * 100 : 0
           const metricName = metricLabel(metric)
-          // Avoid duplicate "Posts" rows when Volume is selected.
-          const showMetricRow = metricName !== "Posts"
+          const showMetricRow = metric !== "volume"
           return `
             <div class="px-3 py-2 text-xs">
               <div class="font-medium">${r.group}</div>
               <div class="mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
-                <div>Posts</div><div class="text-right">${Number(r.posts || 0).toLocaleString()}</div>
+                <div>Share of slice</div><div class="text-right">${sharePct.toFixed(1)}%</div>
                 ${
                   showMetricRow
                     ? `<div>${metricName}</div><div class="text-right">${Number(r.metricValue || 0).toLocaleString()}</div>`
@@ -312,16 +313,17 @@ export function GeneralThemesExplorer() {
       plotOptions: { treemap: { distributed: true, enableShades: false } },
       grid: { show: false, borderColor: gridBorderColor, strokeDashArray: 2 },
     }
-  }, [resolvedTheme, axisColor, gridBorderColor, groupBy, openExamples, metric])
+  }, [resolvedTheme, axisColor, gridBorderColor, groupBy, openExamples, metric, options?.meta?.totalPosts])
 
   const bubbleSeries = useMemo(() => {
+    const sliceTotalPosts = Number(options?.meta?.totalPosts || 0)
     const top10 = [...scatterFiltered].sort((a, b) => Number(b.posts || 0) - Number(a.posts || 0)).slice(0, 10)
     const labelSet = new Set(top10.map((p) => p.group))
     return [
       {
         name: "Themes",
         data: scatterFiltered.map((p) => ({
-          x: Number(p.x || 0),
+          x: sliceTotalPosts > 0 ? (Number(p.posts || 0) / sliceTotalPosts) * 100 : 0,
           y: Number(p.y || 0),
           z: Math.max(1, Number(p.size || 0)),
           group: p.group,
@@ -330,9 +332,10 @@ export function GeneralThemesExplorer() {
         })),
       },
     ]
-  }, [scatterFiltered])
+  }, [scatterFiltered, options?.meta?.totalPosts])
 
   const bubbleOptions = useMemo(() => {
+    const sliceTotalPosts = Number(options?.meta?.totalPosts || 0)
     return {
       theme: { mode: resolvedTheme === "dark" ? "dark" : "light" },
       chart: {
@@ -347,7 +350,7 @@ export function GeneralThemesExplorer() {
           },
         },
       },
-      xaxis: { title: { text: "Posts" } },
+      xaxis: { title: { text: "Share of slice (%)" } },
       yaxis: { title: { text: "Sentiment index" }, min: 0, max: 100 },
       grid: { borderColor: gridBorderColor, strokeDashArray: 2 },
       dataLabels: {
@@ -365,11 +368,12 @@ export function GeneralThemesExplorer() {
           const d = w.config.series[seriesIndex].data[dataPointIndex]
           const r: ScatterPoint | undefined = d?.raw
           if (!r) return undefined
+          const sharePct = sliceTotalPosts > 0 ? (Number(r.posts || 0) / sliceTotalPosts) * 100 : 0
           return `
             <div class="px-3 py-2 text-xs">
               <div class="font-medium">${r.group}</div>
               <div class="mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
-                <div>Posts</div><div class="text-right">${Number(r.posts || 0).toLocaleString()}</div>
+                <div>Share of slice</div><div class="text-right">${sharePct.toFixed(1)}%</div>
                 <div>Sentiment index</div><div class="text-right">${Number(r.sentimentIndex || 0).toFixed(1)}</div>
                 <div>Avg polarity</div><div class="text-right">${Number(r.avgPolarity || 0).toFixed(2)}</div>
               </div>
@@ -380,7 +384,7 @@ export function GeneralThemesExplorer() {
       },
       colors: ["#60a5fa"],
     }
-  }, [resolvedTheme, axisColor, gridBorderColor, groupBy, openExamples])
+  }, [resolvedTheme, axisColor, gridBorderColor, groupBy, openExamples, options?.meta?.totalPosts])
 
   const examplesUrl = useCallback(
     (offset: number) => {
@@ -494,8 +498,7 @@ export function GeneralThemesExplorer() {
                 </span>
               ) : options?.meta ? (
                 <span>
-                  Slice contains <span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts (min {options.meta.minDate}, max{" "}
-                  {options.meta.maxDate})
+                  {options.meta.minDate} -> {options.meta.maxDate}
                 </span>
               ) : null
             }
@@ -618,7 +621,7 @@ export function GeneralThemesExplorer() {
                       <thead className="sticky top-0 bg-background border-b">
                         <tr className="text-xs text-muted-foreground">
                           <th className="text-left p-2">Topic</th>
-                          <th className="text-right p-2">Posts</th>
+                          <th className="text-right p-2">Share</th>
                           {metric !== "volume" ? <th className="text-right p-2">{metricLabel(metric)}</th> : null}
                           <th className="text-right p-2">Sentiment</th>
                           <th className="text-right p-2">% Seq</th>
@@ -633,7 +636,9 @@ export function GeneralThemesExplorer() {
                         {topTopicsFiltered.map((r: any) => (
                           <tr key={r.topic} className="border-b hover:bg-muted/30 cursor-pointer" onClick={() => openExamples("topics_top_topics", r.topic, r)}>
                             <td className="p-2 font-medium">{r.topic}</td>
-                            <td className="p-2 text-right">{Number(r.posts || 0).toLocaleString()}</td>
+                            <td className="p-2 text-right">
+                              {options?.meta?.totalPosts ? `${(((Number(r.posts || 0) / Number(options.meta.totalPosts || 1)) * 100) || 0).toFixed(1)}%` : "—"}
+                            </td>
                             {metric !== "volume" ? <td className="p-2 text-right">{Number(r.metricValue || 0).toLocaleString()}</td> : null}
                             <td className="p-2 text-right">{Number(r.sentimentIndex || 0).toFixed(1)}</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctSequencing || 0) * 100)}%</td>

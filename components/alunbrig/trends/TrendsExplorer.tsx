@@ -307,9 +307,17 @@ export function TrendsExplorer() {
     const series = ts?.series || []
     const baselineMap = new Map<string, number | null>()
     for (const b of ts?.baseline?.values || []) baselineMap.set(b.period, b.baselinePosts ?? null)
+    const totalPosts = series.reduce((acc, p) => acc + Number(p.posts || 0), 0)
+    const baselineTotal = (ts?.baseline?.values || []).reduce((acc, b) => acc + Number(b.baselinePosts || 0), 0)
+
     return series.map((p) => ({
       ...p,
       baselinePosts: baselineMap.get(p.period) ?? null,
+      sharePct: totalPosts > 0 ? (Number(p.posts || 0) / totalPosts) * 100 : 0,
+      baselineSharePct:
+        baselineTotal > 0 && (baselineMap.get(p.period) ?? null) != null
+          ? (Number(baselineMap.get(p.period) || 0) / baselineTotal) * 100
+          : null,
     }))
   }, [ts])
 
@@ -418,7 +426,7 @@ export function TrendsExplorer() {
         metaLine={
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {optionsLoading ? <span>Loading filter options...</span> : options?.meta ? (
-              <span><span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts | {options.meta.minDate} -> {options.meta.maxDate}</span>
+              <span>{options.meta.minDate} -> {options.meta.maxDate}</span>
             ) : null}
             {applied ? <Badge variant="secondary">Applied</Badge> : null}
           </div>
@@ -558,15 +566,23 @@ export function TrendsExplorer() {
                 <Tooltip
                   contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333", borderRadius: "8px" }}
                   formatter={(value: any, name: any, props: any) => {
-                    if (name === "baselinePosts") return [value == null ? "n/a" : Math.round(Number(value)), "Baseline"]
-                    if (name === "posts") return [Math.round(Number(value)), "Posts"]
+                    if (name === "baselineSharePct") return [value == null ? "n/a" : `${Number(value).toFixed(1)}%`, "Baseline share"]
+                    if (name === "sharePct") return [`${Number(value).toFixed(1)}%`, "Share of range"]
                     return [value, name]
                   }}
                   labelFormatter={(v: any) => String(v)}
                 />
-                <Line type="monotone" dataKey="posts" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
+                <Line type="monotone" dataKey="sharePct" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
                 {showBaseline ? (
-                  <Line type="monotone" dataKey="baselinePosts" stroke="#94a3b8" strokeWidth={2} dot={false} strokeDasharray="6 4" isAnimationActive={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="baselineSharePct"
+                    stroke="#94a3b8"
+                    strokeWidth={2}
+                    dot={false}
+                    strokeDasharray="6 4"
+                    isAnimationActive={false}
+                  />
                 ) : null}
               </LineChart>
             </ResponsiveContainer>
@@ -594,7 +610,7 @@ export function TrendsExplorer() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="font-medium">{a.period}</div>
                     <div className="text-xs text-muted-foreground">
-                      Posts: {a.posts.toLocaleString()} | Baseline: {Math.round(a.baselinePosts).toLocaleString()} | +{Math.round(a.pctChange * 100)}%
+                      Lift vs baseline: +{Math.round(a.pctChange * 100)}%
                     </div>
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
@@ -636,7 +652,7 @@ export function TrendsExplorer() {
                       <div className="text-xs text-muted-foreground">{r.type}</div>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      {r.startCount} -> {r.endCount} | +{Math.round(r.pctChange * 100)}% | Sentiment end: {Math.round(r.sentimentIndexEnd)}
+                      Change vs baseline: +{Math.round(r.pctChange * 100)}% | Sentiment end: {Math.round(r.sentimentIndexEnd)}
                     </div>
                   </button>
                 ))}
@@ -669,7 +685,7 @@ export function TrendsExplorer() {
                       <div className="text-xs text-muted-foreground">{r.type}</div>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      {r.startCount} -> {r.endCount} | {Math.round(r.pctChange * 100)}% | Sentiment end: {Math.round(r.sentimentIndexEnd)}
+                      Change vs baseline: {Math.round(r.pctChange * 100)}% | Sentiment end: {Math.round(r.sentimentIndexEnd)}
                     </div>
                   </button>
                 ))}

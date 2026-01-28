@@ -105,7 +105,7 @@ export function ExamplePostsDrawer({
             <div className="min-w-0">
               <DrawerTitle>{title}</DrawerTitle>
               {description ? <DrawerDescription>{description}</DrawerDescription> : null}
-              <div className="mt-1 text-xs text-muted-foreground">Showing social media data · {total.toLocaleString()} posts</div>
+              <div className="mt-1 text-xs text-muted-foreground">Showing social media data</div>
             </div>
             {headerRight}
           </div>
@@ -162,7 +162,7 @@ export function ExamplePostsDrawer({
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No matching posts in this slice.</div>
+            <div className="text-sm text-muted-foreground">No matching results in this slice.</div>
           ) : (
             <div className="space-y-3">
               {items.map((p, idx) => (
