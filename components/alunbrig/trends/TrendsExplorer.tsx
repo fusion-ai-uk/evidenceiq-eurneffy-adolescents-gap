@@ -13,7 +13,6 @@ import { FilterPane } from "@/components/alunbrig/filters/FilterPane"
 import { MultiSelect } from "@/components/alunbrig/filters/MultiSelect"
 import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/filters/ActiveFiltersBar"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
-import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { parseISO, subMonths } from "date-fns"
 
@@ -118,12 +117,6 @@ function classifySentimentLabel(label: string): "positive" | "negative" | "mixed
   if (s.includes("negative")) return "negative"
   if (s.includes("mixed")) return "mixed"
   return "neutral"
-}
-
-function toPct100(v: number) {
-  const n = Number(v || 0)
-  // APIs typically return 0..1 shares, but be defensive.
-  return n <= 1 ? n * 100 : n
 }
 
 export function TrendsExplorer() {
@@ -321,23 +314,6 @@ export function TrendsExplorer() {
     }))
   }, [ts])
 
-  const latestMix = useMemo(() => {
-    const series = ts?.series || []
-    if (series.length === 0) return null
-    const last = series[series.length - 1]
-    return {
-      period: String(last.period || ""),
-      sentimentIndex: Number(last.sentimentIndex || 0),
-      values: [
-        toPct100(last.pctSequencing),
-        toPct100(last.pctQoL),
-        toPct100(last.pctNeurotox),
-        toPct100(last.pctCNS),
-        toPct100(last.pctUKAccess),
-      ],
-    }
-  }, [ts])
-
   const openExamplesForPeriod = useCallback(
     (period: string, mode: "period" | "alert" = "period") => {
       setDrawerMode(mode)
@@ -498,39 +474,6 @@ export function TrendsExplorer() {
           </div>
         </div>
       </FilterPane>
-
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle className="text-base font-medium">Signal mix (latest period)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!latestMix ? (
-            <div className="text-sm text-muted-foreground">Apply filters to load the latest-period signal mix.</div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-[1fr,320px] items-start">
-              <div className="space-y-2">
-                <div className="text-sm">
-                  Period: <span className="text-foreground font-medium">{latestMix.period}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Sentiment index: <span className="text-foreground">{Math.round(latestMix.sentimentIndex)}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Radar values show the share of posts in the latest period that carry each analysis tag.
-                </div>
-              </div>
-              <div className="sm:justify-self-end w-full">
-                <SexyRadar
-                  title="Signal mix"
-                  categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
-                  values={latestMix.values}
-                  height={210}
-                />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       <Card className="border-border/50">
         <CardHeader>
