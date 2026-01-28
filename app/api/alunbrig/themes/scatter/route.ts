@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAlunbrigThemeFilters } from "@/lib/alunbrig/themeFilters"
 import type { AlunbrigThemeGroupBy, AlunbrigThemeMetric } from "@/lib/alunbrig/themeFilters"
@@ -26,7 +26,8 @@ function groupRowsSql(groupBy: AlunbrigThemeGroupBy) {
     return `
       group_rows AS (
         SELECT
-          TRIM(topic) AS grp,
+          LOWER(REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ')) AS grp_key,
+          REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ') AS grp_display,
           sentiment_polarity_minus1_to_1,
           engagement,
           viewCount
@@ -46,7 +47,8 @@ function groupRowsSql(groupBy: AlunbrigThemeGroupBy) {
   return `
     group_rows AS (
       SELECT
-        ${col} AS grp,
+        CAST(${col} AS STRING) AS grp_key,
+        CAST(${col} AS STRING) AS grp_display,
         sentiment_polarity_minus1_to_1,
         engagement,
         viewCount
@@ -82,19 +84,31 @@ export async function GET(req: Request) {
   const sql = `
     ${getBaseCteSql()},
     ${groupRowsSql(groupBy)},
+    display_counts AS (
+      SELECT grp_key, grp_display, COUNT(*) AS cnt
+      FROM group_rows
+      GROUP BY grp_key, grp_display
+    ),
+    display_top AS (
+      SELECT
+        grp_key,
+        ARRAY_AGG(grp_display ORDER BY cnt DESC LIMIT 1)[OFFSET(0)] AS groupLabel
+      FROM display_counts
+      GROUP BY grp_key
+    ),
     grouped AS (
       SELECT
-        grp,
+        grp_key,
         COUNT(*) AS posts,
         AVG((sentiment_polarity_minus1_to_1 + 1) * 50) AS sentiment_index,
         AVG(sentiment_polarity_minus1_to_1) AS avg_polarity,
         SUM(engagement) AS engagement_sum,
         SUM(viewCount) AS views_sum
       FROM group_rows
-      GROUP BY grp
+      GROUP BY grp_key
     )
     SELECT
-      grp AS groupLabel,
+      dt.groupLabel AS groupLabel,
       CASE @metric
         WHEN 'volume' THEN posts
         WHEN 'engagement' THEN engagement_sum
@@ -120,6 +134,7 @@ export async function GET(req: Request) {
         ELSE engagement_sum
       END AS size
     FROM grouped
+    LEFT JOIN display_top dt USING(grp_key)
     ORDER BY posts DESC
     LIMIT @limit
   `

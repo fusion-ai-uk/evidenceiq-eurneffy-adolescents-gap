@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAlunbrigThemeFilters } from "@/lib/alunbrig/themeFilters"
 import type { AlunbrigThemeGroupBy, AlunbrigThemeMetric } from "@/lib/alunbrig/themeFilters"
@@ -17,7 +17,8 @@ function groupRowsSql(groupBy: AlunbrigThemeGroupBy) {
     return `
       group_rows AS (
         SELECT
-          TRIM(topic) AS grp,
+          LOWER(REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ')) AS grp_key,
+          REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ') AS grp_display,
           stakeholder_primary,
           topics_key_terms,
           sentiment_polarity_minus1_to_1,
@@ -45,7 +46,8 @@ function groupRowsSql(groupBy: AlunbrigThemeGroupBy) {
   return `
     group_rows AS (
       SELECT
-        ${col} AS grp,
+        CAST(${col} AS STRING) AS grp_key,
+        CAST(${col} AS STRING) AS grp_display,
         stakeholder_primary,
         topics_key_terms,
         sentiment_polarity_minus1_to_1,
@@ -83,9 +85,21 @@ export async function GET(req: Request) {
   const sql = `
     ${getBaseCteSql()},
     ${groupRowsSql(groupBy)},
+    display_counts AS (
+      SELECT grp_key, grp_display, COUNT(*) AS cnt
+      FROM group_rows
+      GROUP BY grp_key, grp_display
+    ),
+    display_top AS (
+      SELECT
+        grp_key,
+        ARRAY_AGG(grp_display ORDER BY cnt DESC LIMIT 1)[OFFSET(0)] AS groupLabel
+      FROM display_counts
+      GROUP BY grp_key
+    ),
     grouped AS (
       SELECT
-        grp,
+        grp_key,
         COUNT(*) AS posts,
         AVG((sentiment_polarity_minus1_to_1 + 1) * 50) AS sentiment_index,
         AVG(sentiment_polarity_minus1_to_1) AS avg_polarity,
@@ -97,45 +111,45 @@ export async function GET(req: Request) {
         SUM(engagement) AS engagement_sum,
         SUM(viewCount) AS views_sum
       FROM group_rows
-      GROUP BY grp
+      GROUP BY grp_key
     ),
     stakeholder_counts AS (
       SELECT
-        grp,
+        grp_key,
         stakeholder_primary AS label,
         COUNT(*) AS count
       FROM group_rows
       WHERE stakeholder_primary IS NOT NULL AND TRIM(stakeholder_primary) != ''
-      GROUP BY grp, label
+      GROUP BY grp_key, label
     ),
     stakeholder_top AS (
       SELECT
-        grp,
+        grp_key,
         ARRAY_AGG(STRUCT(label, count) ORDER BY count DESC LIMIT 3) AS topStakeholders
       FROM stakeholder_counts
-      GROUP BY grp
+      GROUP BY grp_key
     ),
     term_rows AS (
       SELECT
-        grp,
+        grp_key,
         TRIM(term) AS term
       FROM group_rows, UNNEST(SPLIT(IFNULL(topics_key_terms,''), ';')) AS term
       WHERE TRIM(term) != ''
     ),
     term_counts AS (
-      SELECT grp, term, COUNT(*) AS count
+      SELECT grp_key, term, COUNT(*) AS count
       FROM term_rows
-      GROUP BY grp, term
+      GROUP BY grp_key, term
     ),
     term_top AS (
       SELECT
-        grp,
+        grp_key,
         ARRAY_AGG(STRUCT(term, count) ORDER BY count DESC LIMIT 8) AS topKeyTerms
       FROM term_counts
-      GROUP BY grp
+      GROUP BY grp_key
     )
     SELECT
-      g.grp AS groupLabel,
+      dt.groupLabel AS groupLabel,
       CASE @metric
         WHEN 'volume' THEN g.posts
         WHEN 'engagement' THEN g.engagement_sum
@@ -153,8 +167,9 @@ export async function GET(req: Request) {
       IFNULL(s.topStakeholders, []) AS topStakeholders,
       IFNULL(t.topKeyTerms, []) AS topKeyTerms
     FROM grouped g
-    LEFT JOIN stakeholder_top s USING(grp)
-    LEFT JOIN term_top t USING(grp)
+    LEFT JOIN stakeholder_top s USING(grp_key)
+    LEFT JOIN term_top t USING(grp_key)
+    LEFT JOIN display_top dt USING(grp_key)
     ORDER BY metricValue DESC
     LIMIT @limit
   `

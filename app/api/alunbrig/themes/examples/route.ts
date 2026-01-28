@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAlunbrigThemeFilters } from "@/lib/alunbrig/themeFilters"
 import type { AlunbrigThemeGroupBy } from "@/lib/alunbrig/themeFilters"
@@ -25,6 +25,8 @@ export async function GET(req: Request) {
 
   const groupBy = groupByRaw
 
+  const norm = (expr: string) => `LOWER(REGEXP_REPLACE(REPLACE(TRIM(CAST(${expr} AS STRING)), '_', ' '), r'\\s+', ' '))`
+
   const groupPredicate =
     groupBy === "card_bucket"
       ? "card_bucket = @groupValue"
@@ -35,7 +37,7 @@ export async function GET(req: Request) {
           : `EXISTS(
               SELECT 1
               FROM UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) t
-              WHERE TRIM(t) = @groupValue
+              WHERE ${norm("t")} = ${norm("@groupValue")}
             )`
 
   const itemsSql = `

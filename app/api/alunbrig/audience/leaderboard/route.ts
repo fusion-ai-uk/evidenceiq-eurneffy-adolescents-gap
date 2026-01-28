@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAudienceGlobalFilters, parseAudience } from "@/lib/alunbrig/audienceFilters"
 import { getAudienceBaseCteSql, getAudienceBaseParams, audienceWhereSql } from "@/lib/alunbrig/audienceSql"
@@ -33,7 +33,8 @@ export async function GET(req: Request) {
     ),
     topic_rows AS (
       SELECT
-        TRIM(t) AS topic,
+        LOWER(REGEXP_REPLACE(REPLACE(TRIM(t), '_', ' '), r'\\s+', ' ')) AS topic_key,
+        REGEXP_REPLACE(REPLACE(TRIM(t), '_', ' '), r'\\s+', ' ') AS topic_display,
         sentiment_polarity_minus1_to_1,
         sequencing_is_sequencing_discussed,
         topics_brief_flags_quality_of_life,
@@ -45,9 +46,21 @@ export async function GET(req: Request) {
       FROM slice, UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS t
       WHERE TRIM(t) != ''
     ),
+    topic_display_counts AS (
+      SELECT topic_key, topic_display, COUNT(*) AS cnt
+      FROM topic_rows
+      GROUP BY topic_key, topic_display
+    ),
+    topic_display_top AS (
+      SELECT
+        topic_key,
+        ARRAY_AGG(topic_display ORDER BY cnt DESC LIMIT 1)[OFFSET(0)] AS topic
+      FROM topic_display_counts
+      GROUP BY topic_key
+    ),
     topics AS (
       SELECT
-        topic,
+        topic_key,
         COUNT(*) AS posts,
         AVG((sentiment_polarity_minus1_to_1 + 1) * 50) AS sentimentIndex,
         AVG(CASE WHEN sequencing_is_sequencing_discussed THEN 1 ELSE 0 END) AS pctSequencing,
@@ -56,28 +69,28 @@ export async function GET(req: Request) {
         AVG(CASE WHEN topics_brief_flags_cns_or_brain_mets THEN 1 ELSE 0 END) AS pctCNS,
         AVG(CASE WHEN (topics_brief_flags_uk_access_or_reimbursement OR uk_access_is_uk_related) THEN 1 ELSE 0 END) AS pctUKAccess
       FROM topic_rows
-      GROUP BY topic
+      GROUP BY topic_key
       ORDER BY posts DESC
       LIMIT ${limitTopics}
     ),
     topic_key_terms AS (
       SELECT
-        tr.topic,
+        tr.topic_key,
         TRIM(term) AS term
       FROM topic_rows tr, UNNEST(SPLIT(IFNULL(tr.topics_key_terms,''), ';')) AS term
       WHERE TRIM(term) != ''
     ),
     topic_key_term_counts AS (
-      SELECT topic, term, COUNT(*) AS count
+      SELECT topic_key, term, COUNT(*) AS count
       FROM topic_key_terms
-      GROUP BY topic, term
+      GROUP BY topic_key, term
     ),
     topic_key_term_top AS (
       SELECT
-        topic,
+        topic_key,
         ARRAY_AGG(STRUCT(term, count) ORDER BY count DESC LIMIT 8) AS topKeyTerms
       FROM topic_key_term_counts
-      GROUP BY topic
+      GROUP BY topic_key
     ),
     bucket_base AS (
       SELECT
@@ -133,11 +146,12 @@ export async function GET(req: Request) {
     opp_top AS (SELECT bucket, ARRAY_AGG(STRUCT(opp, count) ORDER BY count DESC LIMIT 8) AS topOpportunities FROM opp_counts GROUP BY bucket)
     SELECT
       @audience AS audience,
-      (SELECT ARRAY_AGG(STRUCT(t.topic, t.posts, t.sentimentIndex, t.pctSequencing, t.pctQoL, t.pctNeurotox, t.pctCNS, t.pctUKAccess,
+      (SELECT ARRAY_AGG(STRUCT(dt.topic AS topic, t.posts, t.sentimentIndex, t.pctSequencing, t.pctQoL, t.pctNeurotox, t.pctCNS, t.pctUKAccess,
         IFNULL(k.topKeyTerms, []) AS topKeyTerms)
         ORDER BY t.posts DESC)
        FROM topics t
-       LEFT JOIN topic_key_term_top k USING(topic)
+       LEFT JOIN topic_key_term_top k USING(topic_key)
+       LEFT JOIN topic_display_top dt USING(topic_key)
       ) AS topics,
       (SELECT ARRAY_AGG(STRUCT(b.bucket, b.posts, b.sentimentIndex, b.pctSequencing, b.pctQoL, b.pctNeurotox, b.pctCNS, b.pctUKAccess,
         IFNULL(dt.topDrivers, []) AS topDrivers,

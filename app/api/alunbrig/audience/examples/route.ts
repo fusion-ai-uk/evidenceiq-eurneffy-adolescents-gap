@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAudienceGlobalFilters, parseAudience } from "@/lib/alunbrig/audienceFilters"
 import { getAudienceBaseCteSql, getAudienceBaseParams, audienceWhereSql } from "@/lib/alunbrig/audienceSql"
@@ -20,6 +20,8 @@ export async function GET(req: Request) {
 
   const audWhere = audienceWhereSql(audience)
 
+  const norm = (expr: string) => `LOWER(REGEXP_REPLACE(REPLACE(TRIM(CAST(${expr} AS STRING)), '_', ' '), r'\\s+', ' '))`
+
   const modeWhere =
     mode === "bucket"
       ? "card_bucket = @value"
@@ -29,7 +31,11 @@ export async function GET(req: Request) {
           ? "competitive_positioning_stance_toward_alunbrig = @value"
           : mode === "uk_signal"
             ? "EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(uk_access_signals,''), ';')) AS s WHERE TRIM(s) = @value)"
-            : "EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS t WHERE TRIM(t) = @value)"
+            : `EXISTS (
+                SELECT 1
+                FROM UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS t
+                WHERE ${norm("t")} = ${norm("@value")}
+              )`
 
   const sqlCount = `
     ${getAudienceBaseCteSql()}

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getTrendsFilters } from "@/lib/alunbrig/trendsFilters"
 import type { TrendsGranularity } from "@/lib/alunbrig/trendsFilters"
@@ -81,11 +81,17 @@ export async function GET(req: Request) {
     )
   `
 
+  const norm = (expr: string) => `LOWER(REGEXP_REPLACE(REPLACE(TRIM(CAST(${expr} AS STRING)), '_', ' '), r'\\s+', ' '))`
+
   const labelPredicate =
     mode === "theme" && type === "bucket"
       ? "card_bucket = @label"
       : mode === "theme" && type === "topic"
-        ? "EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS t WHERE TRIM(t) = @label)"
+        ? `EXISTS (
+            SELECT 1
+            FROM UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS t
+            WHERE ${norm("t")} = ${norm("@label")}
+          )`
         : "TRUE"
 
   const fromRows =

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getTrendsFilters } from "@/lib/alunbrig/trendsFilters"
 import type { TrendsGranularity } from "@/lib/alunbrig/trendsFilters"
@@ -68,17 +68,30 @@ export async function GET(req: Request) {
     topic_rows AS (
       SELECT
         period,
-        TRIM(topic) AS topic,
+        LOWER(REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ')) AS topic_key,
+        REGEXP_REPLACE(REPLACE(TRIM(topic), '_', ' '), r'\\s+', ' ') AS topic_display,
         stakeholder_primary,
         topics_key_terms,
         sentiment_polarity_minus1_to_1
       FROM period_rows, UNNEST(SPLIT(IFNULL(topics_top_topics,''), ';')) AS topic
       WHERE TRIM(topic) != ''
     ),
+    topic_display_counts AS (
+      SELECT topic_key, topic_display, COUNT(*) AS cnt
+      FROM topic_rows
+      GROUP BY topic_key, topic_display
+    ),
+    topic_display_top AS (
+      SELECT
+        topic_key,
+        ARRAY_AGG(topic_display ORDER BY cnt DESC LIMIT 1)[OFFSET(0)] AS topic
+      FROM topic_display_counts
+      GROUP BY topic_key
+    ),
     topic_counts AS (
       SELECT
         'topic' AS type,
-        topic AS label,
+        topic_key AS label,
         SUM(CASE WHEN period IN (SELECT period FROM start_set) THEN 1 ELSE 0 END) AS startCount,
         SUM(CASE WHEN period IN (SELECT period FROM end_set) THEN 1 ELSE 0 END) AS endCount
       FROM topic_rows
@@ -121,7 +134,7 @@ export async function GET(req: Request) {
       UNION ALL
       SELECT
         'topic' AS type,
-        topic AS label,
+        topic_key AS label,
         AVG((sentiment_polarity_minus1_to_1 + 1) * 50) AS sentimentIndexEnd
       FROM end_topic_rows
       GROUP BY label
@@ -138,7 +151,7 @@ export async function GET(req: Request) {
       UNION ALL
       SELECT
         'topic' AS type,
-        topic AS label,
+        topic_key AS label,
         stakeholder_primary AS stakeholder,
         COUNT(*) AS count
       FROM end_topic_rows
@@ -163,7 +176,7 @@ export async function GET(req: Request) {
       UNION ALL
       SELECT
         'topic' AS type,
-        topic AS label,
+        topic_key AS label,
         TRIM(term) AS term
       FROM end_topic_rows, UNNEST(SPLIT(IFNULL(topics_key_terms,''), ';')) AS term
       WHERE TRIM(term) != ''
@@ -183,7 +196,7 @@ export async function GET(req: Request) {
     )
     SELECT
       f.type,
-      f.label,
+      IF(f.type = 'topic', COALESCE(tdt.topic, f.label), f.label) AS label,
       f.startCount,
       f.endCount,
       f.delta,
@@ -195,6 +208,7 @@ export async function GET(req: Request) {
     LEFT JOIN end_sentiment s USING(type, label)
     LEFT JOIN end_stakeholder_top st USING(type, label)
     LEFT JOIN end_key_term_top kt USING(type, label)
+    LEFT JOIN topic_display_top tdt ON f.type = 'topic' AND f.label = tdt.topic_key
   `
 
   try {
