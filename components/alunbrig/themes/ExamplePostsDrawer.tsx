@@ -1,9 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
 
 export type ExamplePost = {
   id: string
@@ -29,12 +30,21 @@ export function ExamplePostsDrawer({
   title,
   description,
   requestUrl,
+  summary,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   title: string
   description?: string
   requestUrl: (offset: number) => string
+  summary?: {
+    sentimentIndex?: number
+    pctSequencing?: number
+    pctQoL?: number
+    pctNeurotox?: number
+    pctCNS?: number
+    pctUKAccess?: number
+  } | null
 }) {
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<ExamplePost[]>([])
@@ -92,13 +102,52 @@ export function ExamplePostsDrawer({
       <DrawerContent className="w-[92vw] sm:w-[720px] max-w-[92vw]">
         <DrawerHeader className="border-b">
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <DrawerTitle>{title}</DrawerTitle>
               {description ? <DrawerDescription>{description}</DrawerDescription> : null}
-              <div className="mt-1 text-xs text-muted-foreground">Showing social media data | {total.toLocaleString()} posts</div>
+              <div className="mt-1 text-xs text-muted-foreground">Showing social media data · {total.toLocaleString()} posts</div>
             </div>
             {headerRight}
           </div>
+
+          {summary ? (
+            <div className="mt-3 grid gap-3 sm:grid-cols-[1fr,260px] items-start">
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  Sentiment index: <span className="text-foreground">{Number(summary.sentimentIndex || 0).toFixed(1)}</span>
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  % sequencing: <span className="text-foreground">{Math.round(Number(summary.pctSequencing || 0) * 100)}%</span>
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  % QoL: <span className="text-foreground">{Math.round(Number(summary.pctQoL || 0) * 100)}%</span>
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  % neurotox: <span className="text-foreground">{Math.round(Number(summary.pctNeurotox || 0) * 100)}%</span>
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  % CNS: <span className="text-foreground">{Math.round(Number(summary.pctCNS || 0) * 100)}%</span>
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-muted-foreground">
+                  % UK access: <span className="text-foreground">{Math.round(Number(summary.pctUKAccess || 0) * 100)}%</span>
+                </span>
+              </div>
+              <div className="sm:justify-self-end w-full">
+                <SexyRadar
+                  title="Signal mix"
+                  categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
+                  values={[
+                    Number(summary.pctSequencing || 0) * 100,
+                    Number(summary.pctQoL || 0) * 100,
+                    Number(summary.pctNeurotox || 0) * 100,
+                    Number(summary.pctCNS || 0) * 100,
+                    Number(summary.pctUKAccess || 0) * 100,
+                  ]}
+                  height={190}
+                />
+              </div>
+            </div>
+          ) : null}
         </DrawerHeader>
 
         <div className="p-4 overflow-y-auto">
@@ -116,11 +165,11 @@ export function ExamplePostsDrawer({
             <div className="text-sm text-muted-foreground">No matching posts in this slice.</div>
           ) : (
             <div className="space-y-3">
-              {items.map((p) => (
-                <div key={String(p.id ?? "").trim() + "::" + String(p.created_ts ?? "").trim() + "::" + String(p.url ?? "").trim()} className="rounded-md border p-3">
+              {items.map((p, idx) => (
+                <div key={`${String(p.id ?? "")}::${String(p.created_ts ?? "")}::${idx}`} className="rounded-md border p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-xs text-muted-foreground">
-                      {p.created_ts} Â· {p.stakeholder_primary || "Unknown"}
+                      {p.created_ts} · {p.stakeholder_primary || "Unknown"}
                     </div>
                   </div>
                   <div className="mt-2 text-sm whitespace-pre-wrap">{p.text}</div>
@@ -138,6 +187,3 @@ export function ExamplePostsDrawer({
     </Drawer>
   )
 }
-
-
-

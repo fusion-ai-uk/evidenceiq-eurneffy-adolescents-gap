@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import dynamic from "next/dynamic"
@@ -11,9 +11,13 @@ import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDra
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Slider } from "@/components/ui/slider"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FilterPane } from "@/components/alunbrig/filters/FilterPane"
 import { MultiSelect } from "@/components/alunbrig/filters/MultiSelect"
 import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/filters/ActiveFiltersBar"
+import { InfoTip } from "@/components/alunbrig/InfoTip"
+import { cachedJson } from "@/lib/client-cache"
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
@@ -122,6 +126,17 @@ export function GeneralThemesExplorer() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerGroupBy, setDrawerGroupBy] = useState<GroupBy>("card_bucket")
   const [drawerGroupValue, setDrawerGroupValue] = useState("")
+  const [drawerSummary, setDrawerSummary] = useState<
+    | {
+        sentimentIndex?: number
+        pctSequencing?: number
+        pctQoL?: number
+        pctNeurotox?: number
+        pctCNS?: number
+        pctUKAccess?: number
+      }
+    | null
+  >(null)
   const [filtersAdvancedOpen, setFiltersAdvancedOpen] = useState(false)
 
   const baseFilterParams = useMemo(
@@ -140,15 +155,24 @@ export function GeneralThemesExplorer() {
     [startDate, endDate, includeLowRelevance, stakeholderPrimary, sentimentLabel, ukNation, sequencingOnly, flags, evidenceType, searchText],
   )
 
-  const openExamples = useCallback((gBy: GroupBy, gVal: string) => {
+  const openExamples = useCallback((gBy: GroupBy, gVal: string, summary?: any) => {
     setDrawerGroupBy(gBy)
     setDrawerGroupValue(gVal)
+    setDrawerSummary(summary ? {
+      sentimentIndex: summary.sentimentIndex,
+      pctSequencing: summary.pctSequencing,
+      pctQoL: summary.pctQoL,
+      pctNeurotox: summary.pctNeurotox,
+      pctCNS: summary.pctCNS,
+      pctUKAccess: summary.pctUKAccess,
+    } : null)
     setDrawerOpen(true)
   }, [])
 
   useEffect(() => {
     if (!startDate || !endDate) return
     setOptionsLoading(true)
+    const ac = new AbortController()
     const q = buildParams({
       startDate,
       endDate,
@@ -158,44 +182,45 @@ export function GeneralThemesExplorer() {
       evidenceType,
       searchText,
     })
-    fetch(`/api/alunbrig/themes/options?${q}`)
-      .then((r) => r.json())
-      .then((d) => setOptions(d))
+    cachedJson(`/api/alunbrig/themes/options?${q}`, { ttlMs: 5 * 60_000, signal: ac.signal })
+      .then((d) => setOptions(d as any))
       .catch(() => setOptions(null))
       .finally(() => setOptionsLoading(false))
+
+    return () => ac.abort()
   }, [startDate, endDate, includeLowRelevance, sequencingOnly, flags, evidenceType, searchText])
 
   useEffect(() => {
     if (!startDate || !endDate) return
+    const ac = new AbortController()
+    // Kick off all heavy requests in parallel to reduce total load time.
     setOverviewLoading(true)
-    const q = buildParams({ ...baseFilterParams, groupBy, metric, limit: 600 })
-    fetch(`/api/alunbrig/themes/overview?${q}`)
-      .then((r) => r.json())
-      .then((d) => setOverviewItems(d.items || []))
-      .catch(() => setOverviewItems([]))
-      .finally(() => setOverviewLoading(false))
-  }, [baseFilterParams, groupBy, metric, startDate, endDate])
-
-  useEffect(() => {
-    if (!startDate || !endDate) return
     setTopTopicsLoading(true)
-    const q = buildParams({ ...baseFilterParams, metric, limit: 50 })
-    fetch(`/api/alunbrig/themes/top-topics?${q}`)
-      .then((r) => r.json())
-      .then((d) => setTopTopicsRows(d.rows || []))
-      .catch(() => setTopTopicsRows([]))
-      .finally(() => setTopTopicsLoading(false))
-  }, [baseFilterParams, metric, startDate, endDate])
-
-  useEffect(() => {
-    if (!startDate || !endDate) return
     setScatterLoading(true)
-    const q = buildParams({ ...baseFilterParams, groupBy, metric, xMetric: "posts", sizeMetric: "engagement", limit: 500 })
-    fetch(`/api/alunbrig/themes/scatter?${q}`)
-      .then((r) => r.json())
-      .then((d) => setScatterPoints(d.points || []))
-      .catch(() => setScatterPoints([]))
-      .finally(() => setScatterLoading(false))
+
+    const qOverview = buildParams({ ...baseFilterParams, groupBy, metric, limit: 600 })
+    const qTop = buildParams({ ...baseFilterParams, metric, limit: 50 })
+    const qScatter = buildParams({ ...baseFilterParams, groupBy, metric, xMetric: "posts", sizeMetric: "engagement", limit: 500 })
+
+    Promise.allSettled([
+      cachedJson(`/api/alunbrig/themes/overview?${qOverview}`, { ttlMs: 30_000, signal: ac.signal }),
+      cachedJson(`/api/alunbrig/themes/top-topics?${qTop}`, { ttlMs: 30_000, signal: ac.signal }),
+      cachedJson(`/api/alunbrig/themes/scatter?${qScatter}`, { ttlMs: 30_000, signal: ac.signal }),
+    ]).then((results) => {
+      const [r0, r1, r2] = results
+      if (r0.status === "fulfilled") setOverviewItems((r0.value as any)?.items || [])
+      else setOverviewItems([])
+      if (r1.status === "fulfilled") setTopTopicsRows((r1.value as any)?.rows || [])
+      else setTopTopicsRows([])
+      if (r2.status === "fulfilled") setScatterPoints((r2.value as any)?.points || [])
+      else setScatterPoints([])
+    }).finally(() => {
+      setOverviewLoading(false)
+      setTopTopicsLoading(false)
+      setScatterLoading(false)
+    })
+
+    return () => ac.abort()
   }, [baseFilterParams, groupBy, metric, startDate, endDate])
 
   const overviewFiltered = useMemo(
@@ -246,7 +271,7 @@ export function GeneralThemesExplorer() {
           dataPointSelection: (_e: any, _ctx: any, cfg: any) => {
             const d = cfg?.w?.config?.series?.[0]?.data?.[cfg.dataPointIndex]
             const raw: OverviewItem | undefined = d?.raw
-            if (raw?.group) openExamples(groupBy, raw.group)
+          if (raw?.group) openExamples(groupBy, raw.group, raw)
           },
         },
       },
@@ -258,12 +283,19 @@ export function GeneralThemesExplorer() {
           const r: OverviewItem | undefined = d?.raw
           if (!r) return undefined
           const pct = (x: number) => `${Math.round(Number(x || 0) * 1000) / 10}%`
+          const metricName = metricLabel(metric)
+          // Avoid duplicate "Posts" rows when Volume is selected.
+          const showMetricRow = metricName !== "Posts"
           return `
             <div class="px-3 py-2 text-xs">
               <div class="font-medium">${r.group}</div>
               <div class="mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
                 <div>Posts</div><div class="text-right">${Number(r.posts || 0).toLocaleString()}</div>
-                <div>${metricLabel(metric)}</div><div class="text-right">${Number(r.metricValue || 0).toLocaleString()}</div>
+                ${
+                  showMetricRow
+                    ? `<div>${metricName}</div><div class="text-right">${Number(r.metricValue || 0).toLocaleString()}</div>`
+                    : ""
+                }
                 <div>Sentiment index</div><div class="text-right">${Number(r.sentimentIndex || 0).toFixed(1)}</div>
                 <div>% sequencing</div><div class="text-right">${pct(r.pctSequencing)}</div>
                 <div>% QoL</div><div class="text-right">${pct(r.pctQoL)}</div>
@@ -365,7 +397,7 @@ export function GeneralThemesExplorer() {
 
   const activeChips = useMemo<ActiveFilterChip[]>(() => {
     const chips: ActiveFilterChip[] = []
-    if (searchText.trim()) chips.push({ key: "search", label: `Search: "${searchText.trim()}"`, onClear: () => setSearchText("") })
+    if (searchText.trim()) chips.push({ key: "search", label: `Search: \"${searchText.trim()}\"`, onClear: () => setSearchText("") })
     if (includeLowRelevance) chips.push({ key: "low", label: "Include low relevance", onClear: () => setIncludeLowRelevance(false) })
     if (sequencingOnly) chips.push({ key: "seqOnly", label: "Sequencing only", onClear: () => setSequencingOnly(false) })
     if (stakeholderPrimary.length) chips.push({ key: "stakeholder", label: `Stakeholder: ${stakeholderPrimary.join(", ")}`, onClear: () => setStakeholderPrimary([]) })
@@ -393,36 +425,51 @@ export function GeneralThemesExplorer() {
       <Card className="border-border/60">
         <CardHeader>
           <div className="flex flex-col gap-2">
-            <CardTitle>Theme Explorer</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle>Theme Explorer</CardTitle>
+              <InfoTip text="Use this page to explore how themes and topics are distributed within the selected slice of social media data. Switch tabs to view a high-level overview, a ranked table, or a relationship view, and click into items to open example posts." />
+            </div>
             <div className="text-sm text-muted-foreground">Explore themes from <span className="text-foreground">social media data</span>.</div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Controls */}
-          <div className="grid gap-3 md:grid-cols-3 rounded-md border p-3 bg-card/40">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Metric</span>
-              <select className="h-8 rounded-md bg-background border px-2 text-sm" value={metric} onChange={(e) => setMetric(e.target.value as Metric)}>
-                <option value="volume">Volume</option>
-                <option value="engagement">Engagement</option>
-                <option value="views">Views</option>
-              </select>
+          <div className="grid gap-3 md:grid-cols-3 rounded-md border border-border/60 p-3 bg-background/40">
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Metric</div>
+              <Select value={metric} onValueChange={(v) => setMetric(v as Metric)}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="volume">Volume</SelectItem>
+                  <SelectItem value="engagement">Engagement</SelectItem>
+                  <SelectItem value="views">Views</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Group</span>
-              <select className="h-8 rounded-md bg-background border px-2 text-sm" value={groupBy} onChange={(e) => setGroupBy(e.target.value as GroupBy)}>
-                <option value="card_bucket">card_bucket</option>
-                <option value="topics_top_topics">topics_top_topics</option>
-                <option value="clinical_context_biomarker">clinical_context_biomarker</option>
-                <option value="competitive_context">competitive_context</option>
-              </select>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Group</div>
+              <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card_bucket">card_bucket</SelectItem>
+                  <SelectItem value="topics_top_topics">topics_top_topics</SelectItem>
+                  <SelectItem value="clinical_context_biomarker">clinical_context_biomarker</SelectItem>
+                  <SelectItem value="competitive_context">competitive_context</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Sentiment threshold</span>
-                <span className="text-xs text-muted-foreground"><span className="text-foreground">{sentimentThreshold}</span>/100</span>
+                <div className="text-xs text-muted-foreground">Sentiment threshold</div>
+                <div className="text-xs text-muted-foreground">
+                  <span className="text-foreground">{sentimentThreshold}</span>/100
+                </div>
               </div>
-              <input type="range" min={0} max={100} step={1} value={sentimentThreshold} onChange={(e) => setSentimentThreshold(Number(e.target.value))} />
+              <Slider value={[sentimentThreshold]} min={0} max={100} step={1} onValueChange={(v) => setSentimentThreshold(v?.[0] ?? 0)} />
             </div>
           </div>
 
@@ -446,12 +493,11 @@ export function GeneralThemesExplorer() {
                 </span>
               ) : options?.meta ? (
                 <span>
-                  Slice contains <span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts (min {options.meta.minDate}, max {options.meta.maxDate})
+                  Slice contains <span className="text-foreground">{options.meta.totalPosts.toLocaleString()}</span> posts (min {options.meta.minDate}, max{" "}
+                  {options.meta.maxDate})
                 </span>
               ) : null
             }
-            advancedOpen={filtersAdvancedOpen}
-            onAdvancedOpenChange={setFiltersAdvancedOpen}
             advanced={
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
@@ -501,13 +547,15 @@ export function GeneralThemesExplorer() {
                 </div>
               </div>
             }
+            advancedOpen={filtersAdvancedOpen}
+            onAdvancedOpenChange={setFiltersAdvancedOpen}
           >
             <div className="grid gap-3 md:grid-cols-6">
               <div className="md:col-span-2 space-y-1">
                 <div className="text-xs text-muted-foreground">Date range</div>
                 <div className="flex items-center gap-2">
                   <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                  <div className="text-xs text-muted-foreground">-></div>
+                  <div className="text-xs text-muted-foreground">→</div>
                   <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </div>
               </div>
@@ -530,6 +578,7 @@ export function GeneralThemesExplorer() {
               </div>
             </div>
           </FilterPane>
+
           <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -538,9 +587,13 @@ export function GeneralThemesExplorer() {
             </TabsList>
 
             <TabsContent value="overview" className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-sm font-medium">Overview treemap</div>
+                <InfoTip text="Each tile represents a theme/topic group. Tile size reflects the selected metric (Volume/Engagement/Views), and color reflects average polarity. Click a tile to open example posts for that group." />
+              </div>
               <div className="h-[760px]">
                 {overviewLoading ? (
-                  <div className="h-full flex items-center justify-center"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Skeleton className="h-2 w-2 rounded-full" /> Loading...</div></div>
+                  <div className="h-full flex items-center justify-center"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Skeleton className="h-2 w-2 rounded-full" /> Loading…</div></div>
                 ) : (
                   <ReactApexChart type="treemap" height="100%" width="100%" options={treemapOptions as any} series={treemapSeries as any} />
                 )}
@@ -548,6 +601,10 @@ export function GeneralThemesExplorer() {
             </TabsContent>
 
             <TabsContent value="top_topics" className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-sm font-medium">Top topics table</div>
+                <InfoTip text="Ranks topics within the selected slice. Use it to compare volume and supporting % signals across topics, then click a row to open example posts." />
+              </div>
               <div className="rounded-md border overflow-hidden">
                 <div className="px-3 py-2 text-xs text-muted-foreground border-b">Click a row to view example posts (social media data)</div>
                 <div className="max-h-[760px] overflow-auto">
@@ -561,7 +618,7 @@ export function GeneralThemesExplorer() {
                         <tr className="text-xs text-muted-foreground">
                           <th className="text-left p-2">Topic</th>
                           <th className="text-right p-2">Posts</th>
-                          <th className="text-right p-2">{metricLabel(metric)}</th>
+                          {metric !== "volume" ? <th className="text-right p-2">{metricLabel(metric)}</th> : null}
                           <th className="text-right p-2">Sentiment</th>
                           <th className="text-right p-2">% Seq</th>
                           <th className="text-right p-2">% QoL</th>
@@ -573,17 +630,17 @@ export function GeneralThemesExplorer() {
                       </thead>
                       <tbody>
                         {topTopicsFiltered.map((r: any) => (
-                          <tr key={r.topic} className="border-b hover:bg-muted/30 cursor-pointer" onClick={() => openExamples("topics_top_topics", r.topic)}>
+                          <tr key={r.topic} className="border-b hover:bg-muted/30 cursor-pointer" onClick={() => openExamples("topics_top_topics", r.topic, r)}>
                             <td className="p-2 font-medium">{r.topic}</td>
                             <td className="p-2 text-right">{Number(r.posts || 0).toLocaleString()}</td>
-                            <td className="p-2 text-right">{Number(r.metricValue || 0).toLocaleString()}</td>
+                            {metric !== "volume" ? <td className="p-2 text-right">{Number(r.metricValue || 0).toLocaleString()}</td> : null}
                             <td className="p-2 text-right">{Number(r.sentimentIndex || 0).toFixed(1)}</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctSequencing || 0) * 100)}%</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctQoL || 0) * 100)}%</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctNeurotox || 0) * 100)}%</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctCNS || 0) * 100)}%</td>
                             <td className="p-2 text-right">{Math.round(Number(r.pctUKAccess || 0) * 100)}%</td>
-                            <td className="p-2 text-xs text-muted-foreground">{(r.topStakeholders || []).map((s: any) => s.label).filter(Boolean).join(", ") || "-"}</td>
+                            <td className="p-2 text-xs text-muted-foreground">{(r.topStakeholders || []).map((s: any) => s.label).filter(Boolean).join(", ") || "—"}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -594,9 +651,13 @@ export function GeneralThemesExplorer() {
             </TabsContent>
 
             <TabsContent value="scatter" className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-sm font-medium">Scatter</div>
+                <InfoTip text="Shows how groups relate across two dimensions (e.g., volume vs sentiment). Use it to identify clusters and outliers; point size reflects the selected size metric. Click a point to open example posts." />
+              </div>
               <div className="h-[760px]">
                 {scatterLoading ? (
-                  <div className="h-full flex items-center justify-center"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Skeleton className="h-2 w-2 rounded-full" /> Loading...</div></div>
+                  <div className="h-full flex items-center justify-center"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Skeleton className="h-2 w-2 rounded-full" /> Loading…</div></div>
                 ) : (
                   <ReactApexChart type="bubble" height="100%" width="100%" options={bubbleOptions as any} series={bubbleSeries as any} />
                 )}
@@ -608,12 +669,15 @@ export function GeneralThemesExplorer() {
 
       <ExamplePostsDrawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(v) => {
+          setDrawerOpen(v)
+          if (!v) setDrawerSummary(null)
+        }}
         title={drawerGroupValue}
         description={`Group: ${drawerGroupBy}`}
         requestUrl={examplesUrl}
+        summary={drawerSummary}
       />
     </div>
   )
 }
-
