@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 
 export default function RootRedirect() {
-  redirect("/dashboard")
+  // Default landing page
+  redirect("/themes")
 }
