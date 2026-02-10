@@ -232,16 +232,19 @@ export function CompetitorLens() {
       competitor?: string,
       period?: { period: string; granularity: "week" | "month" },
     ) => {
+      const effectiveCompetitor = (competitor ?? applied?.competitor ?? draft.competitor) || ""
+      const effectiveGranularity = period?.granularity || applied?.granularity || draft.granularity
+
       setDrawerMode(mode)
       setDrawerValue(value)
-      setDrawerCompetitor((competitor ?? draft.competitor) || "")
+      setDrawerCompetitor(effectiveCompetitor)
       setDrawerPeriod(period?.period || "")
-      setDrawerPeriodGranularity(period?.granularity || draft.granularity)
-      setDrawerTitle(`${mode.replace("_", " ")} | ${value}`)
-      setDrawerDesc(`Showing social media data${competitor ? ` for ${competitor}` : ""}.`)
+      setDrawerPeriodGranularity(effectiveGranularity)
+      setDrawerTitle(`${mode.replaceAll("_", " ")} | ${value}`)
+      setDrawerDesc(`Showing social media data${effectiveCompetitor ? ` for ${effectiveCompetitor}` : ""}.`)
       setDrawerOpen(true)
     },
-    [draft.competitor, draft.granularity],
+    [applied?.competitor, applied?.granularity, draft.competitor, draft.granularity],
   )
 
   const requestUrl = useCallback(
