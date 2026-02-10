@@ -14,8 +14,8 @@ type AppShellProps = {
   children: React.ReactNode
 }
 
-const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
-  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard },
+const nav: { name: string; href: string; icon: any; comingSoon?: boolean; disabled?: boolean }[] = [
+  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard, disabled: true },
   { name: 'General Themes', href: '/themes', icon: MessageCircle },
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
@@ -130,11 +130,13 @@ export function AppShell({ children }: AppShellProps) {
           <CommandList>
             <CommandGroup heading="Navigate">
               {nav.map((item) => (
-                item.comingSoon ? (
+                item.comingSoon || item.disabled ? (
                   <CommandItem key={item.href} disabled aria-disabled className="opacity-60 pointer-events-none">
                     <item.icon className="h-4 w-4 opacity-60" />
                     <span>{item.name}</span>
-                    <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
+                    {item.comingSoon ? (
+                      <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
+                    ) : null}
                   </CommandItem>
                 ) : (
                   <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
@@ -161,9 +163,9 @@ export function AppShell({ children }: AppShellProps) {
             {nav.map(item => {
               const Icon = item.icon
               const active = pathname === item.href
-              return item.comingSoon ? (
+              return item.comingSoon || item.disabled ? (
                 <div key={item.name} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground/70 bg-muted/10 ring-1 ring-border/50 cursor-not-allowed">
-                  <Icon className="h-4 w-4 opacity-60 animate-pulse" />
+                  <Icon className={cn("h-4 w-4 opacity-60", item.comingSoon ? "animate-pulse" : "")} />
                   <span className="truncate">{item.name}</span>
                 </div>
               ) : (

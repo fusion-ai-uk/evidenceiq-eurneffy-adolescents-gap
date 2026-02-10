@@ -31,7 +31,14 @@ function Tooltip({
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      // See note in `components/ui/button.tsx` re: extension-injected attributes.
+      suppressHydrationWarning
+      {...props}
+    />
+  )
 }
 
 function TooltipContent({

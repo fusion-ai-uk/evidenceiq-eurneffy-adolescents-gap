@@ -28,3 +28,9 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## BigQuery configuration
+
+This app reads from BigQuery using Application Default Credentials / service account JSON provided via env vars (see `lib/bigquery.ts`).
+
+- **BQ_MAIN_TABLE**: `fusion-424109.evidenceiq_alunbrig.vw_text_filtered_core_only` (view/table id used in all `FROM \`...\`` clauses)

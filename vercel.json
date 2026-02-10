@@ -1,5 +1,8 @@
 {
-  "installCommand": "pnpm install --no-frozen-lockfile"
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "env": {
+    "BQ_MAIN_TABLE": "fusion-424109.evidenceiq_alunbrig.vw_text_filtered_core_only"
+  }
 }
 
 

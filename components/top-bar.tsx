@@ -82,8 +82,8 @@ export function TopBar() {
         <CommandInput placeholder="Search pages and actions..." />
         <CommandList>
           <CommandGroup heading="Navigate">
-            <CommandItem asChild>
-              <Link href="/dashboard">Executive Summary</Link>
+            <CommandItem disabled aria-disabled className="opacity-60 pointer-events-none">
+              <span>Executive Summary</span>
             </CommandItem>
             <CommandItem asChild>
               <Link href="/themes">General Themes</Link>
@@ -96,9 +96,9 @@ export function TopBar() {
             </CommandItem>
             <CommandItem asChild>
               <Link href="/competitors">Competitor Lens</Link>
+            </CommandItem>
             <CommandItem asChild>
               <Link href="/sequencing">Sequencing &amp; Pathways</Link>
-            </CommandItem>
             </CommandItem>
             
             <CommandItem disabled aria-disabled className="opacity-60 pointer-events-none">

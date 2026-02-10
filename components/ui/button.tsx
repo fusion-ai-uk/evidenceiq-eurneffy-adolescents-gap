@@ -51,6 +51,9 @@ function Button({
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      // Some browser extensions inject attributes (e.g. `fdprocessedid`) before hydration,
+      // which can trigger Next/React hydration mismatch errors on interactive elements.
+      suppressHydrationWarning
       {...props}
     />
   )

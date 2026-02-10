@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const navigation = [
-  { name: "Executive Summary", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Executive Summary", href: "/dashboard", icon: LayoutDashboard, disabled: true },
   { name: "General Themes", href: "/themes", icon: MessageCircle },
   { name: "Trends Explorer", href: "/trends", icon: TrendingUp },
   { name: "Audience Insights", href: "/audience", icon: Users },
@@ -48,11 +48,13 @@ export function MainNav() {
                 const Icon = item.icon
                 return (
                   <SidebarMenuItem key={item.name}>
-                    {item.comingSoon ? (
+                    {item.comingSoon || item.disabled ? (
                       <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-muted-foreground/70 bg-muted/10 ring-1 ring-border/50 cursor-not-allowed">
                         <Icon className="opacity-60" />
                         <span>{item.name}</span>
-                        <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/60">Coming soon</span>
+                        {item.comingSoon ? (
+                          <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/60">Coming soon</span>
+                        ) : null}
                       </div>
                     ) : (
                       <SidebarMenuButton asChild isActive={isActive}>

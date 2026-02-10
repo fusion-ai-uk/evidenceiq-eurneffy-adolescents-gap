@@ -14,6 +14,8 @@ function CollapsibleTrigger({
   return (
     <CollapsiblePrimitive.CollapsibleTrigger
       data-slot="collapsible-trigger"
+      // See note in `components/ui/button.tsx` re: extension-injected attributes.
+      suppressHydrationWarning
       {...props}
     />
   )

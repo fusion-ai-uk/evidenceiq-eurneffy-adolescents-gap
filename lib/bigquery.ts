@@ -2,6 +2,9 @@ import { BigQuery } from "@google-cloud/bigquery"
 import type { QueryParamTypeStruct } from "@google-cloud/bigquery"
 import fs from "node:fs"
 
+// Default BigQuery source for the Alunbrig EvidenceIQ app (can be overridden via env).
+process.env.BQ_MAIN_TABLE ||= "fusion-424109.evidenceiq_alunbrig.vw_text_filtered_core_only"
+
 declare global {
   // eslint-disable-next-line no-var
   var __bqClient: BigQuery | undefined
