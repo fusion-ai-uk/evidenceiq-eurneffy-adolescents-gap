@@ -20,10 +20,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing startDate/endDate" }, { status: 400 })
   }
 
+  // IMPORTANT: wrap the OR condition so it composes correctly with additional AND filters.
+  // Without these parentheses, when competitorEnabled=false the WHERE clause becomes true
+  // and mode/period filters are effectively ignored due to SQL operator precedence.
   const competitorWhere = `
-    (NOT @competitorEnabled) OR (
-      EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS t WHERE TRIM(t) = @competitor)
-      OR EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b WHERE TRIM(b) = @competitor)
+    (
+      (NOT @competitorEnabled)
+      OR (
+        EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS t WHERE TRIM(t) = @competitor)
+        OR EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b WHERE TRIM(b) = @competitor)
+      )
     )
   `
 
