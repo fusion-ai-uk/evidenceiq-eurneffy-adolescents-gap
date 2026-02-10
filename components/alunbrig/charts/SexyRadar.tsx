@@ -44,6 +44,8 @@ export function SexyRadar({
           background: "transparent",
           toolbar: { show: false },
           animations: { enabled: true, speed: 650 },
+          // Give x-axis labels (especially the top label) extra room so they don't clip.
+          offsetY: 10,
           dropShadow: {
             enabled: true,
             blur: 10,
@@ -80,13 +82,14 @@ export function SexyRadar({
         xaxis: {
           categories,
           labels: {
+            offsetY: 6,
             style: { colors: categories.map(() => label), fontSize: "11px", fontWeight: 600 },
           },
         },
         yaxis: { show: false, min: 0, max: axisMax, tickAmount: 4 },
         plotOptions: {
           radar: {
-            size: 98,
+            size: 92,
             polygons: {
               strokeColor: grid,
               connectorColors: grid,
