@@ -14,6 +14,16 @@ export function normalizeEntityTokenSql(expr: string) {
 }
 
 /**
+ * Canonicalize a token for grouping:
+ * - normalize whitespace/case
+ * - strip trailing parenthetical qualifiers (e.g. "brigatinib (implied)" -> "brigatinib")
+ */
+export function tokenKeySql(expr: string) {
+  const n = normalizeEntityTokenSql(expr)
+  return `REGEXP_REPLACE(${n}, r'\\s*\\([^)]*\\)\\s*$', '')`
+}
+
+/**
  * Canonical key for competitor/drug tokens so we can:
  * - dedupe accidental duplicates (case/whitespace)
  * - group brand/generic for the same asset (e.g. Alunbrig == brigatinib)
@@ -21,20 +31,17 @@ export function normalizeEntityTokenSql(expr: string) {
  * NOTE: This is intentionally small and can be extended as needed.
  */
 export function competitorAssetKeySql(expr: string) {
-  const n = normalizeEntityTokenSql(expr)
-  return `
-    CASE
-      WHEN REGEXP_CONTAINS(${n}, r'^(alunbrig|brigatinib)(\\b|\\s|\\(|$)') THEN 'alunbrig'
-      ELSE ${n}
-    END
-  `
+  const k = tokenKeySql(expr)
+  // brand_to_generic_map is defined in getCompetitorBaseCteSql() for all competitor endpoints.
+  return `COALESCE((SELECT generic_key FROM brand_to_generic_map WHERE brand_key = ${k} LIMIT 1), ${k})`
 }
 
 export function competitorAssetLabelSql(keyExpr: string, fallbackLabelExpr: string) {
-  // Provide a human-friendly combined label for grouped assets.
+  // Provide a human-friendly combined label for the target asset.
+  // (We keep other assets' labels stable, to avoid unintended UI churn.)
   return `
     CASE
-      WHEN ${keyExpr} = 'alunbrig' THEN 'Alunbrig (brigatinib)'
+      WHEN ${keyExpr} = 'brigatinib' THEN 'Alunbrig (brigatinib)'
       ELSE ${fallbackLabelExpr}
     END
   `
@@ -127,6 +134,90 @@ export function getCompetitorBaseCteSql() {
             OR LOWER(IFNULL(topics_top_topics,'')) LIKE CONCAT('%', LOWER(@searchText), '%')
           )
         )
+    ),
+    __brand_tokens AS (
+      SELECT
+        id,
+        TRIM(b) AS brand_raw,
+        ${tokenKeySql("b")} AS brand_key
+      FROM base,
+      UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b
+      WHERE TRIM(b) != ''
+        AND LOWER(TRIM(b)) NOT IN ('unknown')
+    ),
+    __generic_tokens AS (
+      SELECT
+        id,
+        TRIM(g) AS generic_raw,
+        ${tokenKeySql("g")} AS generic_key
+      FROM base,
+      UNNEST(SPLIT(IFNULL(CAST(entities_drugs_generics AS STRING), ''), ';')) AS g
+      WHERE TRIM(g) != ''
+        AND LOWER(TRIM(g)) NOT IN ('unknown')
+    ),
+    __brand_label_variants AS (
+      SELECT brand_key, brand_raw, COUNT(DISTINCT id) AS mentions
+      FROM __brand_tokens
+      WHERE brand_key != ''
+      GROUP BY brand_key, brand_raw
+    ),
+    __generic_label_variants AS (
+      SELECT generic_key, generic_raw, COUNT(DISTINCT id) AS mentions
+      FROM __generic_tokens
+      WHERE generic_key != ''
+      GROUP BY generic_key, generic_raw
+    ),
+    __brand_label_pick AS (
+      SELECT
+        brand_key,
+        ARRAY_AGG(STRUCT(brand_raw, mentions) ORDER BY mentions DESC, brand_raw LIMIT 1)[OFFSET(0)].brand_raw AS brand_label
+      FROM __brand_label_variants
+      GROUP BY brand_key
+    ),
+    __generic_label_pick AS (
+      SELECT
+        generic_key,
+        ARRAY_AGG(STRUCT(generic_raw, mentions) ORDER BY mentions DESC, generic_raw LIMIT 1)[OFFSET(0)].generic_raw AS generic_label
+      FROM __generic_label_variants
+      GROUP BY generic_key
+    ),
+    __brand_generic_counts AS (
+      SELECT
+        b.brand_key,
+        g.generic_key,
+        COUNT(DISTINCT b.id) AS cnt
+      FROM __brand_tokens b
+      JOIN __generic_tokens g USING(id)
+      WHERE b.brand_key != ''
+        AND g.generic_key != ''
+        AND b.brand_key != g.generic_key
+      GROUP BY b.brand_key, g.generic_key
+    ),
+    __brand_generic_ranked AS (
+      SELECT
+        *,
+        SUM(cnt) OVER (PARTITION BY brand_key) AS total_cnt,
+        SAFE_DIVIDE(cnt, NULLIF(SUM(cnt) OVER (PARTITION BY brand_key),0)) AS share
+      FROM __brand_generic_counts
+    ),
+    __brand_to_generic AS (
+      -- Data-driven brand->generic mapping based on co-occurrence in the same post.
+      -- Conservative thresholds reduce the risk of incorrect merges.
+      SELECT brand_key, generic_key
+      FROM __brand_generic_ranked
+      WHERE cnt >= 3
+        AND share >= 0.5
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY brand_key ORDER BY cnt DESC, generic_key) = 1
+    ),
+    brand_to_generic_map AS (
+      SELECT
+        m.brand_key,
+        m.generic_key,
+        bl.brand_label,
+        gl.generic_label
+      FROM __brand_to_generic m
+      LEFT JOIN __brand_label_pick bl USING(brand_key)
+      LEFT JOIN __generic_label_pick gl USING(generic_key)
     )
   `
 }
