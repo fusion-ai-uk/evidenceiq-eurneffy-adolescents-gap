@@ -1,7 +1,7 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getCompetitorLensFilters } from "@/lib/alunbrig/competitorFilters"
-import { getCompetitorBaseCteSql, getCompetitorBaseParams } from "@/lib/alunbrig/competitorSql"
+import { competitorAssetKeySql, getCompetitorBaseCteSql, getCompetitorBaseParams } from "@/lib/alunbrig/competitorSql"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -18,8 +18,21 @@ export async function GET(req: Request) {
       SELECT *
       FROM base
       WHERE (NOT @competitorEnabled) OR (
-        EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS t WHERE TRIM(t) = @competitor)
-        OR EXISTS (SELECT 1 FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b WHERE TRIM(b) = @competitor)
+        EXISTS (
+          SELECT 1
+          FROM UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS t
+          WHERE ${competitorAssetKeySql("t")} = ${competitorAssetKeySql("@competitor")}
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b
+          WHERE ${competitorAssetKeySql("b")} = ${competitorAssetKeySql("@competitor")}
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_generics AS STRING), ''), ';')) AS g
+          WHERE ${competitorAssetKeySql("g")} = ${competitorAssetKeySql("@competitor")}
+        )
       )
     ),
     slice_meta AS (

@@ -1,7 +1,44 @@
-﻿import type { CompetitorLensFilters } from "@/lib/alunbrig/competitorFilters"
+import type { CompetitorLensFilters } from "@/lib/alunbrig/competitorFilters"
 import { flagsToParams } from "@/lib/alunbrig/themeFilters"
 
 const truthy = (field: string) => `(LOWER(TRIM(CAST(${field} AS STRING))) IN ('true','1','yes'))`
+
+/**
+ * Normalize a token for stable grouping/comparison:
+ * - lower-case
+ * - trim
+ * - collapse repeated whitespace
+ */
+export function normalizeEntityTokenSql(expr: string) {
+  return `REGEXP_REPLACE(LOWER(TRIM(CAST(${expr} AS STRING))), r'\\s+', ' ')`
+}
+
+/**
+ * Canonical key for competitor/drug tokens so we can:
+ * - dedupe accidental duplicates (case/whitespace)
+ * - group brand/generic for the same asset (e.g. Alunbrig == brigatinib)
+ *
+ * NOTE: This is intentionally small and can be extended as needed.
+ */
+export function competitorAssetKeySql(expr: string) {
+  const n = normalizeEntityTokenSql(expr)
+  return `
+    CASE
+      WHEN REGEXP_CONTAINS(${n}, r'^(alunbrig|brigatinib)(\\b|\\s|\\(|$)') THEN 'alunbrig'
+      ELSE ${n}
+    END
+  `
+}
+
+export function competitorAssetLabelSql(keyExpr: string, fallbackLabelExpr: string) {
+  // Provide a human-friendly combined label for grouped assets.
+  return `
+    CASE
+      WHEN ${keyExpr} = 'alunbrig' THEN 'Alunbrig (brigatinib)'
+      ELSE ${fallbackLabelExpr}
+    END
+  `
+}
 
 export function getCompetitorBaseCteSql() {
   if (!process.env.BQ_MAIN_TABLE) throw new Error("Missing env var BQ_MAIN_TABLE")

@@ -1,7 +1,12 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getCompetitorLensFilters } from "@/lib/alunbrig/competitorFilters"
-import { getCompetitorBaseCteSql, getCompetitorBaseParams } from "@/lib/alunbrig/competitorSql"
+import {
+  competitorAssetKeySql,
+  competitorAssetLabelSql,
+  getCompetitorBaseCteSql,
+  getCompetitorBaseParams,
+} from "@/lib/alunbrig/competitorSql"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -32,16 +37,37 @@ export async function GET(req: Request) {
     competitor_tokens AS (
       SELECT
         id,
-        TRIM(tok) AS name
+        TRIM(tok) AS name_raw,
+        ${competitorAssetKeySql("tok")} AS name_key
       FROM competitive, UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS tok
       WHERE is_competitive
         AND TRIM(tok) != ''
         AND LOWER(TRIM(tok)) NOT IN ('unknown')
     ),
-    competitor_counts AS (
-      SELECT name, COUNT(DISTINCT id) AS mentions
+    competitor_key_counts AS (
+      SELECT name_key, COUNT(DISTINCT id) AS mentions
       FROM competitor_tokens
-      GROUP BY name
+      GROUP BY name_key
+    ),
+    competitor_label_variants AS (
+      SELECT name_key, name_raw, COUNT(DISTINCT id) AS mentions
+      FROM competitor_tokens
+      GROUP BY name_key, name_raw
+    ),
+    competitor_label_pick AS (
+      SELECT
+        name_key,
+        ARRAY_AGG(STRUCT(name_raw, mentions) ORDER BY mentions DESC, name_raw LIMIT 1)[OFFSET(0)].name_raw AS name_label_raw
+      FROM competitor_label_variants
+      GROUP BY name_key
+    ),
+    competitor_counts AS (
+      SELECT
+        c.name_key,
+        ${competitorAssetLabelSql("c.name_key", "IFNULL(p.name_label_raw, c.name_key)")} AS name,
+        c.mentions AS mentions
+      FROM competitor_key_counts c
+      LEFT JOIN competitor_label_pick p USING(name_key)
     ),
     brand_tokens AS (
       SELECT
