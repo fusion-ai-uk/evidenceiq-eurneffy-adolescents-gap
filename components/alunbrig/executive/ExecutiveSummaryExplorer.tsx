@@ -75,6 +75,19 @@ function cleanToken(s: string) {
     .trim()
 }
 
+function quoteTerm(s: string) {
+  const t = cleanToken(s)
+  if (!t) return ""
+  // avoid double-quoting if already quoted
+  if (t.startsWith("\"") && t.endsWith("\"")) return t
+  return `"${t}"`
+}
+
+function quoteList(items: string[], max: number) {
+  const out = items.map(quoteTerm).filter(Boolean).slice(0, max)
+  return out.join(", ")
+}
+
 function clampText(s: string, maxLen: number) {
   const t = cleanToken(s)
   if (t.length <= maxLen) return t
@@ -353,7 +366,7 @@ function themeTakeaway(item: ThemeEvolutionItem, totalPostsInRange: number) {
   const share = fmtShare(item.endCount, totalPostsInRange)
 
   const stake = stakeholders.length ? `Who drove it: ${stakeholders.join(" + ")}.` : ""
-  const key = terms.length ? `What people focused on: ${terms.join(", ")}.` : ""
+  const key = terms.length ? `What people focused on: ${quoteList(terms, 5)}.` : ""
 
   return (
     `${label} ${changePhrase(item.pctChange)} in the most recent window and represented about ${share} of the overall conversation in the selected range.` +
@@ -577,7 +590,7 @@ export function ExecutiveSummaryExplorer() {
         const summary =
           `In the ${when || "most recent period"}, discussion increased materially versus baseline (approximately ${pctRounded}% above expected).` +
           ` This period accounted for ~${share} of total discussion in the selected range.` +
-          ` The increase was most associated with ${d0}${d1 ? ` and ${d1}` : ""}.` +
+          ` The increase was most associated with ${quoteTerm(d0)}${d1 ? ` and ${quoteTerm(d1)}` : ""}.` +
           (topStakeholders.length
             ? ` Primary sources were ${topStakeholders.slice(0, 2).join(" and ")}.`
             : stakeholder
@@ -692,7 +705,7 @@ export function ExecutiveSummaryExplorer() {
           `${title} was a prominent theme by volume in the selected range (approximately ${share} of discussion). ` +
           `Sentiment was ${tone}. ` +
           (signalBits.length ? `Signal composition: ${signalBits.join(", ")}. ` : "") +
-          (terms.length ? `Common co-occurring concepts: ${terms.slice(0, 5).join(", ")}. ` : "") +
+          (terms.length ? `Common co-occurring concepts: ${quoteList(terms, 5)}. ` : "") +
           (stakeholders.length ? `Stakeholder visibility: ${stakeholders.join(" + ")}.` : "")
 
         return {
