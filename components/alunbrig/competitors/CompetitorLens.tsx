@@ -335,14 +335,20 @@ export function CompetitorLens() {
     setListLoading(true)
     fetch(`/api/alunbrig/competitors/list?${q}`)
       .then((r) => r.json())
-      .then((d) => setList(d as CompetitorListResponse))
+      .then((d) => {
+        if (d && Array.isArray((d as any).competitors)) setList(d as CompetitorListResponse)
+        else setList(null)
+      })
       .catch(() => setList(null))
       .finally(() => setListLoading(false))
 
     setTableLoading(true)
     fetch(`/api/alunbrig/competitors/comparator-table?${q}&limit=20`)
       .then((r) => r.json())
-      .then((d) => setTable(d as ComparatorResponse))
+      .then((d) => {
+        if (d && Array.isArray((d as any).rows)) setTable(d as ComparatorResponse)
+        else setTable(null)
+      })
       .catch(() => setTable(null))
       .finally(() => setTableLoading(false))
   }, [appliedParams])
@@ -355,7 +361,10 @@ export function CompetitorLens() {
     setSummaryLoading(true)
     fetch(`/api/alunbrig/competitors/summary?${q}`)
       .then((r) => r.json())
-      .then((d) => setSummary(d as SummaryResponse))
+      .then((d) => {
+        if (d && (d as any).kpis) setSummary(d as SummaryResponse)
+        else setSummary(null)
+      })
       .catch(() => setSummary(null))
       .finally(() => setSummaryLoading(false))
 
@@ -364,10 +373,12 @@ export function CompetitorLens() {
       .then((r) => r.json())
       .then((d) => {
         if (applied?.competitor) {
-          setTrendsCompetitor(d as TrendsCompetitorResponse)
+          if (d && Array.isArray((d as any).series)) setTrendsCompetitor(d as TrendsCompetitorResponse)
+          else setTrendsCompetitor(null)
           setTrendsOverall(null)
         } else {
-          setTrendsOverall(d as TrendsOverallResponse)
+          if (d && Array.isArray((d as any).series)) setTrendsOverall(d as TrendsOverallResponse)
+          else setTrendsOverall(null)
           setTrendsCompetitor(null)
         }
       })
@@ -545,7 +556,7 @@ export function CompetitorLens() {
           <CardContent>
             {tableLoading || !table ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
-            ) : table.rows.length === 0 ? (
+            ) : !Array.isArray(table.rows) || table.rows.length === 0 ? (
               <div className="text-sm text-muted-foreground">No competitors found in this slice.</div>
             ) : (
               <Table>
