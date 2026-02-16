@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const filters = getTrendsFilters(searchParams)
   const granularity = filters.granularity
+  const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)))
 
   if (!filters.startDate || !filters.endDate) {
     return NextResponse.json({ error: "Missing startDate/endDate" }, { status: 400 })
@@ -225,8 +226,8 @@ export async function GET(req: Request) {
       topKeyTermsEnd: r.topKeyTermsEnd || [],
     }))
 
-    const rising = [...items].sort((a, b) => (b.pctChange - a.pctChange) || (b.delta - a.delta)).slice(0, 10)
-    const falling = [...items].sort((a, b) => (a.pctChange - b.pctChange) || (a.delta - b.delta)).slice(0, 10)
+    const rising = [...items].sort((a, b) => (b.pctChange - a.pctChange) || (b.delta - a.delta)).slice(0, limit)
+    const falling = [...items].sort((a, b) => (a.pctChange - b.pctChange) || (a.delta - b.delta)).slice(0, limit)
 
     return NextResponse.json({ granularity, rising, falling })
   } catch (e) {

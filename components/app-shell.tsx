@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import * as React from 'react'
 import Link from 'next/link'
@@ -14,8 +14,8 @@ type AppShellProps = {
   children: React.ReactNode
 }
 
-const nav: { name: string; href: string; icon: any; comingSoon?: boolean; disabled?: boolean }[] = [
-  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard, disabled: true },
+const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
+  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard },
   { name: 'General Themes', href: '/themes', icon: MessageCircle },
   { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
   { name: 'Audience Insights', href: '/audience', icon: Users },
@@ -130,7 +130,7 @@ export function AppShell({ children }: AppShellProps) {
           <CommandList>
             <CommandGroup heading="Navigate">
               {nav.map((item) => (
-                item.comingSoon || item.disabled ? (
+                item.comingSoon ? (
                   <CommandItem key={item.href} disabled aria-disabled className="opacity-60 pointer-events-none">
                     <item.icon className="h-4 w-4 opacity-60" />
                     <span>{item.name}</span>
@@ -163,7 +163,7 @@ export function AppShell({ children }: AppShellProps) {
             {nav.map(item => {
               const Icon = item.icon
               const active = pathname === item.href
-              return item.comingSoon || item.disabled ? (
+              return item.comingSoon ? (
                 <div key={item.name} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground/70 bg-muted/10 ring-1 ring-border/50 cursor-not-allowed">
                   <Icon className={cn("h-4 w-4 opacity-60", item.comingSoon ? "animate-pulse" : "")} />
                   <span className="truncate">{item.name}</span>

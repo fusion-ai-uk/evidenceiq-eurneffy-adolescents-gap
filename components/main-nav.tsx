@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const navigation = [
-  { name: "Executive Summary", href: "/dashboard", icon: LayoutDashboard, disabled: true },
+  { name: "Executive Summary", href: "/dashboard", icon: LayoutDashboard },
   { name: "General Themes", href: "/themes", icon: MessageCircle },
   { name: "Trends Explorer", href: "/trends", icon: TrendingUp },
   { name: "Audience Insights", href: "/audience", icon: Users },
@@ -48,7 +48,7 @@ export function MainNav() {
                 const Icon = item.icon
                 return (
                   <SidebarMenuItem key={item.name}>
-                    {item.comingSoon || item.disabled ? (
+                    {item.comingSoon ? (
                       <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-muted-foreground/70 bg-muted/10 ring-1 ring-border/50 cursor-not-allowed">
                         <Icon className="opacity-60" />
                         <span>{item.name}</span>

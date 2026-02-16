@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getTrendsFilters } from "@/lib/alunbrig/trendsFilters"
 import { getTrendsBaseCteSql, getTrendsBaseParams, periodOrderExpr } from "@/lib/alunbrig/trendsSql"
@@ -15,6 +15,7 @@ function pct(n: number) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const filters = getTrendsFilters(searchParams)
+  const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)))
 
   if (!filters.startDate || !filters.endDate) {
     return NextResponse.json({ error: "Missing startDate/endDate" }, { status: 400 })
@@ -167,11 +168,11 @@ export async function GET(req: Request) {
     LEFT JOIN topic_top tt USING(period)
     LEFT JOIN driver_top dt USING(period)
     ORDER BY pctChange DESC, delta DESC
-    LIMIT 10
+    LIMIT @limit
   `
 
   try {
-    const rows = await runQuery<any>(sql, getTrendsBaseParams(filters))
+    const rows = await runQuery<any>(sql, { ...getTrendsBaseParams(filters), limit })
 
     const alerts = (rows || []).map((r: any) => {
       const topDrivers = (r.topDrivers || []).slice(0, 2).map((d: any) => d.driver).filter(Boolean)

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { Button } from "@/components/ui/button"
 import { Calendar, Command, Moon, Sun } from "lucide-react"
@@ -82,8 +82,8 @@ export function TopBar() {
         <CommandInput placeholder="Search pages and actions..." />
         <CommandList>
           <CommandGroup heading="Navigate">
-            <CommandItem disabled aria-disabled className="opacity-60 pointer-events-none">
-              <span>Executive Summary</span>
+            <CommandItem asChild>
+              <Link href="/dashboard">Executive Summary</Link>
             </CommandItem>
             <CommandItem asChild>
               <Link href="/themes">General Themes</Link>
