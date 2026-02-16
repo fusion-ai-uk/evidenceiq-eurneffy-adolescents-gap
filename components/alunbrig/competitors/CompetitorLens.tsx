@@ -178,6 +178,7 @@ export function CompetitorLens() {
 
   const [tableLoading, setTableLoading] = useState(false)
   const [table, setTable] = useState<ComparatorResponse | null>(null)
+  const [tableError, setTableError] = useState<string | null>(null)
 
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
@@ -343,13 +344,21 @@ export function CompetitorLens() {
       .finally(() => setListLoading(false))
 
     setTableLoading(true)
+    setTableError(null)
     fetch(`/api/alunbrig/competitors/comparator-table?${q}&limit=20`)
       .then((r) => r.json())
       .then((d) => {
-        if (d && Array.isArray((d as any).rows)) setTable(d as ComparatorResponse)
-        else setTable(null)
+        if (d && Array.isArray((d as any).rows)) {
+          setTable(d as ComparatorResponse)
+        } else {
+          setTable(null)
+          setTableError(String((d as any)?.error || "Failed to load comparator table"))
+        }
       })
-      .catch(() => setTable(null))
+      .catch((e) => {
+        setTable(null)
+        setTableError((e as any)?.message || "Failed to load comparator table")
+      })
       .finally(() => setTableLoading(false))
   }, [appliedParams])
 
@@ -554,8 +563,12 @@ export function CompetitorLens() {
             <CardTitle className="text-base font-medium">Comparator table</CardTitle>
           </CardHeader>
           <CardContent>
-            {tableLoading || !table ? (
+            {tableLoading ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : tableError ? (
+              <div className="text-sm text-destructive">Error: {tableError}</div>
+            ) : !table ? (
+              <div className="text-sm text-muted-foreground">No data.</div>
             ) : !Array.isArray(table.rows) || table.rows.length === 0 ? (
               <div className="text-sm text-muted-foreground">No competitors found in this slice.</div>
             ) : (
