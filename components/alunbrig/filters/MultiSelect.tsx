@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import { Check, ChevronsUpDown, X } from "lucide-react"
@@ -21,7 +21,7 @@ export function MultiSelect({
   maxBadges = 2,
   searchPlaceholder = "Search...",
 }: {
-  value: string[]
+  value?: string[]
   options: Array<string | MultiSelectOption>
   onChange: (next: string[]) => void
   placeholder?: string
@@ -30,6 +30,7 @@ export function MultiSelect({
   maxBadges?: number
   searchPlaceholder?: string
 }) {
+  const safeValue = value ?? []
   const normalizedOptions = React.useMemo<MultiSelectOption[]>(
     () =>
       options
@@ -38,24 +39,24 @@ export function MultiSelect({
     [options],
   )
 
-  const selectedSet = React.useMemo(() => new Set(value), [value])
+  const selectedSet = React.useMemo(() => new Set(safeValue), [safeValue])
 
   const toggle = React.useCallback(
     (v: string) => {
-      const next = new Set(value)
+      const next = new Set(safeValue)
       if (next.has(v)) next.delete(v)
       else next.add(v)
       onChange(Array.from(next))
     },
-    [value, onChange],
+    [safeValue, onChange],
   )
 
   const clear = React.useCallback(() => onChange([]), [onChange])
 
   const selectedLabels = React.useMemo(() => {
     const labelByValue = new Map(normalizedOptions.map((o) => [o.value, o.label ?? o.value]))
-    return value.map((v) => labelByValue.get(v) ?? v).filter(Boolean)
-  }, [value, normalizedOptions])
+    return safeValue.map((v) => labelByValue.get(v) ?? v).filter(Boolean)
+  }, [safeValue, normalizedOptions])
 
   const preview = selectedLabels.slice(0, maxBadges)
   const overflow = Math.max(0, selectedLabels.length - preview.length)
@@ -112,7 +113,7 @@ export function MultiSelect({
                 </div>
                 Select all
               </CommandItem>
-              <CommandItem onSelect={clear} disabled={value.length === 0}>
+              <CommandItem onSelect={clear} disabled={safeValue.length === 0}>
                 <X className="mr-2 h-4 w-4 opacity-60" />
                 Clear
               </CommandItem>
