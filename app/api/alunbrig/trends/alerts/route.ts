@@ -95,6 +95,21 @@ export async function GET(req: Request) {
       LEFT JOIN stakeholder_counts sc ON sc.period = a.period
       GROUP BY a.period, a.posts
     ),
+    stakeholder_top3 AS (
+      SELECT
+        a.period,
+        ARRAY_AGG(
+          STRUCT(
+            sc.label AS label,
+            SAFE_DIVIDE(sc.count, a.posts) AS share
+          )
+          ORDER BY sc.count DESC
+          LIMIT 3
+        ) AS topStakeholders
+      FROM alerts a
+      LEFT JOIN stakeholder_counts sc ON sc.period = a.period
+      GROUP BY a.period, a.posts
+    ),
     bucket_counts AS (
       SELECT
         period,
@@ -159,11 +174,13 @@ export async function GET(req: Request) {
       a.sentimentIndex,
       a.avgPolarity,
       IFNULL(st.mostInvolvedStakeholder, STRUCT('Unknown' AS label, 0.0 AS share)) AS mostInvolvedStakeholder,
+      IFNULL(st3.topStakeholders, []) AS topStakeholders,
       IFNULL(bt.topBuckets, []) AS topBuckets,
       IFNULL(tt.topTopics, []) AS topTopics,
       IFNULL(dt.topDrivers, []) AS topDrivers
     FROM alerts a
     LEFT JOIN stakeholder_top st USING(period)
+    LEFT JOIN stakeholder_top3 st3 USING(period)
     LEFT JOIN bucket_top bt USING(period)
     LEFT JOIN topic_top tt USING(period)
     LEFT JOIN driver_top dt USING(period)
@@ -188,6 +205,7 @@ export async function GET(req: Request) {
         sentimentIndex: Number(r.sentimentIndex || 0),
         avgPolarity: Number(r.avgPolarity || 0),
         mostInvolvedStakeholder: r.mostInvolvedStakeholder || { label: "Unknown", share: 0 },
+        topStakeholders: r.topStakeholders || [],
         topBuckets: r.topBuckets || [],
         topTopics: r.topTopics || [],
         topDrivers: r.topDrivers || [],

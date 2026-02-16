@@ -188,6 +188,12 @@ function plainPeriodLabel(granularity: Granularity, period: string) {
   }
 }
 
+function fmtShare01(x: number) {
+  const v = Number(x || 0)
+  if (!isFinite(v)) return ""
+  return `${Math.round(v * 100)}%`
+}
+
 function pickUnique(pool: string[], seed: string, used: Set<string>) {
   if (!pool.length) return ""
   const start = hashString(seed) % pool.length
@@ -202,6 +208,43 @@ function pickUnique(pool: string[], seed: string, used: Set<string>) {
   const v = pool[start]
   used.add(v)
   return v
+}
+
+function alunbrigRelevanceKey(title: string, tags: string[]) {
+  const t = `${cleanToken(title)} ${tags.map(cleanToken).join(" ")}`.toLowerCase()
+  const hasBrand = /(alunbrig|brigatinib)\b/.test(t)
+  if (hasBrand) return "direct"
+  const hasComparatorOrClass = /(alk\b|lorlatinib|alectinib|crizotinib|osimertinib|ensartinib|trial|alina|alex|esmo|nice)/.test(t)
+  return hasComparatorOrClass ? "indirect" : "unclear"
+}
+
+function relevanceNote(title: string, tags: string[], used: Set<string>) {
+  const key = alunbrigRelevanceKey(title, tags)
+  const pool =
+    key === "direct"
+      ? [
+          "Alunbrig relevance: direct (explicit brand/generic mentions are present).",
+          "Alunbrig relevance: direct (posts include Alunbrig/brigatinib references).",
+        ]
+      : key === "indirect"
+        ? [
+            "Alunbrig relevance: indirect (primarily ALK landscape/trial discourse; potential implications for positioning).",
+            "Alunbrig relevance: indirect (context-setting discussion that may influence comparator framing).",
+          ]
+        : [
+            "Alunbrig relevance: uncertain (review the examples to confirm whether brand-specific language is present).",
+            "Alunbrig relevance: uncertain (confirm brand specificity in the underlying posts).",
+          ]
+
+  return pickUnique(pool, `rel:${key}:${title}`, used)
+}
+
+function sourcesNote(stakeholders: string[] | undefined, used: Set<string>, seed: string) {
+  const s = (stakeholders || []).map(cleanToken).filter(Boolean)
+  if (!s.length) return ""
+  const label = s.slice(0, 2).join(" + ")
+  const prefix = pickUnique(["Primary sources", "Dominant sources", "Most visible among"], `src:${seed}`, used)
+  return `${prefix}: ${label}.`
 }
 
 function soWhatLine(kind: ExecCard["kind"], focus: string[], seed: string, used: Set<string>) {
@@ -331,6 +374,7 @@ type AlertsResponse = {
     sentimentIndex: number
     avgPolarity: number
     mostInvolvedStakeholder: { label: string; share: number }
+    topStakeholders?: { label: string; share: number }[]
     topBuckets: { bucket: string; share: number }[]
     topTopics: { topic: string; count: number }[]
     topDrivers: { driver: string; count: number }[]
@@ -346,6 +390,7 @@ type ExecCard = {
   summary: string
   tags: string[]
   focus: string[]
+  stakeholders?: string[]
   viewPosts:
     | { mode: "theme"; type: "topic" | "bucket"; label: string }
     | { mode: "alert"; period: string }
@@ -515,6 +560,10 @@ export function ExecutiveSummaryExplorer() {
         const topics = (a.topTopics || []).slice(0, 4).map((t) => t.topic).filter(Boolean)
         const tags = Array.from(new Set([...drivers.map(cleanToken), ...topics.map(cleanToken)])).slice(0, 8)
 
+        const topStakeholders = (a.topStakeholders || [])
+          .slice(0, 3)
+          .map((x: any) => `${cleanToken(x.label)}${x.share != null ? ` (${fmtShare01(x.share)})` : ""}`)
+          .filter(Boolean)
         const stakeholder = cleanToken(a?.mostInvolvedStakeholder?.label || "")
         const d0 = cleanToken(drivers[0] || topics[0] || "key themes")
         const d1 = cleanToken(drivers[1] || topics[1] || "")
@@ -529,7 +578,11 @@ export function ExecutiveSummaryExplorer() {
           `In the ${when || "most recent period"}, discussion increased materially versus baseline (approximately ${pctRounded}% above expected).` +
           ` This period accounted for ~${share} of total discussion in the selected range.` +
           ` The increase was most associated with ${d0}${d1 ? ` and ${d1}` : ""}.` +
-          (stakeholder ? ` The highest activity was observed among ${stakeholder}.` : "") +
+          (topStakeholders.length
+            ? ` Primary sources were ${topStakeholders.slice(0, 2).join(" and ")}.`
+            : stakeholder
+              ? ` The highest activity was observed among ${stakeholder}.`
+              : "") +
           ` Sentiment was ${sentimentPhrase(sentimentRounded)} overall.`
 
         return {
@@ -545,6 +598,7 @@ export function ExecutiveSummaryExplorer() {
           summary,
           tags,
           focus,
+          stakeholders: (a.topStakeholders || []).map((x: any) => cleanToken(x.label)).filter(Boolean).slice(0, 3),
           viewPosts: { mode: "alert", period: a.period },
         }
       })
@@ -562,6 +616,7 @@ export function ExecutiveSummaryExplorer() {
         summary: themeTakeaway(t, totalPostsInRange),
         tags: (t.topKeyTermsEnd || []).map((k) => cleanToken(k.term)).filter(Boolean).slice(0, 8),
         focus: inferFocusTokens(t.label, (t.topKeyTermsEnd || []).map((k) => k.term).filter(Boolean)),
+        stakeholders: (t.topStakeholdersEnd || []).map((s) => cleanToken(s.label)).filter(Boolean).slice(0, 3),
         viewPosts: { mode: "theme", type: "topic", label: cleanToken(t.label) },
       }))
 
@@ -577,6 +632,7 @@ export function ExecutiveSummaryExplorer() {
         summary: themeTakeaway(t, totalPostsInRange),
         tags: (t.topKeyTermsEnd || []).map((k) => cleanToken(k.term)).filter(Boolean).slice(0, 8),
         focus: inferFocusTokens(t.label, (t.topKeyTermsEnd || []).map((k) => k.term).filter(Boolean)),
+        stakeholders: (t.topStakeholdersEnd || []).map((s) => cleanToken(s.label)).filter(Boolean).slice(0, 3),
         viewPosts: { mode: "theme", type: "topic", label: cleanToken(t.label) },
       }))
 
@@ -592,6 +648,7 @@ export function ExecutiveSummaryExplorer() {
         summary: themeTakeaway(t, totalPostsInRange),
         tags: (t.topKeyTermsEnd || []).map((k) => cleanToken(k.term)).filter(Boolean).slice(0, 8),
         focus: inferFocusTokens(t.label, (t.topKeyTermsEnd || []).map((k) => k.term).filter(Boolean)),
+        stakeholders: (t.topStakeholdersEnd || []).map((s) => cleanToken(s.label)).filter(Boolean).slice(0, 3),
         viewPosts: { mode: "theme", type: "bucket", label: cleanToken(t.label) },
       }))
 
@@ -607,6 +664,7 @@ export function ExecutiveSummaryExplorer() {
         summary: themeTakeaway(t, totalPostsInRange),
         tags: (t.topKeyTermsEnd || []).map((k) => cleanToken(k.term)).filter(Boolean).slice(0, 8),
         focus: inferFocusTokens(t.label, (t.topKeyTermsEnd || []).map((k) => k.term).filter(Boolean)),
+        stakeholders: (t.topStakeholdersEnd || []).map((s) => cleanToken(s.label)).filter(Boolean).slice(0, 3),
         viewPosts: { mode: "theme", type: "bucket", label: cleanToken(t.label) },
       }))
 
@@ -645,6 +703,7 @@ export function ExecutiveSummaryExplorer() {
           summary: cleanToken(summary),
           tags: terms.slice(0, 10),
           focus,
+          stakeholders,
           viewPosts: { mode: "themes", groupBy: "topics_top_topics", groupValue: title },
         }
       })
@@ -779,7 +838,14 @@ export function ExecutiveSummaryExplorer() {
     const used = new Set<string>()
     return sliced.map((c) => ({
       ...c,
-      summary: `${ensureSentence(c.summary)} ${soWhatLine(c.kind, c.focus, c.key, used)}`,
+      summary: [
+        ensureSentence(c.summary),
+        sourcesNote(c.stakeholders, used, c.key),
+        relevanceNote(c.title, c.tags, used),
+        soWhatLine(c.kind, c.focus, c.key, used),
+      ]
+        .filter(Boolean)
+        .join(" "),
     }))
   }, [alerts, evo, options?.meta?.totalPosts, topTopics])
 
