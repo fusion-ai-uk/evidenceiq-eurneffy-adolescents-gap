@@ -81,6 +81,18 @@ function clampText(s: string, maxLen: number) {
   return `${t.slice(0, Math.max(0, maxLen - 1)).trim()}…`
 }
 
+function normKey(s: string) {
+  return cleanToken(s).toLowerCase()
+}
+
+function jaccard(a: Set<string>, b: Set<string>) {
+  if (a.size === 0 && b.size === 0) return 0
+  let inter = 0
+  for (const x of a) if (b.has(x)) inter++
+  const union = a.size + b.size - inter
+  return union ? inter / union : 0
+}
+
 function fmtInt(n: number) {
   return Math.round(Number(n || 0)).toLocaleString()
 }
@@ -193,57 +205,57 @@ function pickUnique(pool: string[], seed: string, used: Set<string>) {
 }
 
 function soWhatLine(kind: ExecCard["kind"], focus: string[], seed: string, used: Set<string>) {
-  const prefixPool = ["Client takeaway", "Practical implication", "What to watch", "So what"]
+  const prefixPool = ["Interpretation", "Implications", "Points to note", "Clinical context"]
   const prefix = pickUnique(prefixPool, `${seed}:prefix`, used)
 
   const focusPool: Record<string, string[]> = {
     outcomes: [
-      "Efficacy proof points are doing the heavy lifting here—pay attention to which endpoints are being quoted and in what setting.",
-      "Outcome language is setting the frame; this is the kind of signal that influences preference and switching narratives.",
-      "When endpoints dominate the conversation, comparative claims tend to harden—watch what gets positioned as ‘best-in-class’.",
-      "This looks like an evidence-led moment; expect follow-on discussion to reference the same endpoints as shorthand.",
+      "Endpoint-driven discussion is shaping the narrative; note which outcomes are emphasised and in which clinical setting.",
+      "When outcomes dominate, comparative framing tends to follow; review the examples for the implicit comparator and claim boundaries.",
+      "This pattern is consistent with an evidence-led signal; subsequent discussion often reuses the same endpoint language as shorthand.",
+      "If the endpoint language persists across multiple periods, it may indicate a stabilising preference framework in the conversation.",
     ],
     cns: [
-      "CNS framing acts as an attention magnet in ALK conversations; intracranial control language often steers comparisons and sequencing.",
-      "If CNS is driving attention, look for ‘brain control’ to become the default yardstick in peer-to-peer discussion.",
-      "CNS narratives travel fast because they feel clinically decisive—expect them to show up in competitor mentions and pathway logic.",
-      "This is a ‘brain benefit’ moment; it can shift which attributes people treat as non-negotiable.",
+      "CNS/intracranial framing frequently acts as a decision anchor in ALK conversations; it can materially influence sequencing and comparative discussion.",
+      "If CNS language is prominent, check whether it is framed as intracranial control, relapse prevention, or durability—each supports different interpretations.",
+      "CNS themes can propagate into competitor context; confirm whether the comparator set and endpoints are consistent in example posts.",
+      "Sustained CNS emphasis may indicate a shift in what the community treats as a minimum clinical standard.",
     ],
     safety: [
-      "Safety/tolerability is being used as the trade-off lens; watch which AEs are called out and how they’re framed as manageable (or not).",
-      "When safety rises, messaging quality matters—specific AE language and mitigation details can change the tone quickly.",
-      "This is likely a risk–benefit discussion; small differences in tolerability can become decisive in sequencing talk.",
-      "Safety themes often pull patients/caregivers into the conversation—worth tracking who is amplifying the point.",
+      "Safety/tolerability appears to be the trade-off lens; review which adverse events are referenced and whether mitigation/monitoring is discussed.",
+      "When safety rises alongside efficacy, the conversation often shifts to risk–benefit thresholds and patient selection.",
+      "Safety themes can be stakeholder-sensitive; confirm whether the signal is HCP-led, patient-led, or mixed in the examples.",
+      "If safety remains elevated, it may indicate an emerging differentiation axis rather than transient commentary.",
     ],
     access: [
-      "Access and policy cues can move adoption faster than clinical nuance—track how NICE/Blueteq-type language shifts the practicality of the story.",
-      "This looks like a system-level constraint conversation; it can change what ‘best’ means in the real world.",
-      "When access heats up, implementation details matter; expect ‘who can get what, where’ to dominate follow-on posts.",
-      "Policy moments tend to ripple—watch for spillover into stakeholder conversations beyond HCPs.",
+      "Access/policy discussion can materially constrain real-world adoption; review whether the posts reference eligibility, commissioning, or reimbursement criteria.",
+      "System-level constraints can change the effective comparator and standard-of-care framing in the conversation.",
+      "If access themes persist, implementation details (pathways, criteria, service capacity) tend to dominate the downstream discourse.",
+      "Policy-related signals often diffuse across stakeholders; assess whether the signal is confined to HCPs or includes institutions/industry/media.",
     ],
     sequencing: [
-      "The conversation is shifting from ‘best drug’ to ‘best pathway’; sequencing logic will matter as much as endpoints.",
-      "When sequencing rises, decision rules appear—look for patient-selection and resistance framing to show up more.",
-      "This is pathway thinking: what comes next, and why. That tends to drive tool/education needs for clients.",
-      "Sequencing talk often becomes the bridge between efficacy and safety—watch how trade-offs are described.",
+      "Sequencing discussion reflects pathway-level decision making; review whether it is framed by resistance, line of therapy, or patient selection.",
+      "When sequencing rises, decision rules typically become explicit; inspect whether the examples describe ‘if/then’ logic or pragmatic constraints.",
+      "Sequencing often connects efficacy and tolerability; assess how trade-offs are stated and whether specific endpoints are used to justify transitions.",
+      "Sustained sequencing emphasis may indicate that pathway optimisation is becoming the primary frame rather than single-asset evaluation.",
     ],
     competitive: [
-      "Competitor references signal active comparison; note who becomes the default comparator and what attributes are used to differentiate.",
-      "This is a head-to-head framing moment—even implicit comparisons can reset which claims feel ‘table stakes’.",
-      "Competitive language usually co-moves with endpoints and CNS; watch for a ‘winner narrative’ forming.",
-      "If competitor mentions persist, clients will ask ‘why not X?’—it’s a good time to sharpen differentiation.",
+      "Competitor references indicate active comparison; note the implicit comparator set and the attributes used to differentiate.",
+      "Competitive framing can reset what is treated as ‘table stakes’; review whether the examples contain explicit vs implicit comparisons.",
+      "Competitor context often co-occurs with endpoints and CNS; confirm whether the claim structure is consistent across posts.",
+      "If competitor references remain elevated, it may indicate a stable comparative narrative rather than a one-off citation.",
     ],
     diagnostics: [
-      "Testing/biomarker language often precedes decision and access conversations; watch for NGS and selection criteria as the narrative backbone.",
-      "Diagnostics focus suggests a ‘right patient, right time’ frame—useful for positioning around decision support.",
-      "When biomarkers rise, evidence and implementation get linked; expect talk about testing access and workflow.",
-      "This is patient-selection logic taking shape; it tends to show up next in sequencing and payer/access posts.",
+      "Testing/biomarker language often underpins patient-selection and access decisions; review whether NGS, assay choice, or workflow constraints are described.",
+      "Diagnostics emphasis suggests a selection-and-timing frame; check for explicit criteria or biomarker-driven sequencing logic.",
+      "When biomarkers rise, evidence and implementation are often linked; assess whether testing access and turnaround times are discussed.",
+      "If diagnostics remains prominent, it may precede increases in sequencing and access-related discourse in adjacent cards.",
     ],
     general: [
-      "This is a clear attention signal; the key is whether it persists across weeks or fades after the initial moment.",
-      "If this holds, it becomes part of the default client narrative—worth checking the examples for the strongest phrasing.",
-      "This pattern often points to a new ‘headline’ idea; track whether it spreads across stakeholders.",
-      "This looks like a meaningful framing shift; it can influence what questions clients bring to the next discussion.",
+      "This is a measurable shift; the key question is persistence across periods versus reversion to baseline.",
+      "Review the example posts for the dominant framing and any explicit causal drivers (data, decisions, policy, comparative claims).",
+      "Assess whether the signal is concentrated in a specific stakeholder group or broadly distributed.",
+      "If this pattern repeats, it is likely to reflect a stable narrative rather than a transient artefact.",
     ],
   }
 
@@ -254,34 +266,34 @@ function soWhatLine(kind: ExecCard["kind"], focus: string[], seed: string, used:
   // Slightly different nuance by kind to avoid cross-card sameness
   const kindPool: Record<string, string[]> = {
     alert: [
-      "Spikes like this are where narratives ‘break through’—they’re usually worth opening the posts drawer to see the exact wording.",
-      "Alert weeks are often triggered by a specific catalyst; the examples typically show the trigger clearly.",
-      "This is an attention peak—helpful for understanding what is cutting through right now.",
+      "Spike periods are typically associated with specific catalysts; the examples help identify the primary trigger and framing.",
+      "These periods often reveal the language that is most readily repeated; review the posts for claim structure and comparator cues.",
+      "This is a transient peak by definition; confirm whether it is followed by sustained theme movement in other cards.",
     ],
     topic_rising: [
-      "Because it’s gaining share, this is likely to show up more in future client questions and comparisons.",
-      "Rising topics tend to become default context; the phrasing in example posts is what clients will echo.",
-      "If it keeps rising, it becomes a stable pillar rather than a one-off mention.",
+      "Because it is gaining share, it is likely to feature more prominently in subsequent periods.",
+      "Rising topics often become default context; validate the dominant framing in the example posts.",
+      "If the increase persists, it should be treated as a structural theme rather than a one-off signal.",
     ],
     topic_falling: [
-      "Cooling topics still matter, but they’re less likely to be the headline driver right now.",
-      "This may be moving into ‘background’ status—useful context, but not today’s main lever.",
-      "If it stays down, it can free up narrative space for emerging themes.",
+      "Cooling topics may remain relevant, but are less likely to be the primary driver of current attention.",
+      "This may be transitioning to background context; confirm whether it is still referenced as supporting rationale in other posts.",
+      "If the decline persists, it may indicate displacement by emerging frames rather than loss of relevance.",
     ],
     bucket_rising: [
-      "Bucket movement is a signal of the *frame* changing, not just a single topic spiking.",
-      "When a bucket rises, it usually pulls multiple sub-topics along with it—worth checking the terms for the underlying drivers.",
-      "This indicates a broader framing shift, which tends to persist longer than a single-topic blip.",
+      "Bucket movement indicates a shift in framing, not just a single-topic fluctuation.",
+      "When a bucket rises, it often reflects multiple sub-topics moving together; use the terms to identify the underlying drivers.",
+      "This suggests a broader narrative reweighting, which can persist longer than isolated topic spikes.",
     ],
     bucket_falling: [
-      "A falling bucket suggests the frame is cooling; clients may still care, but it may not lead the conversation.",
-      "This frame is losing momentum relative to others; the end-window examples show what replaced it.",
-      "If this keeps falling, it’s a sign the conversation is reorganising around different decision lenses.",
+      "A falling bucket suggests the framing is cooling relative to other decision lenses.",
+      "The end-window examples can indicate what is replacing the frame as primary context.",
+      "If the decline continues, it indicates the conversation is reorganising around alternative decision criteria.",
     ],
     top_topic: [
-      "High-volume themes are the ‘background context’ clients will keep hearing; it’s useful to know what they’re most exposed to.",
-      "Because it’s prominent by volume, this is likely to be part of the default storyline clients bring into meetings.",
-      "High-volume themes often set expectations; the key is whether the framing is efficacy-led, safety-led, or pathway-led.",
+      "High-volume themes provide the dominant context; they often shape baseline expectations for interpretation of new signals.",
+      "Prominence by volume suggests broad exposure; confirm the framing to understand how the theme is being internalised.",
+      "High-volume themes can set the default comparator and endpoint language; review whether the frame is efficacy-led, safety-led, or pathway-led.",
     ],
   }
 
@@ -491,8 +503,8 @@ export function ExecutiveSummaryExplorer() {
   }, [applied])
 
   const cards = useMemo<ExecCard[]>(() => {
-    const target = 30
-    const max = 32
+    const target = 10
+    const max = 10
     const totalPostsInRange = Number(options?.meta?.totalPosts || 0)
 
     const alertCards: ExecCard[] = (alerts?.alerts || [])
@@ -514,11 +526,11 @@ export function ExecutiveSummaryExplorer() {
         const when = plainPeriodLabel(applied?.granularity || "week", a.period)
 
         const summary =
-          `In the ${when || "latest period"}, conversation rose well above what we’d normally expect for this slice (around ${pctRounded}% higher than baseline).` +
-          ` This accounted for roughly ${share} of total discussion in the selected range, so it reads as a genuine attention moment rather than background variation.` +
-          ` The conversation concentrated on ${d0}${d1 ? ` and ${d1}` : ""}, which helps explain what specifically pulled interest.` +
-          (stakeholder ? ` Activity was led primarily by ${stakeholder}, suggesting where the narrative is being set.` : "") +
-          ` Overall tone was ${sentimentPhrase(sentimentRounded)}.`
+          `In the ${when || "most recent period"}, discussion increased materially versus baseline (approximately ${pctRounded}% above expected).` +
+          ` This period accounted for ~${share} of total discussion in the selected range.` +
+          ` The increase was most associated with ${d0}${d1 ? ` and ${d1}` : ""}.` +
+          (stakeholder ? ` The highest activity was observed among ${stakeholder}.` : "") +
+          ` Sentiment was ${sentimentPhrase(sentimentRounded)} overall.`
 
         return {
           key: `alert:${a.period}`,
@@ -619,16 +631,16 @@ export function ExecutiveSummaryExplorer() {
         if (Number(r.pctNeurotox || 0) >= 0.2) signalBits.push("Neurotox present")
 
         const summary =
-          `${title} was one of the biggest themes by volume in the selected range (about ${share} of the conversation). ` +
-          `Overall tone was ${tone}. ` +
-          (signalBits.length ? `This theme skewed ${signalBits.join(", ")}. ` : "") +
-          (terms.length ? `People most often referenced ${terms.slice(0, 5).join(", ")}. ` : "") +
-          (stakeholders.length ? `The conversation was most visible among ${stakeholders.join(" + ")}.` : "")
+          `${title} was a prominent theme by volume in the selected range (approximately ${share} of discussion). ` +
+          `Sentiment was ${tone}. ` +
+          (signalBits.length ? `Signal composition: ${signalBits.join(", ")}. ` : "") +
+          (terms.length ? `Common co-occurring concepts: ${terms.slice(0, 5).join(", ")}. ` : "") +
+          (stakeholders.length ? `Stakeholder visibility: ${stakeholders.join(" + ")}.` : "")
 
         return {
           key: `top_topic:${title.toLowerCase()}`,
           kind: "top_topic" as const,
-          title: `High-volume theme: ${title}`,
+          title: `Prominent theme: ${title}`,
           meta: [`Conversation share: ${share}`, `Tone: ${tone}`],
           summary: cleanToken(summary),
           tags: terms.slice(0, 10),
@@ -637,49 +649,131 @@ export function ExecutiveSummaryExplorer() {
         }
       })
 
-    const out: ExecCard[] = []
-    const pushUnique = (arr: ExecCard[]) => {
-      for (const c of arr) {
-        // De-dupe by base label so the same topic/bucket doesn't appear twice (e.g. rising + cooling).
-        const baseKey = c.key.replace(/^(topic_rising|topic_falling|bucket_rising|bucket_falling|top_topic):/, "")
-        const isDup = out.some((x) => x.key.includes(`:${baseKey}`) || x.key === c.key)
-        if (isDup) continue
-        // Skip obvious low-signal cards (flat change or zero delta).
-        const metaText = c.meta.join(" ").toLowerCase()
-        if (metaText.includes("0%") || metaText.includes("broadly flat")) continue
-        if (c.title.toLowerCase().trim() === "other" || c.title.toLowerCase().startsWith("other (bucket")) continue
-        out.push(c)
-        if (out.length >= max) break
+    // Build a larger candidate pool, then select 10 with strict de-duplication.
+    const candidates: ExecCard[] = [
+      ...alertCards,
+      ...risingTopics,
+      ...fallingTopics,
+      ...risingBuckets,
+      ...fallingBuckets,
+      ...highVolumeTopics,
+    ]
+
+    const quotas: Partial<Record<ExecCard["kind"], number>> = {
+      alert: 3,
+      topic_rising: 3,
+      bucket_rising: 2,
+      top_topic: 2,
+      topic_falling: 0,
+      bucket_falling: 0,
+    }
+
+    const selected: ExecCard[] = []
+    const usedBase = new Set<string>()
+    const usedTagSets: Set<string>[] = []
+    const usedFocus = new Map<string, number>()
+    const kindCounts: Partial<Record<ExecCard["kind"], number>> = {}
+
+    const baseKeyOf = (c: ExecCard) =>
+      normKey(
+        c.key
+          .replace(/^(topic_rising|topic_falling|bucket_rising|bucket_falling|top_topic):/, "")
+          .replace(/^alert:/, ""),
+      )
+
+    const tagSetOf = (c: ExecCard) =>
+      new Set(
+        [...(c.tags || []), ...(c.focus || [])]
+          .map((x) => normKey(x))
+          .filter(Boolean)
+          .slice(0, 16),
+      )
+
+    const isLowSignal = (c: ExecCard) => {
+      const metaText = c.meta.join(" ").toLowerCase()
+      if (metaText.includes("0%") || metaText.includes("broadly flat")) return true
+      if (normKey(c.title) === "other" || normKey(c.title).startsWith("other (bucket")) return true
+      return false
+    }
+
+    const kindPriority: ExecCard["kind"][] = ["alert", "topic_rising", "bucket_rising", "top_topic"]
+
+    // Sort candidates within kind by strength proxies.
+    const strength = (c: ExecCard) => {
+      const m = c.meta.join(" ").toLowerCase()
+      const pctMatch = m.match(/(\d+)%/)
+      const pct = pctMatch ? Number(pctMatch[1]) : 0
+      const shareMatch = m.match(/(\d+(\.\d+)?)%/)
+      const share = shareMatch ? Number(shareMatch[1]) : 0
+      return pct * 2 + share
+    }
+
+    const byKind = new Map<ExecCard["kind"], ExecCard[]>()
+    for (const k of kindPriority) byKind.set(k, [])
+    for (const c of candidates) {
+      if (!byKind.has(c.kind)) continue
+      byKind.get(c.kind)!.push(c)
+    }
+    for (const k of kindPriority) byKind.get(k)!.sort((a, b) => strength(b) - strength(a))
+
+    const canTake = (c: ExecCard) => {
+      if (isLowSignal(c)) return false
+      const base = baseKeyOf(c)
+      if (usedBase.has(base)) return false
+
+      const nextKindCount = (kindCounts[c.kind] || 0) + 1
+      const quota = quotas[c.kind]
+      if (quota !== undefined && nextKindCount > quota) return false
+
+      const tags = tagSetOf(c)
+      // avoid near-duplicates by overlap
+      for (const prev of usedTagSets) {
+        if (jaccard(tags, prev) >= 0.55) return false
+      }
+
+      // avoid over-representing the same primary focus
+      const primary = c.focus?.[0] || "general"
+      if ((usedFocus.get(primary) || 0) >= 3) return false
+
+      return true
+    }
+
+    const accept = (c: ExecCard) => {
+      selected.push(c)
+      usedBase.add(baseKeyOf(c))
+      usedTagSets.push(tagSetOf(c))
+      kindCounts[c.kind] = (kindCounts[c.kind] || 0) + 1
+      const primary = c.focus?.[0] || "general"
+      usedFocus.set(primary, (usedFocus.get(primary) || 0) + 1)
+    }
+
+    // First pass: satisfy quotas in priority order
+    for (const k of kindPriority) {
+      const quota = quotas[k] || 0
+      for (const c of byKind.get(k) || []) {
+        if (selected.length >= target) break
+        if ((kindCounts[k] || 0) >= quota) break
+        if (canTake(c)) accept(c)
       }
     }
 
-    // Priority: alerts + rising topics + cooling topics, then buckets as filler.
-    pushUnique(alertCards)
-    pushUnique(
-      risingTopics.filter((t) => Number(evo?.rising?.find((x) => x.type === "topic" && cleanToken(x.label).toLowerCase() === t.title.toLowerCase())?.pctChange || 0) >= 0.2),
-    )
-    pushUnique(
-      fallingTopics.filter((t) => {
-        const base = t.title.replace(/\s*\(cooling\)\s*$/i, "").toLowerCase()
-        const src = (evo?.falling || []).find((x) => x.type === "topic" && cleanToken(x.label).toLowerCase() === base)
-        return Number(src?.pctChange || 0) <= -0.2
-      }),
-    )
-    pushUnique(risingBuckets.filter((b) => b.title.toLowerCase().includes("sequencing") || b.title.toLowerCase().includes("efficacy") || b.title.toLowerCase().includes("cns") || b.title.toLowerCase().includes("safety")))
-    pushUnique(fallingBuckets.filter((b) => Number(b.meta.join(" ").includes("10%")) ? false : true))
-    // Additional distinct cards: high-volume themes (broad view)
-    pushUnique(highVolumeTopics)
-
-    // Backfill if we got too strict.
-    if (out.length < 12) {
-      pushUnique(risingTopics)
-      pushUnique(fallingTopics)
-      pushUnique(risingBuckets)
-      pushUnique(fallingBuckets)
-      pushUnique(highVolumeTopics)
+    // Second pass: fill remaining with the strongest non-duplicate across priority kinds
+    while (selected.length < target) {
+      let picked: ExecCard | null = null
+      for (const k of kindPriority) {
+        for (const c of byKind.get(k) || []) {
+          if (canTake(c)) {
+            picked = c
+            break
+          }
+        }
+        if (picked) break
+      }
+      if (!picked) break
+      accept(picked)
     }
 
-    const sliced = out.slice(0, Math.min(max, Math.max(8, target)))
+    const sliced = selected.slice(0, target)
 
     // Add a unique "so what" line per card (no copy/paste repetition across cards).
     const used = new Set<string>()
