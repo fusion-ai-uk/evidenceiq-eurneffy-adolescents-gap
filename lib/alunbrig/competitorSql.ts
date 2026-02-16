@@ -20,7 +20,9 @@ export function normalizeEntityTokenSql(expr: string) {
  */
 export function tokenKeySql(expr: string) {
   const n = normalizeEntityTokenSql(expr)
-  return `REGEXP_REPLACE(${n}, r'\\s*\\([^)]*\\)\\s*$', '')`
+  // Strip trailing parenthetical qualifiers and trim surrounding punctuation (e.g. "Alunbrig? (implied)" -> "alunbrig")
+  const noParen = `REGEXP_REPLACE(${n}, r'\\s*\\([^)]*\\)\\s*$', '')`
+  return `REGEXP_REPLACE(${noParen}, r'^[\\p{P}\\p{S}]+|[\\p{P}\\p{S}]+$', '')`
 }
 
 /**

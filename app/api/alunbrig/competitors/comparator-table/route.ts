@@ -140,8 +140,9 @@ export async function GET(req: Request) {
     stance_pivot AS (
       SELECT
         sc.competitor_key,
-        SAFE_DIVIDE(SUM(IF(sc.stance = 'favor_alunbrig', sc.posts, 0)), NULLIF(st.total_posts,0)) AS stanceFavorAlunbrig,
-        SAFE_DIVIDE(SUM(IF(sc.stance = 'favor_competitor', sc.posts, 0)), NULLIF(st.total_posts,0)) AS stanceFavorCompetitor,
+        -- Stance labels in data are "favors_alunbrig" / "favors_competitor" (plural).
+        SAFE_DIVIDE(SUM(IF(sc.stance = 'favors_alunbrig', sc.posts, 0)), NULLIF(st.total_posts,0)) AS stanceFavorAlunbrig,
+        SAFE_DIVIDE(SUM(IF(sc.stance = 'favors_competitor', sc.posts, 0)), NULLIF(st.total_posts,0)) AS stanceFavorCompetitor,
         SAFE_DIVIDE(SUM(IF(sc.stance = 'balanced', sc.posts, 0)), NULLIF(st.total_posts,0)) AS stanceBalanced
       FROM stance_counts sc
       JOIN stance_totals st USING(competitor_key)
