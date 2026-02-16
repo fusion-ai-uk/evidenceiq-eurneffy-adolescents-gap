@@ -218,7 +218,7 @@ export function CompetitorLens() {
     if (draft.includeLowRelevance) chips.push({ key: "low", label: "Include low relevance", onClear: () => setDraft((d) => ({ ...d, includeLowRelevance: false })) })
     if (draft.sequencingOnly) chips.push({ key: "seqOnly", label: "Sequencing only", onClear: () => setDraft((d) => ({ ...d, sequencingOnly: false })) })
     if (draft.searchText?.trim()) chips.push({ key: "search", label: `Search: "${draft.searchText.trim()}"`, onClear: () => setDraft((d) => ({ ...d, searchText: "" })) })
-    if (draft.stakeholderPrimary?.length) chips.push({ key: "stakeholder", label: `Stakeholder: ${draft.stakeholderPrimary.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, stakeholderPrimary: [] })) })
+    if (draft.stakeholder?.length) chips.push({ key: "stakeholder", label: `Stakeholder: ${draft.stakeholder.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, stakeholder: [] })) })
     if (draft.sentimentLabel?.length) chips.push({ key: "sentiment", label: `Sentiment: ${draft.sentimentLabel.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, sentimentLabel: [] })) })
     if (draft.ukNation?.length) chips.push({ key: "uk", label: `UK nation: ${draft.ukNation.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, ukNation: [] })) })
     if (draft.evidenceType?.length) chips.push({ key: "evidence", label: `Evidence: ${draft.evidenceType.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, evidenceType: [] })) })
@@ -470,7 +470,7 @@ export function CompetitorLens() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground">Stakeholder (primary)</div>
-              <MultiSelect value={draft.stakeholderPrimary} options={options?.stakeholderPrimary || []} onChange={(v) => setDraft((d) => ({ ...d, stakeholderPrimary: v }))} placeholder="All stakeholders" />
+              <MultiSelect value={draft.stakeholder} options={options?.stakeholderPrimary || []} onChange={(v) => setDraft((d) => ({ ...d, stakeholder: v }))} placeholder="All stakeholders" />
             </div>
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground">Sentiment label</div>
