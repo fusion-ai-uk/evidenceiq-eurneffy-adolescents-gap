@@ -25,22 +25,31 @@ export async function GET(req: Request) {
       SELECT
         id,
         TRIM(tok) AS competitor_raw,
-        ${competitorAssetKeySql("tok")} AS competitor_key
+        ${competitorAssetKeySql("tok")} AS competitor_key_raw
       FROM base,
       UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS tok
       WHERE TRIM(tok) != ''
         AND LOWER(TRIM(tok)) NOT IN ('unknown')
     ),
+    comp_tokens_mapped AS (
+      SELECT
+        c.id,
+        c.competitor_raw,
+        COALESCE(m.generic_key, c.competitor_key_raw) AS competitor_key
+      FROM comp_tokens c
+      LEFT JOIN brand_to_generic_map m
+        ON m.brand_key = c.competitor_key_raw
+    ),
     comp_key_mentions AS (
       SELECT competitor_key, COUNT(DISTINCT id) AS mentions
-      FROM comp_tokens
+      FROM comp_tokens_mapped
       GROUP BY competitor_key
       ORDER BY mentions DESC
       LIMIT @limit
     ),
     label_variants AS (
       SELECT competitor_key, competitor_raw, COUNT(DISTINCT id) AS mentions
-      FROM comp_tokens
+      FROM comp_tokens_mapped
       GROUP BY competitor_key, competitor_raw
     ),
     label_pick AS (
@@ -62,7 +71,7 @@ export async function GET(req: Request) {
     match_tokens AS (
       SELECT
         b.id,
-        ${competitorAssetKeySql("tok")} AS competitor_key
+        COALESCE(m.generic_key, ${competitorAssetKeySql("tok")}) AS competitor_key
       FROM base b,
       UNNEST(
         ARRAY(
@@ -77,6 +86,8 @@ export async function GET(req: Request) {
           WHERE TRIM(t) != ''
         )
       ) AS tok
+      LEFT JOIN brand_to_generic_map m
+        ON m.brand_key = ${competitorAssetKeySql("tok")}
       WHERE LOWER(TRIM(tok)) NOT IN ('unknown')
     ),
     slice AS (

@@ -38,20 +38,29 @@ export async function GET(req: Request) {
       SELECT
         id,
         TRIM(tok) AS name_raw,
-        ${competitorAssetKeySql("tok")} AS name_key
+        ${competitorAssetKeySql("tok")} AS name_key_raw
       FROM competitive, UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS tok
       WHERE is_competitive
         AND TRIM(tok) != ''
         AND LOWER(TRIM(tok)) NOT IN ('unknown')
     ),
+    competitor_tokens_mapped AS (
+      SELECT
+        t.id,
+        t.name_raw,
+        COALESCE(m.generic_key, t.name_key_raw) AS name_key
+      FROM competitor_tokens t
+      LEFT JOIN brand_to_generic_map m
+        ON m.brand_key = t.name_key_raw
+    ),
     competitor_key_counts AS (
       SELECT name_key, COUNT(DISTINCT id) AS mentions
-      FROM competitor_tokens
+      FROM competitor_tokens_mapped
       GROUP BY name_key
     ),
     competitor_label_variants AS (
       SELECT name_key, name_raw, COUNT(DISTINCT id) AS mentions
-      FROM competitor_tokens
+      FROM competitor_tokens_mapped
       GROUP BY name_key, name_raw
     ),
     competitor_label_pick AS (

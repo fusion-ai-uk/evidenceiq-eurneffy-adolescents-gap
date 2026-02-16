@@ -14,6 +14,12 @@ export async function GET(req: Request) {
 
   const sql = `
     ${getCompetitorBaseCteSql()},
+    param AS (
+      SELECT COALESCE(m.generic_key, ${competitorAssetKeySql("@competitor")}) AS competitor_key
+      FROM (SELECT 1) _
+      LEFT JOIN brand_to_generic_map m
+        ON m.brand_key = ${competitorAssetKeySql("@competitor")}
+    ),
     slice AS (
       SELECT *
       FROM base
@@ -21,17 +27,23 @@ export async function GET(req: Request) {
         EXISTS (
           SELECT 1
           FROM UNNEST(SPLIT(IFNULL(CAST(entities_competitors AS STRING), ''), ';')) AS t
-          WHERE ${competitorAssetKeySql("t")} = ${competitorAssetKeySql("@competitor")}
+          LEFT JOIN brand_to_generic_map m
+            ON m.brand_key = ${competitorAssetKeySql("t")}
+          WHERE COALESCE(m.generic_key, ${competitorAssetKeySql("t")}) = (SELECT competitor_key FROM param)
         )
         OR EXISTS (
           SELECT 1
           FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_brands AS STRING), ''), ';')) AS b
-          WHERE ${competitorAssetKeySql("b")} = ${competitorAssetKeySql("@competitor")}
+          LEFT JOIN brand_to_generic_map m
+            ON m.brand_key = ${competitorAssetKeySql("b")}
+          WHERE COALESCE(m.generic_key, ${competitorAssetKeySql("b")}) = (SELECT competitor_key FROM param)
         )
         OR EXISTS (
           SELECT 1
           FROM UNNEST(SPLIT(IFNULL(CAST(entities_drugs_generics AS STRING), ''), ';')) AS g
-          WHERE ${competitorAssetKeySql("g")} = ${competitorAssetKeySql("@competitor")}
+          LEFT JOIN brand_to_generic_map m
+            ON m.brand_key = ${competitorAssetKeySql("g")}
+          WHERE COALESCE(m.generic_key, ${competitorAssetKeySql("g")}) = (SELECT competitor_key FROM param)
         )
       )
     ),

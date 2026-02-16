@@ -32,8 +32,10 @@ export function tokenKeySql(expr: string) {
  */
 export function competitorAssetKeySql(expr: string) {
   const k = tokenKeySql(expr)
-  // brand_to_generic_map is defined in getCompetitorBaseCteSql() for all competitor endpoints.
-  return `COALESCE((SELECT generic_key FROM brand_to_generic_map WHERE brand_key = ${k} LIMIT 1), ${k})`
+  // IMPORTANT: do NOT reference brand_to_generic_map here via correlated subquery.
+  // BigQuery rejects correlated subqueries in many contexts; do the mapping with JOINs
+  // in the calling query instead.
+  return k
 }
 
 export function competitorAssetLabelSql(keyExpr: string, fallbackLabelExpr: string) {
