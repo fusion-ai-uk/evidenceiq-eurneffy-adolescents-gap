@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
+import { InfoTip } from "@/components/alunbrig/InfoTip"
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { subMonths } from "date-fns"
 import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
@@ -242,7 +243,10 @@ export function TrendsExplorer() {
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base font-medium">Conversation volume over time</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-medium">Conversation volume over time</CardTitle>
+                <InfoTip text="This line chart shows the share of total posts captured each week in the selected date range. Use it to identify sustained growth or decline in conversation intensity over time." />
+              </div>
               <div className="text-sm text-muted-foreground">Click a point to open example posts.</div>
             </div>
             <label className="flex items-center gap-2 text-sm">
@@ -306,7 +310,10 @@ export function TrendsExplorer() {
 
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-base font-medium">Above-baseline alerts</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-medium">Above-baseline alerts</CardTitle>
+            <InfoTip text="This section highlights periods where volume is materially above each period's rolling baseline. It helps identify short-term spikes that may require explanation or response." />
+          </div>
         </CardHeader>
         <CardContent>
           {alertsLoading ? (

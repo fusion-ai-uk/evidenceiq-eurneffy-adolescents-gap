@@ -3,18 +3,21 @@
 import dynamic from "next/dynamic"
 import { useMemo } from "react"
 import { useTheme } from "next-themes"
+import { InfoTip } from "@/components/alunbrig/InfoTip"
 
 // Ensure we resolve the actual component across module formats (CJS/ESM).
 const ReactApexChart = dynamic(() => import("react-apexcharts").then((m: any) => m?.default ?? m), { ssr: false })
 
 export function SexyRadar({
   title,
+  infoText,
   categories,
   values,
   height = 210,
   seriesName = "Signal mix",
 }: {
   title?: string
+  infoText?: string
   categories: string[]
   /** 0–100 values */
   values: number[]
@@ -109,7 +112,12 @@ export function SexyRadar({
 
   return (
     <div className="rounded-xl border border-border/60 bg-gradient-to-b from-background/70 via-background/50 to-background/30 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.65)] backdrop-blur">
-      {title ? <div className="px-4 pt-3 text-xs font-medium text-muted-foreground">{title}</div> : null}
+      {title ? (
+        <div className="px-4 pt-3 flex items-center gap-2">
+          <div className="text-xs font-medium text-muted-foreground">{title}</div>
+          {infoText ? <InfoTip text={infoText} /> : null}
+        </div>
+      ) : null}
       <div className="px-2 pb-2">
         <ReactApexChart type="radar" height={height} options={options as any} series={series as any} />
       </div>

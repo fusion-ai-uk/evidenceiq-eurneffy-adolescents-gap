@@ -7,6 +7,7 @@ import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDra
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Cell, ReferenceLine } from "recharts"
 import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
 import { toDateInputValue } from "@/lib/date-input"
+import { InfoTip } from "@/components/alunbrig/InfoTip"
 
 type DraftFilters = {
   startDate: string
@@ -266,40 +267,12 @@ export function SequencingExecutiveExplorer() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Signal purity gap</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{purityGap >= 0 ? "+" : ""}{purityGap.toFixed(1)}pp</div>
-            <div className="text-xs text-muted-foreground mt-1">ALK focus minus non-ALK spillover</div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Narrative concentration</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{narrativeConcentration.toFixed(1)}%</div>
-            <div className="text-xs text-muted-foreground mt-1">Share held by the largest LoT or direction narrative</div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Evidence maturity</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{evidenceMaturityPct.toFixed(1)}%</div>
-            <div className="text-xs text-muted-foreground mt-1">Trial + real-world evidence share</div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Clinical balance score</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{balanceScore.toFixed(0)}/100</div>
-            <div className="text-xs text-muted-foreground mt-1">Safety framing relative to efficacy framing</div>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-base font-medium">Signal quality profile</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-medium">Signal quality profile</CardTitle>
+            <InfoTip text="This chart shows the percentage of sequencing posts that mention each clinical or access signal. It helps compare which themes are strongly represented versus underrepresented in current discussion." />
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
@@ -346,18 +319,33 @@ export function SequencingExecutiveExplorer() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Top line-of-therapy narratives</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-medium">Top line-of-therapy narratives</CardTitle>
+              <InfoTip text="Ranks the most common line-of-therapy contexts mentioned in sequencing posts. This indicates where discussion is concentrated across treatment-line framing." />
+            </div>
+          </CardHeader>
           <CardContent>{briefingLoading ? <div className="text-sm text-muted-foreground">Loading...</div> : <ShareList items={lotData} onSelect={(x) => openExamples("lot", `LoT | ${x.name}`, { lotValue: x.name })} />}</CardContent>
         </Card>
         <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Top sequencing directions</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-medium">Top sequencing directions</CardTitle>
+              <InfoTip text="Ranks the most frequently referenced sequence directions (for example, switch patterns). This helps identify which treatment transition narratives are most visible." />
+            </div>
+          </CardHeader>
           <CardContent>{briefingLoading ? <div className="text-sm text-muted-foreground">Loading...</div> : <ShareList items={directionData} onSelect={(x) => openExamples("direction", `Direction | ${x.name}`, { directionValue: x.name })} />}</CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
-          <CardHeader><CardTitle className="text-base font-medium">Who is shaping this conversation</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-medium">Who is shaping this conversation</CardTitle>
+              <InfoTip text="These bars show the distribution of stakeholder groups and sentiment labels within sequencing conversation. Use this to understand both audience composition and emotional tone." />
+            </div>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <div className="mb-2 text-xs text-muted-foreground">Stakeholder mix</div>

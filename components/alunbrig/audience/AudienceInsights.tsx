@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
 import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
+import { InfoTip } from "@/components/alunbrig/InfoTip"
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { subMonths } from "date-fns"
 import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
@@ -280,7 +281,10 @@ export function AudienceInsights() {
         <Card className="border-border/50">
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-base font-medium">Audience split</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-medium">Audience split</CardTitle>
+                <InfoTip text="This chart shows how the total conversation is distributed across stakeholder groups based on the primary audience label. It is useful for understanding which audience currently dominates overall visibility." />
+              </div>
               <div className="text-sm text-muted-foreground">Hard (primary label)</div>
             </div>
           </CardHeader>
@@ -318,6 +322,7 @@ export function AudienceInsights() {
                   <div className="w-full">
                     <SexyRadar
                       title="Signal mix (overall)"
+                      infoText="This radar compares how frequently key discussion signals appear across the overall dataset. Higher values indicate stronger presence of that signal in conversation content."
                       categories={["Seq", "QoL", "Neurotox", "CNS", "UK"]}
                       values={[
                         toPct100(summary.flagRatesOverall.pctSequencing),
@@ -354,7 +359,10 @@ export function AudienceInsights() {
 
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-base font-medium">HCP vs Patient vs Caregiver</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-medium">HCP vs Patient vs Caregiver</CardTitle>
+              <InfoTip text="This comparison shows how key signals differ by audience segment. It helps identify where message emphasis is concentrated by stakeholder type rather than in the aggregate view." />
+            </div>
           </CardHeader>
           <CardContent>
             {cmpLoading ? (
@@ -406,7 +414,10 @@ export function AudienceInsights() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="border-border/50">
               <CardHeader>
-                <CardTitle className="text-base font-medium">Top topics</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base font-medium">Top topics</CardTitle>
+                  <InfoTip text="Ranks the most discussed topics for the selected audience segment. Use this to understand which subject areas are currently driving conversation within that audience." />
+                </div>
               </CardHeader>
               <CardContent>
                 {leaderLoading || !leader ? (
@@ -440,7 +451,10 @@ export function AudienceInsights() {
 
             <Card className="border-border/50">
               <CardHeader>
-                <CardTitle className="text-base font-medium">Top buckets</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base font-medium">Top buckets</CardTitle>
+                  <InfoTip text="Groups posts into broader thematic buckets for the selected audience segment. This provides a higher-level view of narrative structure than individual topic labels." />
+                </div>
               </CardHeader>
               <CardContent>
                 {leaderLoading || !leader ? (
@@ -481,7 +495,10 @@ export function AudienceInsights() {
           {tab === "Payer" ? (
             <Card className="border-border/50">
               <CardHeader>
-                <CardTitle className="text-base font-medium">UK access / payer lens</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base font-medium">UK access / payer lens</CardTitle>
+                  <InfoTip text="Summarizes UK access and reimbursement-related conversation for payer-oriented analysis, including geographic distribution and the most frequent access signals." />
+                </div>
               </CardHeader>
               <CardContent>
                 {ukLoading || !uk ? (
@@ -492,7 +509,10 @@ export function AudienceInsights() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <div className="rounded-md border p-3">
-                        <div className="text-sm font-medium">Nation breakdown</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium">Nation breakdown</div>
+                          <InfoTip text="Shows UK access-related post volume by nation. This helps identify where access and reimbursement discussion is most concentrated geographically." />
+                        </div>
                         <ResponsiveContainer width="100%" height={240}>
                           <BarChart data={uk.nationBreakdown}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" />

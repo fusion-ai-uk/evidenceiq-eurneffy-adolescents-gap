@@ -135,6 +135,7 @@ export function ExamplePostsDrawer({
               <div className="sm:justify-self-end w-full">
                 <SexyRadar
                   title="Signal mix"
+                  infoText="This radar summarizes the frequency of key discussion signals in the currently selected post slice. It is intended as a quick profile of thematic emphasis within the selected segment."
                   categories={["Sequencing", "QoL", "Neurotox", "CNS", "UK"]}
                   values={[
                     Number(summary.pctSequencing || 0) * 100,
