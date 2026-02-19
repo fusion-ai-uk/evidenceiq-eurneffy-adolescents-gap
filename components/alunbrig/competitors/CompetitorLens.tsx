@@ -216,6 +216,15 @@ export function CompetitorLens() {
     return (table?.rows || []).find((r) => String(r.competitor) === c) || null
   }, [draft.competitor, table])
 
+  const competitivePostDenom = Number(list?.meta?.competitivePosts || 0)
+  const shareFromMentions = useCallback(
+    (mentions: number, fallbackShare: number) => {
+      if (competitivePostDenom > 0) return Number(mentions || 0) / competitivePostDenom
+      return Number(fallbackShare || 0)
+    },
+    [competitivePostDenom],
+  )
+
   return (
     <div className="space-y-6">
       <div>
@@ -290,6 +299,9 @@ export function CompetitorLens() {
                 </TableHeader>
                 <TableBody>
                   {table.rows.map((r, i) => (
+                    (() => {
+                      const share = shareFromMentions(Number(r.mentions || 0), Number(r.shareCompetitive || 0))
+                      return (
                     <TableRow
                       key={`${r.competitor}-${i}`}
                       className={`cursor-pointer ${draft.competitor === r.competitor ? "bg-muted/30" : "hover:bg-muted/20"}`}
@@ -300,10 +312,10 @@ export function CompetitorLens() {
                       <TableCell className="font-medium max-w-[180px] truncate">{r.competitor}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="text-sm font-medium">{pct(r.shareCompetitive)}</div>
+                          <div className="text-sm font-medium">{pct(share)}</div>
                           <div className="text-[11px] text-muted-foreground">SI {Math.round(Number(r.sentimentIndex || 0))}</div>
                           <div className="mt-1 h-1.5 w-full rounded bg-muted/40">
-                            <div className="h-1.5 rounded bg-emerald-500/70" style={{ width: `${Math.min(100, Math.max(0, Number(r.shareCompetitive || 0) * 100))}%` }} />
+                            <div className="h-1.5 rounded bg-emerald-500/70" style={{ width: `${Math.min(100, Math.max(0, Number(share || 0) * 100))}%` }} />
                           </div>
                         </div>
                       </TableCell>
@@ -323,7 +335,9 @@ export function CompetitorLens() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                      )
+                    })()
+                  )}
                 </TableBody>
               </Table>
             )}
@@ -346,7 +360,7 @@ export function CompetitorLens() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-md border p-3">
                     <div className="text-xs text-muted-foreground">Share of competitive</div>
-                    <div className="mt-1 text-sm font-medium">{pct(Number(selectedRow.shareCompetitive || 0))}</div>
+                    <div className="mt-1 text-sm font-medium">{pct(shareFromMentions(Number(selectedRow.mentions || 0), Number(selectedRow.shareCompetitive || 0)))}</div>
                   </div>
                   <div className="rounded-md border p-3">
                     <div className="text-xs text-muted-foreground">Sentiment index</div>
