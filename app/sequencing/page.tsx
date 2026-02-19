@@ -1,7 +1,7 @@
-﻿"use client"
+"use client"
 
-import { SequencingExplorer } from "@/components/alunbrig/sequencing/SequencingExplorer"
+import { SequencingExecutiveExplorer } from "@/components/alunbrig/sequencing/SequencingExecutiveExplorer"
 
 export default function SequencingPage() {
-  return <SequencingExplorer />
+  return <SequencingExecutiveExplorer />
 }

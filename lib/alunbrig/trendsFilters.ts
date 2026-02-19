@@ -1,4 +1,4 @@
-﻿import { parseBool, parseRepeated } from "@/lib/alunbrig/themeFilters"
+import { parseBool, parseRepeated } from "@/lib/alunbrig/themeFilters"
 
 export type TrendsGranularity = "day" | "week" | "month"
 
@@ -9,6 +9,7 @@ export type TrendsFilters = {
   endDate: string
   granularity: TrendsGranularity
   includeLowRelevance: boolean
+  cardBucket: string[] // card_bucket values
   stakeholder: string[] // UI group values: HCP, Patient, Caregiver, Payer, Other
   sentimentLabel: string[] // raw sentiment_label values
   sequencingOnly: boolean
@@ -61,6 +62,7 @@ export function getTrendsFilters(searchParams: URLSearchParams): TrendsFilters {
     endDate,
     granularity: parseGranularity(searchParams.get("granularity")),
     includeLowRelevance: parseBool(searchParams.get("includeLowRelevance")),
+    cardBucket: parseRepeated(searchParams, "cardBucket"),
     stakeholder: parseRepeated(searchParams, "stakeholder"),
     sentimentLabel: parseRepeated(searchParams, "sentimentLabel"),
     sequencingOnly: parseBool(searchParams.get("sequencingOnly")),

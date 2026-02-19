@@ -2,17 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { FilterPane } from "@/components/alunbrig/filters/FilterPane"
-import { ActiveFiltersBar, type ActiveFilterChip } from "@/components/alunbrig/filters/ActiveFiltersBar"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
 import { SexyRadar } from "@/components/alunbrig/charts/SexyRadar"
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { parseISO, subMonths } from "date-fns"
+import { subMonths } from "date-fns"
+import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
+import { toDateInputValue } from "@/lib/date-input"
 
 type AudienceKey = "HCP" | "Patient" | "Caregiver" | "Payer" | "Other" | "All"
 
@@ -66,14 +62,6 @@ type LeaderboardResponse = {
   }
 }
 
-type CompetitiveResponse = {
-  audience: AudienceKey
-  competitiveContextShare: { context: string; posts: number; share: number }[]
-  stanceTowardAlunbrig: { stance: string; posts: number; share: number }[]
-  topCompetitorsMentioned: { competitor: string; mentions: number }[]
-  topBrandsMentioned: { brand: string; mentions: number }[]
-}
-
 type UkAccessResponse = {
   audience: AudienceKey
   totalUKAccessPosts: number
@@ -84,17 +72,6 @@ type UkAccessResponse = {
   topTopics: { topic: string; count: number }[]
   topEvidenceTypes: { type: string; count: number }[]
 }
-
-type DraftFilters = {
-  startDate: string
-  endDate: string
-  includeLowRelevance: boolean
-  sequencingOnly: boolean
-  searchText: string
-  flags: string[]
-}
-
-const toISODate = (d: Date) => d.toISOString().slice(0, 10)
 
 function buildParams(obj: Record<string, any>) {
   const sp = new URLSearchParams()
@@ -124,17 +101,8 @@ export function AudienceInsights() {
   const today = new Date()
   const yearAgo = subMonths(today, 12)
 
-  const [draft, setDraft] = useState<DraftFilters>({
-    startDate: toISODate(yearAgo),
-    endDate: toISODate(today),
-    includeLowRelevance: false,
-    sequencingOnly: false,
-    searchText: "",
-    flags: [],
-  })
-
-  const [applied, setApplied] = useState<DraftFilters>(draft)
-  const [softMode, setSoftMode] = useState(true)
+  const [startDate, setStartDate] = useState(toDateInputValue(yearAgo))
+  const [endDate, setEndDate] = useState(toDateInputValue(today))
   const [tab, setTab] = useState<AudienceKey>("HCP")
 
   const [summaryLoading, setSummaryLoading] = useState(false)
@@ -143,51 +111,25 @@ export function AudienceInsights() {
   const [leaderLoading, setLeaderLoading] = useState(false)
   const [leader, setLeader] = useState<LeaderboardResponse | null>(null)
 
-  const [compLoading, setCompLoading] = useState(false)
-  const [comp, setComp] = useState<CompetitiveResponse | null>(null)
-
   const [ukLoading, setUkLoading] = useState(false)
   const [uk, setUk] = useState<UkAccessResponse | null>(null)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerTitle, setDrawerTitle] = useState("Examples")
   const [drawerDesc, setDrawerDesc] = useState<string | undefined>(undefined)
-  const [drawerMode, setDrawerMode] = useState<"topic" | "bucket" | "competitive_context" | "stance" | "uk_signal">("topic")
+  const [drawerMode, setDrawerMode] = useState<"topic" | "bucket" | "uk_signal">("topic")
   const [drawerValue, setDrawerValue] = useState<string>("")
-
-  const apply = useCallback(() => {
-    setApplied(draft)
-  }, [draft])
-  const discard = useCallback(() => setDraft(applied), [applied])
-
-  const hasUnsavedChanges = useMemo(() => {
-    try {
-      return JSON.stringify(draft) !== JSON.stringify(applied)
-    } catch {
-      return true
-    }
-  }, [draft, applied])
-
-  const activeChips = useMemo<ActiveFilterChip[]>(() => {
-    const chips: ActiveFilterChip[] = []
-    const q = draft.searchText.trim()
-    if (q) chips.push({ key: "search", label: `Search: "${q}"`, onClear: () => setDraft((d) => ({ ...d, searchText: "" })) })
-    if (draft.sequencingOnly) chips.push({ key: "seqOnly", label: "Sequencing only", onClear: () => setDraft((d) => ({ ...d, sequencingOnly: false })) })
-    if (draft.includeLowRelevance) chips.push({ key: "low", label: "Include low relevance", onClear: () => setDraft((d) => ({ ...d, includeLowRelevance: false })) })
-    if (draft.flags.length) chips.push({ key: "flags", label: `Flags: ${draft.flags.join(", ")}`, onClear: () => setDraft((d) => ({ ...d, flags: [] })) })
-    return chips
-  }, [draft])
 
   const baseParams = useMemo(
     () => ({
-      startDate: applied.startDate,
-      endDate: applied.endDate,
-      includeLowRelevance: applied.includeLowRelevance,
-      sequencingOnly: applied.sequencingOnly,
-      searchText: applied.searchText,
-      flags: applied.flags,
+      startDate,
+      endDate,
+      includeLowRelevance: false,
+      sequencingOnly: false,
+      searchText: "",
+      flags: [],
     }),
-    [applied],
+    [startDate, endDate],
   )
 
   // Summary + comparator always refresh on Apply.
@@ -212,13 +154,6 @@ export function AudienceInsights() {
       .catch(() => setLeader(null))
       .finally(() => setLeaderLoading(false))
 
-    setCompLoading(true)
-    fetch(`/api/alunbrig/audience/competitive-attention?${q}`)
-      .then((r) => r.json())
-      .then((d) => setComp(d as CompetitiveResponse))
-      .catch(() => setComp(null))
-      .finally(() => setCompLoading(false))
-
     if (tab === "Payer") {
       setUkLoading(true)
       fetch(`/api/alunbrig/audience/uk-access?${q}`)
@@ -234,11 +169,8 @@ export function AudienceInsights() {
 
   const shareData = useMemo(() => {
     if (!summary) return []
-    if (softMode) {
-      return AUDIENCES.map((a) => ({ label: a, value: summary.softShares[a] || 0 }))
-    }
     return AUDIENCES.map((a) => ({ label: a, value: summary.hardShares[a]?.share || 0, posts: summary.hardShares[a]?.posts || 0 }))
-  }, [summary, softMode])
+  }, [summary])
 
   const colors = ["#3b82f6", "#10b981", "#f59e0b", "#a855f7", "#64748b"]
 
@@ -322,58 +254,34 @@ export function AudienceInsights() {
         <p className="lead">Understand who's driving conversation and what each group cares about in social media data.</p>
       </div>
 
-      <FilterPane
-        title="Filters"
-        description={
-          <span>Refine audience slice across charts (<span className="text-foreground">social media data</span>).</span>
-        }
-        hasUnsavedChanges={hasUnsavedChanges}
-        rightSlot={
-          <div className="flex items-center gap-2">
-            {hasUnsavedChanges ? (
-              <Button type="button" variant="outline" size="sm" onClick={discard}>Discard</Button>
-            ) : null}
-            <Button type="button" size="sm" onClick={apply}>Apply</Button>
-          </div>
-        }
-        metaLine={applied ? <Badge variant="secondary">Applied</Badge> : null}
-      >
-        <div className="grid gap-3 md:grid-cols-6">
-          <div className="md:col-span-2 space-y-1">
-            <div className="text-xs text-muted-foreground">Date range</div>
-            <div className="flex items-center gap-2">
-              <Input type="date" value={draft.startDate} onChange={(e) => setDraft((d) => ({ ...d, startDate: e.target.value }))} />
-              <div className="text-xs text-muted-foreground">-></div>
-              <Input type="date" value={draft.endDate} onChange={(e) => setDraft((d) => ({ ...d, endDate: e.target.value }))} />
+      <Card className="border-border/50">
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <CardTitle className="text-base font-medium">Filters</CardTitle>
+              <div className="text-sm text-muted-foreground">Filter Audience Insights by date range.</div>
             </div>
           </div>
-          <div className="md:col-span-2 space-y-1">
-            <div className="text-xs text-muted-foreground">Search</div>
-            <Input value={draft.searchText} onChange={(e) => setDraft((d) => ({ ...d, searchText: e.target.value }))} placeholder="Keyword across text + topics" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-6">
+            <div className="md:col-span-3 space-y-1">
+              <div className="text-xs text-muted-foreground">Date range</div>
+              <DateRangeControl startDate={startDate} endDate={endDate} onChange={(nextStart, nextEnd) => {
+                setStartDate(nextStart)
+                setEndDate(nextEnd)
+              }} />
+            </div>
           </div>
-          <div className="md:col-span-2 grid grid-cols-2 gap-3">
-            <label className="flex items-center justify-between rounded-md border border-border/60 bg-background/40 px-3 py-2">
-              <span className="text-sm">Include low</span>
-              <Switch checked={draft.includeLowRelevance} onCheckedChange={(v) => setDraft((d) => ({ ...d, includeLowRelevance: v }))} />
-            </label>
-            <label className="flex items-center justify-between rounded-md border border-border/60 bg-background/40 px-3 py-2">
-              <span className="text-sm">Audience</span>
-              <span className="text-sm text-muted-foreground">{draft.audience}</span>
-            </label>
-          </div>
-          <div className="md:col-span-6">
-            <ActiveFiltersBar chips={activeChips} />
-          </div>
-        </div>
-      </FilterPane>      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
               <CardTitle className="text-base font-medium">Audience split</CardTitle>
-              <label className="flex items-center gap-2 text-sm">
-                <Switch checked={softMode} onCheckedChange={setSoftMode} />
-                {softMode ? "Soft (likelihood-weighted)" : "Hard (primary label)"}
-              </label>
+              <div className="text-sm text-muted-foreground">Hard (primary label)</div>
             </div>
           </CardHeader>
           <CardContent>
@@ -563,119 +471,6 @@ export function AudienceInsights() {
                           ))}
                         </div>
                       </button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle className="text-base font-medium">Key flag rates</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!leader ? (
-                <div className="text-sm text-muted-foreground">-</div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {([
-                    ["Sequencing", leader.flagRates.pctSequencing],
-                    ["QoL", leader.flagRates.pctQoL],
-                    ["Neurotox", leader.flagRates.pctNeurotox],
-                    ["Caregiver", leader.flagRates.pctCaregiverBurden],
-                    ["CNS", leader.flagRates.pctCNS],
-                    ["UK access", leader.flagRates.pctUKAccess],
-                  ] as const).map(([k, v]) => (
-                    <div key={k} className="rounded-md border p-3">
-                      <div className="text-xs text-muted-foreground">{k}</div>
-                      <div className="mt-1 text-sm font-medium">{pct(v)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Competitive context</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {compLoading || !comp ? (
-                  <div className="text-sm text-muted-foreground">Loading competitive context...</div>
-                ) : (
-                  <div className="space-y-2">
-                    {comp.competitiveContextShare.slice(0, 10).map((c, i) => (
-                      <button key={`${String(c.context)}-${i}`} className="w-full text-left rounded-md border p-3 hover:bg-accent/30" onClick={() => openExamples("competitive_context", String(c.context))}>
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium">{String(c.context)}</div>
-                          <div className="text-xs text-muted-foreground">{pct(c.share)}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Stance toward Alunbrig</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {compLoading || !comp ? (
-                  <div className="text-sm text-muted-foreground">Loading stance...</div>
-                ) : (
-                  <div className="space-y-2">
-                    {comp.stanceTowardAlunbrig.slice(0, 10).map((s, i) => (
-                      <button key={`${String((s as any)?.stance?.stance ?? (s as any)?.stance ?? "")}-${i}`} className="w-full text-left rounded-md border p-3 hover:bg-accent/30" onClick={() => openExamples("stance", String((s as any)?.stance?.stance ?? (s as any)?.stance ?? ""))}>
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium">{String((s as any)?.stance?.stance ?? (s as any)?.stance ?? "")}</div>
-                          <div className="text-xs text-muted-foreground">{pct(s.share)}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Top competitors mentioned</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {compLoading || !comp ? (
-                  <div className="text-sm text-muted-foreground">Loading...</div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {comp.topCompetitorsMentioned.slice(0, 20).map((x, i) => (
-                      <span key={`${String(x.competitor)}-${i}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
-                        {x.competitor} | {x.mentions}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Top brands mentioned</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {compLoading || !comp ? (
-                  <div className="text-sm text-muted-foreground">Loading...</div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {comp.topBrandsMentioned.slice(0, 20).map((x, i) => (
-                      <span key={`${String(x.brand)}-${i}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
-                        {x.brand} | {x.mentions}
-                      </span>
                     ))}
                   </div>
                 )}

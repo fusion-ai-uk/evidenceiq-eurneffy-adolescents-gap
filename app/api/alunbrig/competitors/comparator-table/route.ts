@@ -156,6 +156,36 @@ export async function GET(req: Request) {
       JOIN stance_totals st USING(competitor_key)
       GROUP BY sc.competitor_key, st.total_posts
     ),
+    bucket_counts AS (
+      SELECT
+        competitor_key,
+        TRIM(CAST(card_bucket AS STRING)) AS bucket,
+        COUNT(DISTINCT id) AS posts
+      FROM slice
+      WHERE card_bucket IS NOT NULL AND TRIM(CAST(card_bucket AS STRING)) != ''
+      GROUP BY competitor_key, bucket
+    ),
+    bucket_totals AS (
+      SELECT competitor_key, SUM(posts) AS total_posts
+      FROM bucket_counts
+      GROUP BY competitor_key
+    ),
+    bucket_mix AS (
+      SELECT
+        bc.competitor_key,
+        ARRAY_AGG(
+          STRUCT(
+            bc.bucket AS bucket,
+            bc.posts AS posts,
+            SAFE_DIVIDE(bc.posts, NULLIF(bt.total_posts,0)) AS share
+          )
+          ORDER BY bc.posts DESC
+          LIMIT 8
+        ) AS bucketMix
+      FROM bucket_counts bc
+      JOIN bucket_totals bt USING(competitor_key)
+      GROUP BY bc.competitor_key
+    ),
     driver_counts AS (
       SELECT
         competitor_key,
@@ -206,7 +236,8 @@ export async function GET(req: Request) {
         s.pctSequencing AS pctSequencing,
         IFNULL(td.topDrivers, []) AS topDrivers,
         IFNULL(tt.topKeyTerms, []) AS topKeyTerms,
-        IFNULL(sb.stanceBreakdown, []) AS stanceBreakdown
+        IFNULL(sb.stanceBreakdown, []) AS stanceBreakdown,
+        IFNULL(bm.bucketMix, []) AS bucketMix
       ) ORDER BY c.mentions DESC) AS competitorRows
     FROM top_comps c
     CROSS JOIN competitive_total ct
@@ -215,6 +246,7 @@ export async function GET(req: Request) {
     LEFT JOIN top_drivers td USING(competitor_key)
     LEFT JOIN top_terms tt USING(competitor_key)
     LEFT JOIN stance_breakdown sb USING(competitor_key)
+    LEFT JOIN bucket_mix bm USING(competitor_key)
   `
 
   try {

@@ -1,4 +1,4 @@
-﻿import type { TrendsFilters, TrendsGranularity } from "@/lib/alunbrig/trendsFilters"
+import type { TrendsFilters, TrendsGranularity } from "@/lib/alunbrig/trendsFilters"
 import { stakeholderUiToPrimary, trendsFlagsToParams } from "@/lib/alunbrig/trendsFilters"
 
 const truthy = (field: string) => `(LOWER(TRIM(CAST(${field} AS STRING))) IN ('true','1','yes'))`
@@ -68,6 +68,10 @@ export function getTrendsBaseCteSql(granularity: TrendsGranularity) {
           OR (@includeLow = FALSE AND relevance_label IN ('high','medium'))
         )
         AND (
+          NOT @cardBucketEnabled
+          OR TRIM(CAST(card_bucket AS STRING)) IN UNNEST(@cardBuckets)
+        )
+        AND (
           NOT @stakeholderEnabled
           OR stakeholder_primary IN UNNEST(@stakeholders)
         )
@@ -118,6 +122,8 @@ export function getTrendsBaseCteSql(granularity: TrendsGranularity) {
 }
 
 export function getTrendsBaseParams(filters: TrendsFilters) {
+  const cardBuckets = (filters.cardBucket || []).map((s) => s.trim()).filter(Boolean)
+  const cardBucketEnabled = cardBuckets.length > 0
   const stakeholders = stakeholderUiToPrimary(filters.stakeholder)
   const stakeholderEnabled = stakeholders.length > 0
   const sentimentEnabled = filters.sentimentLabel.length > 0
@@ -128,6 +134,9 @@ export function getTrendsBaseParams(filters: TrendsFilters) {
     startDate: filters.startDate,
     endDate: filters.endDate,
     includeLow: filters.includeLowRelevance,
+
+    cardBucketEnabled,
+    cardBuckets,
 
     stakeholderEnabled,
     stakeholders,

@@ -1,4 +1,4 @@
-﻿import type { SequencingFilters } from "@/lib/alunbrig/sequencingFilters"
+import type { SequencingFilters } from "@/lib/alunbrig/sequencingFilters"
 
 const truthy = (field: string) => `(LOWER(TRIM(CAST(${field} AS STRING))) IN ('true','1','yes'))`
 
@@ -66,6 +66,8 @@ export function getSequencingBaseCteSql() {
         ${truthy("topics_brief_flags_uk_access_or_reimbursement")} AS topics_brief_flags_uk_access_or_reimbursement,
 
         ${truthy("topics_brief_flags_quality_of_life")} AS topics_brief_flags_quality_of_life,
+        ${truthy("topics_brief_flags_efficacy_outcomes")} AS topics_brief_flags_efficacy_outcomes,
+        ${truthy("topics_brief_flags_safety_or_tolerability")} AS topics_brief_flags_safety_or_tolerability,
         ${truthy("topics_brief_flags_neuro_or_cognitive_toxicity")} AS topics_brief_flags_neuro_or_cognitive_toxicity,
         ${truthy("topics_brief_flags_cns_or_brain_mets")} AS topics_brief_flags_cns_or_brain_mets,
 

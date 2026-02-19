@@ -226,8 +226,14 @@ export async function GET(req: Request) {
       topKeyTermsEnd: r.topKeyTermsEnd || [],
     }))
 
-    const rising = [...items].sort((a, b) => (b.pctChange - a.pctChange) || (b.delta - a.delta)).slice(0, limit)
-    const falling = [...items].sort((a, b) => (a.pctChange - b.pctChange) || (a.delta - b.delta)).slice(0, limit)
+    // Important: keep Rising and Falling directional + disjoint.
+    // If only a few items qualify overall, a naive "top N" + "bottom N" on the same set can cause
+    // the same theme to appear in both lists (confusing in the UI).
+    const risingCandidates = items.filter((x) => x.delta > 0 || x.pctChange > 0)
+    const fallingCandidates = items.filter((x) => x.delta < 0 || x.pctChange < 0)
+
+    const rising = [...risingCandidates].sort((a, b) => (b.pctChange - a.pctChange) || (b.delta - a.delta)).slice(0, limit)
+    const falling = [...fallingCandidates].sort((a, b) => (a.pctChange - b.pctChange) || (a.delta - b.delta)).slice(0, limit)
 
     return NextResponse.json({ granularity, rising, falling })
   } catch (e) {

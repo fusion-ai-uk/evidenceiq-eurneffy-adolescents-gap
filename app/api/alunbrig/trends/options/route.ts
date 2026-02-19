@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getTrendsFilters } from "@/lib/alunbrig/trendsFilters"
 import { getTrendsBaseCteSql, getTrendsBaseParams } from "@/lib/alunbrig/trendsSql"
@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     SELECT
       ARRAY_AGG(DISTINCT sentiment_label IGNORE NULLS ORDER BY sentiment_label) AS sentimentLabel,
       ARRAY_AGG(DISTINCT post_type_evidence_type IGNORE NULLS ORDER BY post_type_evidence_type) AS evidenceType,
+      ARRAY_AGG(DISTINCT TRIM(CAST(card_bucket AS STRING)) IGNORE NULLS ORDER BY TRIM(CAST(card_bucket AS STRING))) AS cardBuckets,
       COUNT(*) AS totalPosts,
       FORMAT_DATE('%Y-%m-%d', MIN(created_date)) AS minDate,
       FORMAT_DATE('%Y-%m-%d', MAX(created_date)) AS maxDate
@@ -35,6 +36,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       sentimentLabel: r.sentimentLabel || [],
       evidenceType: r.evidenceType || [],
+      cardBuckets: (r.cardBuckets || []).filter(Boolean),
       meta: {
         totalPosts: Number(r.totalPosts || 0),
         minDate: r.minDate || filters.startDate,

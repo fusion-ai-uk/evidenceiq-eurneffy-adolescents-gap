@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { runQuery } from "@/lib/bigquery"
 import { getAlunbrigThemeFilters, flagsToParams } from "@/lib/alunbrig/themeFilters"
 
@@ -38,6 +38,7 @@ export async function GET(req: Request) {
       FROM \`${process.env.BQ_MAIN_TABLE}\`
       WHERE ${truthy("data_quality_keep_for_analysis")} = TRUE
         AND SAFE.PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', createdAt) IS NOT NULL
+        AND DATE(SAFE.PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', createdAt)) BETWEEN DATE(@startDate) AND DATE(@endDate)
         AND (
           (@includeLow = TRUE AND relevance_label IN ('high','medium','low'))
           OR (@includeLow = FALSE AND relevance_label IN ('high','medium'))
@@ -109,6 +110,8 @@ export async function GET(req: Request) {
 
   try {
     const params = {
+      startDate: filters.startDate,
+      endDate: filters.endDate,
       includeLow: filters.includeLowRelevance,
       sequencingOnly: filters.sequencingOnly,
       evidenceType: filters.evidenceType,
