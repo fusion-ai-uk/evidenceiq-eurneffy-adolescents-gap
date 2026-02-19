@@ -298,46 +298,44 @@ export function CompetitorLens() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {table.rows.map((r, i) => (
-                    (() => {
-                      const share = shareFromMentions(Number(r.mentions || 0), Number(r.shareCompetitive || 0))
-                      return (
-                    <TableRow
-                      key={`${r.competitor}-${i}`}
-                      className={`cursor-pointer ${draft.competitor === r.competitor ? "bg-muted/30" : "hover:bg-muted/20"}`}
-                      onClick={() => {
-                        setDraft((d) => ({ ...d, competitor: r.competitor }))
-                      }}
-                    >
-                      <TableCell className="font-medium max-w-[180px] truncate">{r.competitor}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="text-sm font-medium">{pct(share)}</div>
-                          <div className="text-[11px] text-muted-foreground">SI {Math.round(Number(r.sentimentIndex || 0))}</div>
-                          <div className="mt-1 h-1.5 w-full rounded bg-muted/40">
-                            <div className="h-1.5 rounded bg-emerald-500/70" style={{ width: `${Math.min(100, Math.max(0, Number(share || 0) * 100))}%` }} />
+                  {table.rows.map((r, i) => {
+                    const share = shareFromMentions(Number(r.mentions || 0), Number(r.shareCompetitive || 0))
+                    return (
+                      <TableRow
+                        key={`${r.competitor}-${i}`}
+                        className={`cursor-pointer ${draft.competitor === r.competitor ? "bg-muted/30" : "hover:bg-muted/20"}`}
+                        onClick={() => {
+                          setDraft((d) => ({ ...d, competitor: r.competitor }))
+                        }}
+                      >
+                        <TableCell className="font-medium max-w-[180px] truncate">{r.competitor}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="text-sm font-medium">{pct(share)}</div>
+                            <div className="text-[11px] text-muted-foreground">SI {Math.round(Number(r.sentimentIndex || 0))}</div>
+                            <div className="mt-1 h-1.5 w-full rounded bg-muted/40">
+                              <div className="h-1.5 rounded bg-emerald-500/70" style={{ width: `${Math.min(100, Math.max(0, Number(share || 0) * 100))}%` }} />
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-normal">
-                        <div className="flex flex-wrap gap-1">
-                          {(r.bucketMix || []).slice(0, 4).map((b, j) => (
-                            <span key={`${r.competitor}-bucket-${String(b.bucket)}-${j}`} className="text-xs rounded-full border px-2 py-0.5 text-muted-foreground">
-                              {String(b.bucket)} {pct(Number(b.share || 0))}
-                            </span>
-                          ))}
-                          {(r.bucketMix || []).length === 0 ? <span className="text-xs text-muted-foreground">—</span> : null}
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-normal">
-                        <div className="text-xs text-muted-foreground leading-5 break-words">
-                          {(r.topDrivers || []).slice(0, 2).map((d) => d.driver).filter(Boolean).join(" • ") || "—"}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                      )
-                    })()
-                  )}
+                        </TableCell>
+                        <TableCell className="whitespace-normal">
+                          <div className="flex flex-wrap gap-1">
+                            {(r.bucketMix || []).slice(0, 4).map((b, j) => (
+                              <span key={`${r.competitor}-bucket-${String(b.bucket)}-${j}`} className="text-xs rounded-full border px-2 py-0.5 text-muted-foreground">
+                                {String(b.bucket)} {pct(Number(b.share || 0))}
+                              </span>
+                            ))}
+                            {(r.bucketMix || []).length === 0 ? <span className="text-xs text-muted-foreground">—</span> : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-normal">
+                          <div className="text-xs text-muted-foreground leading-5 break-words">
+                            {(r.topDrivers || []).slice(0, 2).map((d) => d.driver).filter(Boolean).join(" • ") || "—"}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             )}
