@@ -404,9 +404,6 @@ export function CompetitorLens() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" size="sm" onClick={() => openExamples("competitor", draft.competitor, draft.competitor)}>
-                    View posts
-                  </Button>
                   <Button type="button" size="sm" variant="outline" onClick={() => setDraft((d) => ({ ...d, competitor: "" }))}>
                     Clear selection
                   </Button>
