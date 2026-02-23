@@ -540,7 +540,7 @@ export function AudienceInsights() {
                         <div className="text-sm font-medium">Top hurdles</div>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {uk.topHurdles.slice(0, 20).map((h, i) => (
-                            <span key={`${String(h.hurdle)}-${j}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
+                            <span key={`${String(h.hurdle)}-${i}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
                               {h.hurdle}
                             </span>
                           ))}
@@ -550,7 +550,7 @@ export function AudienceInsights() {
                         <div className="text-sm font-medium">Top opportunities</div>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {uk.topOpportunities.slice(0, 20).map((o, i) => (
-                            <span key={`${String(o.opp)}-${j}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
+                            <span key={`${String(o.opp)}-${i}`} className="text-xs rounded-full border px-2 py-1 text-muted-foreground">
                               {o.opp}
                             </span>
                           ))}
