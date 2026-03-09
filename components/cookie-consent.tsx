@@ -188,46 +188,66 @@ export function CookieBanner() {
   const onAcceptAll = () => { acceptAll(); setShowPreferences(false); setShowBanner(false) }
   const onAcceptNecessary = () => { acceptNecessaryOnly(); setShowPreferences(false); setShowBanner(false) }
 
-  if (!showBanner) return null
-
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
-      <div className="mx-auto max-w-5xl rounded-xl border border-border/60 bg-card/90 backdrop-blur shadow-xl">
-        <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:gap-6 md:p-5">
-          <div className="text-sm md:text-base font-medium">Cookie Settings</div>
-          <div className="text-xs md:text-sm text-muted-foreground md:flex-1">
-            We use cookies to provide secure access, remember preferences, and analyze performance. Choose which types to accept.
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-background/40" onClick={() => setShowPreferences(true)}>Customize</Button>
-            <Button variant="outline" size="sm" className="bg-background/40" onClick={onAcceptNecessary}>Essential Only</Button>
-            <Button size="sm" onClick={onAcceptAll}>Accept All</Button>
+    <>
+      {hasStoredValue && !showBanner ? (
+        <div className="fixed bottom-4 left-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-card/90 shadow-md backdrop-blur"
+            onClick={() => {
+              setShowPreferences(true)
+              setShowBanner(true)
+            }}
+            aria-label="Open cookie settings"
+          >
+            Cookie Settings
+          </Button>
+        </div>
+      ) : null}
+
+      {showBanner ? (
+        <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
+          <div className="mx-auto max-w-5xl rounded-xl border border-border/60 bg-card/90 backdrop-blur shadow-xl">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:gap-6 md:p-5">
+              <div className="text-sm md:text-base font-medium">Cookie Settings</div>
+              <div className="text-xs md:text-sm text-muted-foreground md:flex-1">
+                We use cookies to provide secure access, remember preferences, and analyze performance. Choose which types to accept.
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="bg-background/40" onClick={() => setShowPreferences(true)}>Customize</Button>
+                <Button variant="outline" size="sm" className="bg-background/40" onClick={onAcceptNecessary}>Essential Only</Button>
+                <Button size="sm" onClick={onAcceptAll}>Accept All</Button>
+              </div>
+            </div>
+            {showPreferences && (
+              <div className="border-t border-border/60 p-4 md:p-5">
+                <div className="mb-3 text-sm text-muted-foreground">Necessary cookies are required and cannot be disabled.</div>
+                <div className="grid gap-3">
+                  {COOKIE_CATEGORIES.map((cat) => (
+                    <div key={cat.id} className="flex items-start justify-between gap-4 rounded-lg border border-border/60 bg-background/40 p-3">
+                      <div>
+                        <div className="text-sm font-medium">{cat.name}</div>
+                        <div className="text-xs text-muted-foreground">{cat.description}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch checked={cat.id === 'necessary' ? true : Boolean(preferences[cat.id])} onCheckedChange={(v) => setCategory(cat.id, v)} disabled={cat.required} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button onClick={onSave}>Save Preferences</Button>
+                  <Button variant="outline" className="bg-background/40" onClick={onAcceptAll}>Accept All</Button>
+                  <Button variant="outline" className="bg-background/40" onClick={onAcceptNecessary}>Essential Only</Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        {showPreferences && (
-          <div className="border-t border-border/60 p-4 md:p-5">
-            <div className="mb-3 text-sm text-muted-foreground">Necessary cookies are required and cannot be disabled.</div>
-            <div className="grid gap-3">
-              {COOKIE_CATEGORIES.map((cat) => (
-                <div key={cat.id} className="flex items-start justify-between gap-4 rounded-lg border border-border/60 bg-background/40 p-3">
-                  <div>
-                    <div className="text-sm font-medium">{cat.name}</div>
-                    <div className="text-xs text-muted-foreground">{cat.description}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch checked={cat.id === 'necessary' ? true : Boolean(preferences[cat.id])} onCheckedChange={(v) => setCategory(cat.id, v)} disabled={cat.required} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={onSave}>Save Preferences</Button>
-              <Button variant="outline" className="bg-background/40" onClick={onAcceptAll}>Accept All</Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      ) : null}
+    </>
   )
 }
 

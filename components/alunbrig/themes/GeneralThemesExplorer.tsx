@@ -155,6 +155,8 @@ export function GeneralThemesExplorer() {
 
   const overviewFiltered = overviewItems
   const topTopicsFiltered = topTopicsRows
+  const hasDateRange = Boolean(startDate && endDate)
+  const noOverviewData = !overviewLoading && hasDateRange && overviewFiltered.length === 0
 
   const { resolvedTheme } = useTheme()
   const axisColor = resolvedTheme === "dark" ? "#9CA3AF" : "#374151"
@@ -297,6 +299,18 @@ export function GeneralThemesExplorer() {
               <div className="h-[760px]">
                 {overviewLoading ? (
                   <div className="h-full flex items-center justify-center"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Skeleton className="h-2 w-2 rounded-full" /> Loading…</div></div>
+                ) : !hasDateRange ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="rounded-lg border border-border/60 bg-background/50 px-4 py-3 text-sm text-muted-foreground">
+                      Select a valid date range to load theme data.
+                    </div>
+                  </div>
+                ) : noOverviewData ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="rounded-lg border border-border/60 bg-background/50 px-4 py-3 text-sm text-muted-foreground">
+                      No data is available for the current selection. Try a wider date range or different filters.
+                    </div>
+                  </div>
                 ) : (
                   <ReactApexChart type="treemap" height="100%" width="100%" options={treemapOptions as any} series={treemapSeries as any} />
                 )}
@@ -313,8 +327,10 @@ export function GeneralThemesExplorer() {
                 <div className="max-h-[760px] overflow-auto">
                   {topTopicsLoading ? (
                     <div className="p-4"><Skeleton className="h-4 w-40" /><Skeleton className="mt-2 h-4 w-full" /><Skeleton className="mt-2 h-4 w-3/4" /></div>
+                  ) : !hasDateRange ? (
+                    <div className="p-4 text-sm text-muted-foreground">Select a valid date range to load topic data.</div>
                   ) : topTopicsFiltered.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground">No topics match the current slice.</div>
+                    <div className="p-4 text-sm text-muted-foreground">No data is available for the current selection.</div>
                   ) : (
                     <table className="w-full text-sm">
                       <thead className="sticky top-0 bg-background border-b">

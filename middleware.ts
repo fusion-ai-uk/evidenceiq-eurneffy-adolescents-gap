@@ -1,4 +1,5 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { verifySession } from "@/lib/authSession"
 
 const PUBLIC_PATHS = [
   "/login",
@@ -11,7 +12,7 @@ const PUBLIC_PATHS = [
   "/favicon.ico",
 ]
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))
   // Allow static assets from /public (e.g., /logo.png, /icons/*.svg) and any file-like path
@@ -19,20 +20,39 @@ export function middleware(req: NextRequest) {
 
   if (isPublic || isAsset) return NextResponse.next()
 
-  const hasSession = Boolean(req.cookies.get("evidenceiq_session")?.value)
-  if (!hasSession) {
+  const rawSession = req.cookies.get("evidenceiq_session")?.value
+  const session = await verifySession(rawSession)
+  if (!session) {
     const url = req.nextUrl.clone()
     url.pathname = "/login"
     url.searchParams.set("from", pathname)
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    // Ensure stale/invalid cookies are removed.
+    if (rawSession) {
+      redirect.cookies.set({
+        name: "evidenceiq_session",
+        value: "",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0,
+      })
+    }
+    return redirect
   }
 
-  // Lightweight response caching for authenticated Alunbrig GET APIs.
-  // Helps repeated loads/navigation without changing UI or reducing data.
   const res = NextResponse.next()
-  if (req.method === "GET" && pathname.startsWith("/api/alunbrig/")) {
-    // Private: don't allow shared caches to store authenticated analytics responses.
-    res.headers.set("Cache-Control", "private, max-age=30, stale-while-revalidate=60")
+  if (req.method === "GET") {
+    if (pathname.startsWith("/api/alunbrig/")) {
+      // Private: don't allow shared caches to store authenticated analytics responses.
+      res.headers.set("Cache-Control", "private, max-age=30, stale-while-revalidate=60")
+    } else {
+      // Prevent browser from serving protected app pages from cache after logout.
+      res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+      res.headers.set("Pragma", "no-cache")
+      res.headers.set("Expires", "0")
+    }
   }
   return res
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
+import { SESSION_MAX_AGE_SECONDS, signSession } from "@/lib/authSession"
 
 // List of allowed users (static)
 const USERS = [
@@ -9,16 +9,6 @@ const USERS = [
   // New login (add your new credentials here)
   { email: "mary@fusionagency.solutions", password: "Moose01!" },
 ]
-
-function signSession(payload: object) {
-  const secret = process.env.AUTH_SECRET || "dev-secret-change-me"
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url")
-  const sig = crypto
-    .createHmac("sha256", secret)
-    .update(body)
-    .digest("base64url")
-  return `${body}.${sig}`
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +26,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const session = signSession({ email, ts: Date.now() })
+    const session = await signSession({ email, ts: Date.now() })
     const res = NextResponse.json({ ok: true })
     const isProd = process.env.NODE_ENV === "production"
 
@@ -47,7 +37,7 @@ export async function POST(req: NextRequest) {
       sameSite: "lax",
       secure: isProd,
       path: "/",
-      maxAge: 60 * 60 * 24 * 3, // 3 days
+      maxAge: SESSION_MAX_AGE_SECONDS,
     })
 
     return res

@@ -11,6 +11,8 @@ export async function DELETE() {
     path: "/",
     maxAge: 0,
   })
+  res.headers.set("Cache-Control", "no-store")
+  res.headers.set("Clear-Site-Data", "\"cache\"")
   return res
 }
 

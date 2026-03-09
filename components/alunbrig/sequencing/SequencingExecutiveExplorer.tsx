@@ -8,6 +8,7 @@ import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Ba
 import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
 import { toDateInputValue } from "@/lib/date-input"
 import { InfoTip } from "@/components/alunbrig/InfoTip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 type DraftFilters = {
   startDate: string
@@ -67,9 +68,19 @@ function ShareList({
           )
         }
         return (
-          <button key={`${item.name}-${i}`} className="w-full rounded border p-2 text-left hover:bg-accent/30" onClick={() => onSelect(item)}>
-            {body}
-          </button>
+          <Tooltip key={`${item.name}-${i}`}>
+            <TooltipTrigger asChild>
+              <button
+                className="w-full cursor-pointer rounded border p-2 text-left transition-all hover:-translate-y-px hover:bg-accent/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                onClick={() => onSelect(item)}
+              >
+                {body}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6}>
+              Click to view example posts
+            </TooltipContent>
+          </Tooltip>
         )
       })}
     </div>
@@ -378,13 +389,19 @@ export function SequencingExecutiveExplorer() {
             </div>
             <div className="pt-2 flex flex-wrap gap-2">
               {(evidenceData || []).slice(0, 3).map((e) => (
-                <button
-                  key={e.name}
-                  className="rounded border px-2 py-1 text-xs hover:bg-accent/30"
-                  onClick={() => openExamples("period", `Evidence | ${e.name}`, { searchText: e.name, sequencingOnly: "false" })}
-                >
-                  View {e.name} examples
-                </button>
+                <Tooltip key={e.name}>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="cursor-pointer rounded border px-2 py-1 text-xs transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      onClick={() => openExamples("period", `Evidence | ${e.name}`, { searchText: e.name, sequencingOnly: "false" })}
+                    >
+                      View {e.name} examples
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={6}>
+                    Click to open supporting posts
+                  </TooltipContent>
+                </Tooltip>
               ))}
             </div>
           </CardContent>

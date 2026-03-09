@@ -6,9 +6,8 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Command as CommandIcon, Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target, Shuffle } from 'lucide-react'
+import { Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target, Shuffle } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { CommandDialog, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
 type AppShellProps = {
   children: React.ReactNode
@@ -29,18 +28,17 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname()
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
-  const [cmdOpen, setCmdOpen] = React.useState(false)
 
   React.useEffect(() => setMounted(true), [])
   React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault()
-        setCmdOpen((v) => !v)
+    const onPageShow = (e: PageTransitionEvent) => {
+      // If page is restored from bfcache, force fresh auth check via middleware.
+      if (e.persisted) {
+        window.location.reload()
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
   }, [])
 
   // Render bare content on public routes like /login
@@ -53,9 +51,9 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="min-h-svh">
+    <div className="min-h-svh bg-gradient-to-b from-background via-background to-secondary/20">
       {/* Fixed header */}
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-border/60 bg-card/60 backdrop-blur-xl supports-[backdrop-filter]:bg-card/40">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-border/60 bg-gradient-to-r from-card/80 via-card/65 to-card/80 shadow-[0_1px_0_color-mix(in_oklch,var(--border)_75%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-card/45">
         <div className="h-16 flex items-center gap-4">
           {/* Brand anchored to top-left, above the sidebar */}
           <Link href="/" className="pl-4 md:pl-6 shrink-0 inline-flex items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:ring-ring/50 outline-none">
@@ -76,19 +74,6 @@ export function AppShell({ children }: AppShellProps) {
             Alunbrig Marketing Intelligence
           </div>
           <div className="ml-auto flex items-center gap-2 pr-4 md:pr-6">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-background/40"
-              onClick={() => setCmdOpen(true)}
-              title="Search (Ctrl/Cmd K)"
-            >
-              <CommandIcon className="mr-2 h-4 w-4" />
-              Search
-              <span className="ml-2 hidden md:inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] leading-none text-muted-foreground">
-                CtrlK
-              </span>
-            </Button>
             <div className="hidden sm:flex items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               Last Updated: Today
@@ -113,9 +98,10 @@ export function AppShell({ children }: AppShellProps) {
               className="bg-background/40"
               onClick={async () => {
                 try {
-                  await fetch('/api/auth/logout', { method: 'DELETE' })
+                  await fetch('/api/auth/logout', { method: 'DELETE', cache: 'no-store' })
                 } finally {
-                  window.location.href = '/login'
+                  // replace() removes current protected page from immediate history slot.
+                  window.location.replace('/login')
                 }
               }}
             >
@@ -123,40 +109,10 @@ export function AppShell({ children }: AppShellProps) {
             </Button>
           </div>
         </div>
-
-        {/* Command Palette */}
-            <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
-          <CommandInput placeholder="Search pages and actions..." />
-          <CommandList>
-            <CommandGroup heading="Navigate">
-              {nav.map((item) => (
-                item.comingSoon ? (
-                  <CommandItem key={item.href} disabled aria-disabled className="opacity-60 pointer-events-none">
-                    <item.icon className="h-4 w-4 opacity-60" />
-                    <span>{item.name}</span>
-                    {item.comingSoon ? (
-                      <span className="ml-auto text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-0.5 bg-muted/20 text-muted-foreground/80">Coming soon</span>
-                    ) : null}
-                  </CommandItem>
-                ) : (
-                  <CommandItem key={item.href} onSelect={() => { window.location.href = item.href }}>
-                    <item.icon className="h-4 w-4" />
-                    {item.name}
-                  </CommandItem>
-                )
-              ))}
-            </CommandGroup>
-            <CommandGroup heading="Appearance">
-              <CommandItem onSelect={() => setTheme('light')}>Light mode</CommandItem>
-              <CommandItem onSelect={() => setTheme('dark')}>Dark mode</CommandItem>
-              <CommandItem onSelect={() => setTheme('system')}>System</CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </CommandDialog>
       </header>
 
       {/* Fixed sidebar */}
-      <aside className="fixed left-0 top-16 bottom-0 z-30 w-60 border-r border-border/60 bg-sidebar/90 backdrop-blur">
+      <aside className="fixed left-0 top-16 bottom-0 z-30 w-60 border-r border-border/60 bg-gradient-to-b from-sidebar/95 via-sidebar/88 to-sidebar/82 shadow-[1px_0_0_color-mix(in_oklch,var(--border)_80%,transparent)] backdrop-blur">
         <nav className="h-full overflow-y-auto p-3 pb-24 relative">
           <div className="text-xs uppercase text-muted-foreground/80 px-2 py-2">Navigate</div>
           <div className="flex flex-col gap-1">
@@ -189,12 +145,14 @@ export function AppShell({ children }: AppShellProps) {
       {/* Content area */}
       <main className="pt-16 pl-60">
         <Container size="lg" className="py-6">
-          {children}
+          <div className="rounded-2xl border border-border/40 bg-card/20 p-3 shadow-[0_6px_24px_color-mix(in_oklch,var(--primary)_10%,transparent)] md:p-4">
+            {children}
+          </div>
         </Container>
       </main>
 
       {/* Copyright ribbon */}
-      <footer className="fixed bottom-0 left-60 right-0 z-20 border-t border-border/60 bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/50 text-[11px] text-muted-foreground px-4 md:px-6 py-1.5">
+      <footer className="fixed bottom-0 left-60 right-0 z-20 border-t border-border/60 bg-gradient-to-r from-card/80 via-card/65 to-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/50 text-[11px] text-muted-foreground px-4 md:px-6 py-1.5">
         <div className="flex items-center gap-3">
           <span>(c) {new Date().getFullYear()} evidenceIQ | All rights reserved</span>
           <span className="opacity-60">|</span>

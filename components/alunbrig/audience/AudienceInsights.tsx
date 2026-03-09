@@ -74,6 +74,81 @@ type UkAccessResponse = {
   topEvidenceTypes: { type: string; count: number }[]
 }
 
+async function fetchJsonOrThrow(url: string) {
+  const res = await fetch(url)
+  if (!res.ok) {
+    let message = `Request failed (${res.status})`
+    try {
+      const err = await res.json()
+      if (err?.error) message = String(err.error)
+    } catch {
+      // keep fallback message
+    }
+    throw new Error(message)
+  }
+  return res.json()
+}
+
+function normalizeSummary(data: any): SummaryResponse {
+  return {
+    dateRange: {
+      startDate: String(data?.dateRange?.startDate || ""),
+      endDate: String(data?.dateRange?.endDate || ""),
+    },
+    softShares: {
+      HCP: Number(data?.softShares?.HCP || 0),
+      Patient: Number(data?.softShares?.Patient || 0),
+      Caregiver: Number(data?.softShares?.Caregiver || 0),
+      Payer: Number(data?.softShares?.Payer || 0),
+      Other: Number(data?.softShares?.Other || 0),
+    },
+    hardShares: {
+      HCP: { posts: Number(data?.hardShares?.HCP?.posts || 0), share: Number(data?.hardShares?.HCP?.share || 0) },
+      Patient: { posts: Number(data?.hardShares?.Patient?.posts || 0), share: Number(data?.hardShares?.Patient?.share || 0) },
+      Caregiver: { posts: Number(data?.hardShares?.Caregiver?.posts || 0), share: Number(data?.hardShares?.Caregiver?.share || 0) },
+      Payer: { posts: Number(data?.hardShares?.Payer?.posts || 0), share: Number(data?.hardShares?.Payer?.share || 0) },
+      Other: { posts: Number(data?.hardShares?.Other?.posts || 0), share: Number(data?.hardShares?.Other?.share || 0) },
+    },
+    flagRatesOverall: {
+      pctSequencing: Number(data?.flagRatesOverall?.pctSequencing || 0),
+      pctQoL: Number(data?.flagRatesOverall?.pctQoL || 0),
+      pctNeurotox: Number(data?.flagRatesOverall?.pctNeurotox || 0),
+      pctCaregiverBurden: Number(data?.flagRatesOverall?.pctCaregiverBurden || 0),
+      pctCNS: Number(data?.flagRatesOverall?.pctCNS || 0),
+      pctUKAccess: Number(data?.flagRatesOverall?.pctUKAccess || 0),
+    },
+  }
+}
+
+function normalizeLeaderboard(data: any, audience: AudienceKey): LeaderboardResponse {
+  return {
+    audience,
+    topics: Array.isArray(data?.topics) ? data.topics : [],
+    buckets: Array.isArray(data?.buckets) ? data.buckets : [],
+    flagRates: {
+      pctSequencing: Number(data?.flagRates?.pctSequencing || 0),
+      pctQoL: Number(data?.flagRates?.pctQoL || 0),
+      pctNeurotox: Number(data?.flagRates?.pctNeurotox || 0),
+      pctCaregiverBurden: Number(data?.flagRates?.pctCaregiverBurden || 0),
+      pctCNS: Number(data?.flagRates?.pctCNS || 0),
+      pctUKAccess: Number(data?.flagRates?.pctUKAccess || 0),
+    },
+  }
+}
+
+function normalizeUkAccess(data: any, audience: AudienceKey): UkAccessResponse {
+  return {
+    audience,
+    totalUKAccessPosts: Number(data?.totalUKAccessPosts || 0),
+    nationBreakdown: Array.isArray(data?.nationBreakdown) ? data.nationBreakdown : [],
+    topAccessSignals: Array.isArray(data?.topAccessSignals) ? data.topAccessSignals : [],
+    topHurdles: Array.isArray(data?.topHurdles) ? data.topHurdles : [],
+    topOpportunities: Array.isArray(data?.topOpportunities) ? data.topOpportunities : [],
+    topTopics: Array.isArray(data?.topTopics) ? data.topTopics : [],
+    topEvidenceTypes: Array.isArray(data?.topEvidenceTypes) ? data.topEvidenceTypes : [],
+  }
+}
+
 function buildParams(obj: Record<string, any>) {
   const sp = new URLSearchParams()
   for (const [k, v] of Object.entries(obj)) {
@@ -137,9 +212,8 @@ export function AudienceInsights() {
   useEffect(() => {
     const q = buildParams(baseParams)
     setSummaryLoading(true)
-    fetch(`/api/alunbrig/audience/summary?${q}`)
-      .then((r) => r.json())
-      .then((d) => setSummary(d as SummaryResponse))
+    fetchJsonOrThrow(`/api/alunbrig/audience/summary?${q}`)
+      .then((d) => setSummary(normalizeSummary(d)))
       .catch(() => setSummary(null))
       .finally(() => setSummaryLoading(false))
   }, [baseParams])
@@ -149,17 +223,15 @@ export function AudienceInsights() {
     const q = buildParams({ ...baseParams, audience: tab })
 
     setLeaderLoading(true)
-    fetch(`/api/alunbrig/audience/leaderboard?${q}&limitTopics=25&limitBuckets=10`)
-      .then((r) => r.json())
-      .then((d) => setLeader(d as LeaderboardResponse))
+    fetchJsonOrThrow(`/api/alunbrig/audience/leaderboard?${q}&limitTopics=25&limitBuckets=10`)
+      .then((d) => setLeader(normalizeLeaderboard(d, tab)))
       .catch(() => setLeader(null))
       .finally(() => setLeaderLoading(false))
 
     if (tab === "Payer") {
       setUkLoading(true)
-      fetch(`/api/alunbrig/audience/uk-access?${q}`)
-        .then((r) => r.json())
-        .then((d) => setUk(d as UkAccessResponse))
+      fetchJsonOrThrow(`/api/alunbrig/audience/uk-access?${q}`)
+        .then((d) => setUk(normalizeUkAccess(d, tab)))
         .catch(() => setUk(null))
         .finally(() => setUkLoading(false))
     } else {
@@ -234,9 +306,8 @@ export function AudienceInsights() {
     setCmpLoading(true)
     Promise.all(
       audiences.map((a) =>
-        fetch(`/api/alunbrig/audience/leaderboard?${qBase}&audience=${encodeURIComponent(a)}&limitTopics=0&limitBuckets=0`)
-          .then((r) => r.json())
-          .then((d) => [a, d as LeaderboardResponse] as const)
+        fetchJsonOrThrow(`/api/alunbrig/audience/leaderboard?${qBase}&audience=${encodeURIComponent(a)}&limitTopics=0&limitBuckets=0`)
+          .then((d) => [a, normalizeLeaderboard(d, a)] as const)
           .catch(() => [a, null] as const),
       ),
     )

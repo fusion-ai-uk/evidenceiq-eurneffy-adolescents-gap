@@ -86,6 +86,7 @@ export function CompetitorLens() {
   const [tableLoading, setTableLoading] = useState(false)
   const [table, setTable] = useState<ComparatorResponse | null>(null)
   const [tableError, setTableError] = useState<string | null>(null)
+  const [selectionPulse, setSelectionPulse] = useState(false)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerTitle, setDrawerTitle] = useState("Examples")
@@ -210,6 +211,20 @@ export function CompetitorLens() {
       .finally(() => setTableLoading(false))
   }, [baseParams, draft.startDate, draft.endDate])
 
+  // Auto-select first competitor once table is available for faster orientation.
+  useEffect(() => {
+    if (draft.competitor) return
+    const first = table?.rows?.[0]?.competitor
+    if (!first) return
+    setDraft((d) => ({ ...d, competitor: String(first) }))
+  }, [table, draft.competitor])
+
+  useEffect(() => {
+    if (!selectionPulse) return
+    const t = window.setTimeout(() => setSelectionPulse(false), 1200)
+    return () => window.clearTimeout(t)
+  }, [selectionPulse])
+
   const selectedRow = useMemo(() => {
     const c = draft.competitor?.trim()
     if (!c) return null
@@ -273,13 +288,16 @@ export function CompetitorLens() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="border-border/50 xl:col-span-2">
           <CardHeader>
-            <div>
+            <div className="flex items-center justify-between gap-2">
+              <div>
               <CardTitle className="text-base font-medium">Competitor comparison</CardTitle>
               <div className="text-sm text-muted-foreground">Compare competitors by share of competitive conversation and their `card_bucket` theme mix.</div>
+              </div>
+              {tableLoading && table ? <div className="text-xs text-muted-foreground">Refreshing…</div> : null}
             </div>
           </CardHeader>
           <CardContent>
-            {tableLoading ? (
+            {tableLoading && !table ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
             ) : tableError ? (
               <div className="text-sm text-destructive">Error: {tableError}</div>
@@ -288,12 +306,12 @@ export function CompetitorLens() {
             ) : !Array.isArray(table.rows) || table.rows.length === 0 ? (
               <div className="text-sm text-muted-foreground">No competitors found in this slice.</div>
             ) : (
-              <Table className="w-full table-fixed" containerClassName="overflow-x-hidden">
+              <Table className="w-full min-w-[900px] table-fixed text-xs md:text-sm" containerClassName="overflow-x-auto">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Competitor</TableHead>
-                    <TableHead className="w-[150px]">Share</TableHead>
-                    <TableHead className="w-[260px]">Theme mix (`card_bucket`)</TableHead>
+                    <TableHead className="w-[160px]">Competitor</TableHead>
+                    <TableHead className="w-[120px]">Share</TableHead>
+                    <TableHead className="w-[240px]">Theme mix (`card_bucket`)</TableHead>
                     <TableHead>Top drivers</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -306,9 +324,16 @@ export function CompetitorLens() {
                         className={`cursor-pointer ${draft.competitor === r.competitor ? "bg-muted/30" : "hover:bg-muted/20"}`}
                         onClick={() => {
                           setDraft((d) => ({ ...d, competitor: r.competitor }))
+                          setSelectionPulse(true)
+                          window.requestAnimationFrame(() => {
+                            const el = document.getElementById("competitor-focus-panel")
+                            if (el) {
+                              el.scrollIntoView({ behavior: "smooth", block: "nearest" })
+                            }
+                          })
                         }}
                       >
-                        <TableCell className="font-medium max-w-[180px] truncate">{r.competitor}</TableCell>
+                        <TableCell className="font-medium max-w-[160px] truncate">{r.competitor}</TableCell>
                         <TableCell>
                           <div>
                             <div className="text-sm font-medium">{pct(share)}</div>
@@ -318,7 +343,7 @@ export function CompetitorLens() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="whitespace-normal">
+                        <TableCell className="whitespace-normal align-top">
                           <div className="flex flex-wrap gap-1">
                             {(r.bucketMix || []).slice(0, 4).map((b, j) => (
                               <span key={`${r.competitor}-bucket-${String(b.bucket)}-${j}`} className="text-xs rounded-full border px-2 py-0.5 text-muted-foreground">
@@ -328,8 +353,8 @@ export function CompetitorLens() {
                             {(r.bucketMix || []).length === 0 ? <span className="text-xs text-muted-foreground">—</span> : null}
                           </div>
                         </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <div className="text-xs text-muted-foreground leading-5 break-words">
+                        <TableCell className="whitespace-normal align-top">
+                          <div className="text-xs text-muted-foreground leading-5 break-words line-clamp-2">
                             {(r.topDrivers || []).slice(0, 2).map((d) => d.driver).filter(Boolean).join(" • ") || "—"}
                           </div>
                         </TableCell>
@@ -342,9 +367,15 @@ export function CompetitorLens() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50">
+        <Card
+          id="competitor-focus-panel"
+          className={`border-border/50 h-fit xl:sticky xl:top-20 transition-shadow ${selectionPulse ? "shadow-[0_0_0_2px_color-mix(in_oklch,var(--primary)_45%,transparent)]" : ""}`}
+        >
           <CardHeader>
-            <CardTitle className="text-base font-medium">Competitor focus</CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base font-medium">Competitor focus</CardTitle>
+              {draft.competitor ? <span className="text-[11px] text-muted-foreground">Selected: {draft.competitor}</span> : null}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {!draft.competitor ? (
