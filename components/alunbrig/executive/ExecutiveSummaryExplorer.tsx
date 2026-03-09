@@ -24,6 +24,8 @@ type SummaryUpdateSet = {
   timelineLabel: string
   dateRange: string
   cadenceNote?: string
+  isLocked?: boolean
+  lockLabel?: string
   sections: SummarySection[]
 }
 
@@ -283,6 +285,8 @@ const EXECUTIVE_UPDATE_SETS: SummaryUpdateSet[] = [
     timelineLabel: "Mid-Feb to Wk 1 Mar",
     dateRange: "Mid-Feb to first week of March (inclusive)",
     cadenceNote: "Fortnightly update sets will follow after this period.",
+    isLocked: true,
+    lockLabel: "Under expert review",
     sections: UPDATE_SET_1_SECTIONS,
   },
 ]
@@ -331,15 +335,23 @@ export function ExecutiveSummaryExplorer() {
             Update Set
           </Badge>
           {EXECUTIVE_UPDATE_SETS.map((updateSet) => (
-            <Button
-              key={updateSet.id}
-              type="button"
-              variant={activeUpdateSet.id === updateSet.id ? "default" : "outline"}
-              className="h-8 rounded-full px-3 text-xs"
-              onClick={() => handleUpdateSetChange(updateSet.id)}
-            >
-              {updateSet.label}
-            </Button>
+            <div key={updateSet.id} className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant={activeUpdateSet.id === updateSet.id ? "default" : "outline"}
+                className="h-8 rounded-full px-3 text-xs"
+                onClick={() => handleUpdateSetChange(updateSet.id)}
+                disabled={Boolean(updateSet.isLocked)}
+                aria-disabled={Boolean(updateSet.isLocked)}
+              >
+                {updateSet.label}
+              </Button>
+              {updateSet.isLocked ? (
+                <span className="inline-flex animate-pulse items-center rounded-full border border-amber-300/60 bg-amber-100/70 px-2 py-0.5 text-[10px] font-medium text-amber-900 shadow-[0_0_12px_rgba(251,191,36,0.45)] dark:border-amber-700/70 dark:bg-amber-500/15 dark:text-amber-200">
+                  {updateSet.lockLabel ?? "Under review"}
+                </span>
+              ) : null}
+            </div>
           ))}
         </div>
         <div className="mt-3">
