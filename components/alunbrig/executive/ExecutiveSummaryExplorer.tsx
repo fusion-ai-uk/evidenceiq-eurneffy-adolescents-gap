@@ -218,9 +218,9 @@ const UPDATE_SET_1_SECTIONS: SummarySection[] = [
       },
       {
         id: "gt-2",
-        title: "Brigatinib shows up less as a broad brand story and more as a precision-use asset when sequencing becomes mutation-directed",
+        title: "Brigatinib’s role shifts from broad use to precision use in mutation-directed sequencing post-alectinib resistance",
         body:
-          "Brigatinib is not dominating the overall volume, but when it does appear, it shows up in a high-value way: as a purposeful choice in a defined resistance context rather than as generic class chatter. The strongest example is the case-based discussion of sustained complete response after alectinib in an I1171N setting, paired with explicit emphasis on re-biopsy and mutation-directed sequencing. That pattern matters because it suggests brigatinib's most credible lane in this dataset is not breadth, but specificity. The strategic implication is that brigatinib can win disproportionate authority when the narrative is tied to molecular decision-making, resistance mutation logic, and why the next TKI choice should be evidence-shaped rather than automatic.",
+          "Brigatinib does not dominating overall volume, but when it appears it carries disproportionate value as a purposeful choice in a defined resistance context rather than generic class commentary. The clearest example is a case-based discussion of sustained complete response to alectinib in patients with an I1171N ALK mutation, alongside explicit emphasis on re-biopsy and mutation-directed sequencing. This pattern suggests brigatinib’s most credible role according to this dataset lie not in breadth but in specificity. Strategically, brigatinib gains authority when the narrative is tied to molecular decision-making, resistance mutation rationale, and evidence-guided TKI sequencing rather than automatic switching.",
       },
     ],
   },
@@ -231,15 +231,15 @@ const UPDATE_SET_1_SECTIONS: SummarySection[] = [
     cards: [
       {
         id: "tr-1",
-        title: "CNS remains one of the highest-yield attention zones, but the strongest pull is still concentrated around next-generation leaders",
+        title: "CNS remains a high-attention domain, with momentum concentrated around next-generation TKIs",
         body:
-          "CNS/brain metastases continues to behave like a high-salience clinical lens, especially when baseline brain involvement is made explicit. The update includes both meta-analytic and shorthand clinician posts reinforcing that intracranial response is a major decision filter, and that later-generation TKIs are the benchmark against older options in this space. Importantly, the tone of the CNS conversation is not casual; it reads like a credibility test for frontline choice. The implication is that CNS still functions as one of the clearest gateways into treatment preference, but it is also a highly competitive lens, so any attempt to enter it needs to be anchored in concrete clinical logic rather than broad \"brain mets matter\" messaging.",
+          "CNS/brain metastases continues to function as a highly influential driver of clinical decisions, particularly when baseline brain involvement is explicitly stated. This update reinforces that intracranial response remains a key decision criterion, and that later-generation TKIs are the benchmark against older options in this setting. Importantly, the tone of the CNS discussion is not casual; it reads as a credibility test for frontline therapy selection. The implication is that CNS continues to act as one of the clearest entry points into treatment preference, but it is also a highly competitive domain. Any attempt to engage here needs to be anchored in concrete clinical rationale rather than broad \"brain metastases matter\" messaging.",
       },
       {
         id: "tr-2",
-        title: "The update is not driven by steady share growth - it is driven by a few concentrated evidence bursts and proof-point posts",
+        title: "The update is not driven by steady share growth, but by a small number of concentrated evidence-led posts",
         body:
-          "This cut of conversation behaves less like a continuous narrative and more like a sequence of sharp evidence spikes. High-information posts carrying endpoints, named combinations, specific mutations, or policy/actionable access changes do disproportionate work relative to lightweight product mentions. In practice, that means a single post with real numbers, a real resistance lesson, or a real-world sequencing signal travels further than broad promotional language. The strategic lesson is that attention is clustering around posts that help people decide, not just remember. For Alunbrig, that favors a content strategy built around interpretable clinical proof-points, case-based sequencing logic, and concrete system-level relevance rather than undifferentiated brand presence.",
+          "This cut of conversation reads less like a continuous narrative and more like a sequence of discrete evidence signals. High-information posts containing endpoints, named combinations, specific mutations, or actionable policy/access changes carry disproportionate influence relative to lightweight product mentions. In practice, that means a single post presenting real data, a clear resistance insight, or a real-world sequencing signal generates more engagement than broad promotional language. The strategic implication is that attention clusters around posts that support decision-making, not just brand messaging. For Alunbrig, that favours [HT1.1]a content strategy centered on interpretable clinical proof-points, case-based sequencing rationale, and clear system-level relevance rather than undifferentiated brand presence.",
       },
     ],
   },
@@ -250,9 +250,9 @@ const UPDATE_SET_1_SECTIONS: SummarySection[] = [
     cards: [
       {
         id: "au-1",
-        title: "HCP discussion is where clinical meaning is made, while non-HCP voices pull the story toward cost burden, recurrence anxiety, and practical access",
+        title: "HCP discussion is where clinical interpretation happens, while non-HCP voices emphasize cost burden, recurrence anxiety, and practical access",
         body:
-          "The HCP layer of this update is where the most consequential framing happens: resistance biology, intracranial efficacy, sequencing after prior TKIs, and interpretation of evidence quality. By contrast, advocacy and caregiver signals are fewer, but they are emotionally concentrated around affordability, customs-duty relief, and fear of recurrence after response. That split matters because the two audiences are not reacting to the same story. HCPs are asking what works, when, and why; patients and families are asking whether they can afford it, how long it will last, and what happens next. The implication is that one message system will not serve both audiences well. Clinical authority content and support/access content need to be deliberately separated rather than blended.",
+          "Within in this update, HCP conversation provides the most consequential clinical framing, focusing on resistance biology, intracranial efficacy, sequencing after prior TKIs, and interpretation of evidence quality. Advocacy and caregiver signals are less frequent but concentrate around affordability and fear of recurrence after response. This distinction matters because the two audiences do not share the same set of concerns. HCPs focus on what works, when, and why; patients and families focus on affordability, durability of response, and what happens next.",
       },
     ],
   },
@@ -263,9 +263,9 @@ const UPDATE_SET_1_SECTIONS: SummarySection[] = [
     cards: [
       {
         id: "cl-1",
-        title: "The competitor landscape is still anchored by alectinib and lorlatinib, while brigatinib's opening is in the spaces they leave unresolved",
+        title: "The competitor landscape remains anchored by alectinib and lorlatinib, while brigatinib’s opportunity lies in the gaps they leave unresolved",
         body:
-          "Alectinib and lorlatinib continue to define the mental scoreboard: alectinib through strong response and early-stage standard-setting, lorlatinib through best-in-class PFS and strong CNS/resistance-adjacent visibility. That makes the competitive problem less about direct volume parity and more about where those dominant narratives become vulnerable or incomplete. In this update, the clearest openings are mutation-specific sequencing after prior ALK TKIs, the dissatisfaction around post-lorlatinib resistance strategies, and market-specific access stories where brigatinib is directly relevant. The practical insight is that brigatinib does not need to out-shout the leading brands everywhere; it needs to insert itself where the current leaders do not fully answer the decision problem.",
+          "Alectinib and lorlatinib continue to set the competitive reference points: alectinib through strong response and its role in establishing early-stage standards of, and lorlatinib through best-in-class PFS and strong visibility around CNS activity and resistance. This means the competitive challenge is less about direct volume parity and more about where those dominant narratives become incomplete. In this update, the clearest opportunities emerge in mutation-specific sequencing after prior ALK TKIs, ongoing dissatisfaction around post-lorlatinib resistance strategies, and market-specific access situations where brigatinib is directly relevant. The practical insight is that brigatinib will likely not compete with the leading brands across every dimension, but instead be positioned where the current leaders do not fully resolve the clinical issue.",
       },
     ],
   },
