@@ -14,11 +14,15 @@ function InnerShell({ children }: { children: React.ReactNode }) {
 
 export function AnalysisShell({ children }: { children: React.ReactNode }) {
   return (
-    <AnalysisProvider>
-      <AnalystWorkspaceProvider>
-        <InnerShell>{children}</InnerShell>
-      </AnalystWorkspaceProvider>
-    </AnalysisProvider>
+    <React.Suspense
+      fallback={<div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading analysis...</div>}
+    >
+      <AnalysisProvider>
+        <AnalystWorkspaceProvider>
+          <InnerShell>{children}</InnerShell>
+        </AnalystWorkspaceProvider>
+      </AnalysisProvider>
+    </React.Suspense>
   )
 }
 
