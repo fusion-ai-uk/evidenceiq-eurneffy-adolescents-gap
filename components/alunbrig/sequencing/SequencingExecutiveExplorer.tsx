@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { subMonths } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExamplePostsDrawer } from "@/components/alunbrig/themes/ExamplePostsDrawer"
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Cell, ReferenceLine } from "recharts"
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, BarChart, Bar, Cell, ReferenceLine } from "recharts"
 import { DateRangeControl } from "@/components/alunbrig/filters/DateRangeControl"
 import { toDateInputValue } from "@/lib/date-input"
 import { InfoTip } from "@/components/alunbrig/InfoTip"
@@ -297,7 +297,7 @@ export function SequencingExecutiveExplorer() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2f2f2f" horizontal={false} />
                 <XAxis type="number" domain={[0, 100]} tickFormatter={(v: any) => `${Math.round(Number(v || 0))}%`} />
                 <YAxis dataKey="label" type="category" width={140} tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
+                <RechartsTooltip formatter={(v: any) => `${Number(v || 0).toFixed(1)}%`} />
                 <ReferenceLine x={25} stroke="#9ca3af" strokeDasharray="4 4" />
                 <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                   {signalChartData.map((entry) => (
