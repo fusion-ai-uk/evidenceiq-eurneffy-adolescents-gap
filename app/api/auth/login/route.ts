@@ -8,6 +8,7 @@ const USERS = [
 
   // EURneffy login
   { email: "eurneffy@evidenceiq.io", password: "eurneffy" },
+  { email: "eurneffy@evidenceiq.io", password: "evidenceiq" },
 
   // Fusion login
   { email: "mary@fusionagency.solutions", password: "Moose01!" },

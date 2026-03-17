@@ -7,6 +7,7 @@ import {
   AnalysisSectionHeader,
   EvidenceRowList,
   FrequencyListWithChips,
+  InsightReadout,
   MetricStrip,
   RankedTaxonomyBars,
 } from "@/components/evidenceiq/analysis-components"
@@ -20,7 +21,7 @@ import {
 } from "@/lib/evidence/selectors"
 import type { ArticleRow } from "@/lib/evidence/types"
 import { ArticleDetailDrawer } from "@/components/evidenceiq/article-detail-drawer"
-import { formatShare } from "@/lib/evidence/display"
+import { formatShare, humanizeLabel } from "@/lib/evidence/display"
 
 export default function DosingResponseRiskSettingsPage() {
   const { filteredRows, dataset, isLoading, error } = useAnalysisContext()
@@ -70,6 +71,68 @@ export default function DosingResponseRiskSettingsPage() {
     () => getCooccurrenceMatrix(settingsRows, (row) => row.settingTags, (row) => row.barrierTags).slice(0, 12),
     [settingsRows],
   )
+  const tabInsights = React.useMemo(() => {
+    if (activeTab === "dosing") {
+      const topDosingTag = getTagFrequency(dosingRows, (row) => row.dosingTransitionTags)[0]
+      return [
+        {
+          heading: "Most recurring dosing signal",
+          detail: topDosingTag
+            ? `${humanizeLabel(topDosingTag.key)} is the top dosing-transition signal (${topDosingTag.percentage.toFixed(0)}%), indicating where dosing uncertainty appears most often in this evidence base.`
+            : "No dosing-transition concentration signal is available under current selection.",
+        },
+        {
+          heading: "Evidence gap context",
+          detail: `High-priority dosing gap share is ${formatShare(dosingRows.filter((row) => ["high", "critical"].includes(row.gapPriority.toLowerCase())).length, totalDosingRows)}, so this is primarily a follow-up and clarification territory rather than a fully resolved message territory.`,
+        },
+        {
+          heading: "Practical implication",
+          detail:
+            "Use dosing narrative as readiness and review framing, while avoiding broad claims until adolescent-specific and UK-specific support becomes denser.",
+        },
+      ]
+    }
+
+    if (activeTab === "response") {
+      const topResponseTag = getTagFrequency(responseRows, (row) => row.recognitionResponseTags)[0]
+      return [
+        {
+          heading: "Most recurring response issue",
+          detail: topResponseTag
+            ? `${humanizeLabel(topResponseTag.key)} is the top recognition/response signal (${topResponseTag.percentage.toFixed(0)}%), showing where real-world emergency-action friction is most repeated.`
+            : "No recognition/response concentration signal is available under current selection.",
+        },
+        {
+          heading: "Gap pressure signal",
+          detail: `High-priority response gap share is ${formatShare(responseRows.filter((row) => ["high", "critical"].includes(row.gapPriority.toLowerCase())).length, totalResponseRows)}, reinforcing that confidence-to-act messaging should be paired with concrete training support.`,
+        },
+        {
+          heading: "Practical implication",
+          detail:
+            "Prioritise fast-action confidence messaging and decision clarity under pressure, rather than awareness-only messaging.",
+        },
+      ]
+    }
+
+    const topSettingTag = getTagFrequency(settingsRows, (row) => row.settingTags)[0]
+    return [
+      {
+        heading: "Most recurring risk context",
+        detail: topSettingTag
+          ? `${humanizeLabel(topSettingTag.key)} is the most repeated setting signal (${topSettingTag.percentage.toFixed(0)}%), highlighting where contextual readiness support is most needed.`
+          : "No settings-of-risk concentration signal is available under current selection.",
+      },
+      {
+        heading: "Missing-breakout signal",
+        detail: `No setting-specific breakout share is ${formatShare(settingsRows.filter((row) => row.reportsNoSettingSpecificData).length, totalSettingsRows)}, indicating where practical context still needs stronger evidence depth.`,
+      },
+      {
+        heading: "Practical implication",
+        detail:
+          "Use settings to make messaging realistic and lived-in, while flagging under-evidenced contexts for further validation rather than overclaiming.",
+      },
+    ]
+  }, [activeTab, dosingRows, responseRows, settingsRows, totalDosingRows, totalResponseRows, totalSettingsRows])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading dosing/response/settings analysis...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -77,6 +140,7 @@ export default function DosingResponseRiskSettingsPage() {
   return (
     <div className="space-y-4">
       <AnalysisSectionHeader title="Dosing / Response / Risk Settings" description="Use each tab to identify high-priority evidence gaps and missing breakouts in critical care moments." />
+      <InsightReadout title="What this tab is saying" insights={tabInsights} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>

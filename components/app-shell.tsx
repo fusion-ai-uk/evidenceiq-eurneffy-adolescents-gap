@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Moon, Sun, LayoutDashboard, ShieldAlert, Search, Layers, Radar, FlaskConical, Calendar, CircleHelp, Sparkles } from 'lucide-react'
+import { Moon, Sun, LayoutDashboard, ShieldAlert, Search, Layers, Radar, FlaskConical, Calendar, CircleHelp, Sparkles, BookOpenText } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
@@ -16,6 +16,7 @@ type AppShellProps = {
 
 type SubNavItem = { id: string; label: string }
 type NavItem = { name: string; href: string; icon: any; subNav?: SubNavItem[]; standout?: boolean }
+const SOURCES_NAV_ITEM: NavItem = { name: 'Sources', href: '/sources', icon: BookOpenText }
 
 const nav: NavItem[] = [
   {
@@ -254,6 +255,9 @@ export function AppShell({ children }: AppShellProps) {
             <div className="mx-2 my-2 border-t border-border/60" />
             <div className="px-2 pb-1 text-[11px] uppercase tracking-wide text-muted-foreground/65">Analysis Explorer</div>
             {nav.slice(1).map(renderNavItem)}
+          </div>
+          <div className="mt-3 border-t border-border/60 pt-2">
+            {renderNavItem(SOURCES_NAV_ITEM)}
           </div>
           {/* Fusion logo pinned to bottom */}
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center">

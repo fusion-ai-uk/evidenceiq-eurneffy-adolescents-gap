@@ -28,6 +28,32 @@ export function AnalysisSectionHeader({ title, description }: { title: string; d
   )
 }
 
+export function InsightReadout({
+  title = "What this means",
+  insights,
+}: {
+  title?: string
+  insights: Array<{ heading: string; detail: string }>
+}) {
+  if (insights.length === 0) return null
+
+  return (
+    <Card className="border-primary/25 bg-gradient-to-r from-primary/10 via-background to-cyan-500/10 py-4">
+      <CardHeader className="px-4 pb-2">
+        <CardTitle className="text-sm">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-2 px-4 md:grid-cols-2 xl:grid-cols-3">
+        {insights.map((item) => (
+          <div key={item.heading} className="rounded-md border border-border/70 bg-background/70 p-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-foreground">{item.heading}</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function InfoHint({ text }: { text: string }) {
   return (
     <TooltipProvider>

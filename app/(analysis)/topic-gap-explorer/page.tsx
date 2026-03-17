@@ -8,6 +8,7 @@ import {
   AnalysisSectionHeader,
   EvidenceRowList,
   GapQuestionPanel,
+  InsightReadout,
   MetricStrip,
   RankedTaxonomyBars,
   ScoreComparisonCards,
@@ -106,6 +107,29 @@ export default function TopicGapExplorerPage() {
       .filter(Boolean)
     return unresolved.length > 0 ? unresolved : topicRows.map((row) => row.gapSummary).filter(Boolean)
   }, [highPriorityTopicRows, topicRows])
+  const topicInsights = React.useMemo(() => {
+    const topTopic = [...topicCards].sort((a, b) => b.gapRows - a.gapRows || b.score - a.score)[0]
+    const topTheme = getTagFrequency(highPriorityTopicRows, (row) => row.dataGapTags)[0]
+    return [
+      {
+        heading: "Topic with strongest unresolved pressure",
+        detail: topTopic
+          ? `${topTopic.label} currently carries the highest high-priority gap share (${formatShare(topTopic.gapRows ?? 0, topTopic.rows ?? 0)}), so this is the leading topic for evidence-closing work.`
+          : "No topic-level pressure signal is available under current selection.",
+      },
+      {
+        heading: "What is most often missing",
+        detail: topTheme
+          ? `${topTheme.key} is the top recurring high-priority gap theme (${topTheme.percentage.toFixed(0)}%), showing where the current topic evidence is most structurally thin.`
+          : "No repeated gap theme is available under current selection.",
+      },
+      {
+        heading: "How to use this section",
+        detail:
+          "Use the question panels as direct briefing prompts: what can be said confidently now, and what requires KOL or desk-research follow-up before message escalation.",
+      },
+    ]
+  }, [highPriorityTopicRows, topicCards])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading topic explorer...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -113,6 +137,7 @@ export default function TopicGapExplorerPage() {
   return (
     <div className="space-y-4">
       <AnalysisSectionHeader title="Topic & Gap Explorer" description="Focus each topic on gap pressure, missing breakouts, and follow-up research needs." />
+      <InsightReadout title="What this means for topic strategy" insights={topicInsights} />
       <section id="topic-comparison" className="scroll-mt-24">
         <ScoreComparisonCards items={topicCards} activeKey={selectedTopic} onSelect={(key) => setSelectedTopic(key as typeof selectedTopic)} />
       </section>

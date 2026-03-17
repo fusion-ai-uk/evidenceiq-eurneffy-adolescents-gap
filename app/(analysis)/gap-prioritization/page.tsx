@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAnalysisContext } from "@/components/evidenceiq/analysis-context"
-import { AnalysisSectionHeader, EvidenceRowList } from "@/components/evidenceiq/analysis-components"
+import { AnalysisSectionHeader, EvidenceRowList, InsightReadout } from "@/components/evidenceiq/analysis-components"
 import { GapClusterCard, QuestionBankPanel } from "@/components/evidenceiq/workflow-components"
 import { getGapClusters, getQuestionBank, rankGapItems } from "@/lib/evidence/workflow"
 import { getTopGapRows } from "@/lib/evidence/selectors"
@@ -80,6 +80,31 @@ export default function GapPrioritizationPage() {
   const rankedGaps = React.useMemo(() => rankGapItems(gapRows), [gapRows])
   const clusters = React.useMemo(() => getGapClusters(gapRows), [gapRows])
   const questionBank = React.useMemo(() => getQuestionBank(gapRows), [gapRows])
+  const gapInsights = React.useMemo(() => {
+    const topGap = rankedGaps[0]
+    const topClusterEntry = Object.entries(clusters).sort((a, b) => b[1].length - a[1].length)[0]
+    const topClusterName = topClusterEntry ? (CLUSTER_COPY[topClusterEntry[0]]?.title ?? humanizeLabel(topClusterEntry[0])) : null
+    const topClusterShare = topClusterEntry ? formatShare(topClusterEntry[1].length, gapRows.length) : "0%"
+    return [
+      {
+        heading: "Highest-priority gap item",
+        detail: topGap
+          ? `${humanizeLabel(topGap.key)} is currently the top-ranked gap signal (${formatShare(topGap.count, gapRows.length)} of gap cohort), so it should be treated as a lead follow-up topic.`
+          : "No ranked gap signal is available under current selection.",
+      },
+      {
+        heading: "Dominant gap family",
+        detail: topClusterName
+          ? `${topClusterName} is the largest cluster (${topClusterShare}), indicating where unresolved evidence pressure is structurally concentrated.`
+          : "No dominant cluster pattern is available under current selection.",
+      },
+      {
+        heading: "How to action this page",
+        detail:
+          "Use the table for triage order, clusters for workstream grouping, and question banks as immediate briefing prompts for KOL and desk-research execution.",
+      },
+    ]
+  }, [clusters, gapRows.length, rankedGaps])
 
   const getTopGapThemes = React.useCallback((rows: ArticleRow[]) => {
     const counts = new Map<string, number>()
@@ -106,6 +131,7 @@ export default function GapPrioritizationPage() {
         title="Gap Prioritization"
         description="Prioritize the highest-impact unresolved evidence gaps and convert them into concrete follow-up questions."
       />
+      <InsightReadout title="What this means for immediate actions" insights={gapInsights} />
       {gapRows.length < 5 ? (
         <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
           Gap workspace currently has a very small cohort share. Rankings may be unstable under current filters.

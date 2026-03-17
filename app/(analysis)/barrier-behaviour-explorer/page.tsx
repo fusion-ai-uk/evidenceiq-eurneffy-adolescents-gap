@@ -8,6 +8,7 @@ import {
   BarrierDetailPanel,
   EvidenceRowList,
   FrequencyListWithChips,
+  InsightReadout,
   MetricStrip,
   RankedTaxonomyBars,
   SupportVsGapMatrix,
@@ -24,7 +25,7 @@ import {
 } from "@/lib/evidence/selectors"
 import type { ArticleRow } from "@/lib/evidence/types"
 import { ArticleDetailDrawer } from "@/components/evidenceiq/article-detail-drawer"
-import { formatShare } from "@/lib/evidence/display"
+import { formatShare, humanizeLabel } from "@/lib/evidence/display"
 
 export default function BarrierBehaviourExplorerPage() {
   const { filteredRows, dataset, isLoading, error } = useAnalysisContext()
@@ -68,6 +69,31 @@ export default function BarrierBehaviourExplorerPage() {
     () => getCooccurrenceMatrix(focusRows, (row) => row.barrierTags, (row) => row.trainingErrorTags).slice(0, 12),
     [focusRows],
   )
+  const barrierInsights = React.useMemo(() => {
+    const topBarrier = barrierOverview[0]
+    const topDriver = getTagFrequency(focusRows, (row) => row.behaviouralDriverTags)[0]
+    const topSettingPair = cooccurrenceSetting[0]
+    return [
+      {
+        heading: "Most recurring barrier",
+        detail: topBarrier
+          ? `${humanizeLabel(topBarrier.key)} is the highest-frequency barrier signal (${topBarrier.percentage.toFixed(0)}%), so this is likely the biggest friction point to address first.`
+          : "No barrier concentration signal is available under current selection.",
+      },
+      {
+        heading: "Behaviour driver behind the barrier",
+        detail: topDriver
+          ? `${humanizeLabel(topDriver.key)} is the strongest behavioural driver signal (${topDriver.percentage.toFixed(0)}%), indicating the mindset dynamic most often linked to practical failure.`
+          : "No behavioural driver pattern is available under current selection.",
+      },
+      {
+        heading: "Where it shows up in real life",
+        detail: topSettingPair
+          ? `The strongest barrier-setting pairing is ${humanizeLabel(topSettingPair.x)} -> ${humanizeLabel(topSettingPair.y)}, showing where barrier pressure is most repeatedly observed in context.`
+          : "No setting co-occurrence pattern is available under current selection.",
+      },
+    ]
+  }, [barrierOverview, cooccurrenceSetting, focusRows])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading barrier explorer...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -75,6 +101,7 @@ export default function BarrierBehaviourExplorerPage() {
   return (
     <div className="space-y-4">
       <AnalysisSectionHeader title="Barrier & Behaviour Explorer" description="Track where barrier evidence is strongest but the gap pressure remains highest." />
+      <InsightReadout title="What this means for behaviour-led messaging" insights={barrierInsights} />
 
       <section id="barrier-kpis" className="scroll-mt-24">
         <MetricStrip

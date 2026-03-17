@@ -1,11 +1,12 @@
 "use client"
 
+import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAnalysisContext } from "@/components/evidenceiq/analysis-context"
 import { ScoreCard } from "@/components/evidenceiq/score-card"
 import { TaxonomyFrequencyPanel } from "@/components/evidenceiq/taxonomy-frequency-panel"
 import { ScoreDistributionPanel } from "@/components/evidenceiq/score-distribution-panel"
-import { AnalysisSectionHeader, InfoHint } from "@/components/evidenceiq/analysis-components"
+import { AnalysisSectionHeader, InfoHint, InsightReadout } from "@/components/evidenceiq/analysis-components"
 import { formatShare, humanizeLabel } from "@/lib/evidence/display"
 import { getHelpSummaryText, getHelpTooltipText } from "@/lib/evidence/help-text"
 
@@ -51,12 +52,42 @@ export default function OverviewPage() {
 
   const { overview, pillarScores, topicScores, gapSignals } = summaries
   const total = filteredRows.length
+  const overviewInsights = React.useMemo(() => {
+    const topPillar = Object.entries(pillarScores).sort((a, b) => b[1] - a[1])[0]
+    const topTopic = Object.entries(topicScores).sort((a, b) => b[1] - a[1])[0]
+    const topGapTag = gapSignals.topGapTags?.[0]
+    return [
+      {
+        heading: "Primary gap pressure",
+        detail: `High-priority gaps appear in ${formatShare(overview.highGapUsefulnessRows, total)} of the current cohort, so this is primarily a gap-identification evidence set rather than a fully resolved proof set.`,
+      },
+      {
+        heading: "Most affected strategic area",
+        detail: topPillar
+          ? `${humanizeLabel(topPillar[0])} currently has the highest average signal (${topPillar[1].toFixed(1)}), indicating where unresolved evidence pressure is most concentrated.`
+          : "No pillar signal is available under current selection.",
+      },
+      {
+        heading: "Top actionable lens",
+        detail: topTopic
+          ? `${humanizeLabel(topTopic[0])} leads topic-level signal (${topTopic[1].toFixed(1)}), which is the strongest route for message development and follow-up prioritization.`
+          : "No topic signal is available under current selection.",
+      },
+      {
+        heading: "Most repeated missing detail",
+        detail: topGapTag
+          ? `${humanizeLabel(topGapTag.key)} is the top recurring gap theme (${topGapTag.percentage.toFixed(0)}% share), so this missing evidence should be treated as a first-order research priority.`
+          : "No recurring gap-theme signal is available under current selection.",
+      },
+    ]
+  }, [gapSignals.topGapTags, overview.highGapUsefulnessRows, pillarScores, topicScores, total])
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <AnalysisSectionHeader title="Overview" description="EURneffy adolescent anaphylaxis evidence fit and gap snapshot." />
       </div>
+      <InsightReadout title="What this is telling the EURneffy team" insights={overviewInsights} />
 
       <section id="overview-kpis" className="scroll-mt-24 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <ScoreCard label="High-priority gap share" value={formatShare(overview.highGapUsefulnessRows, total)} />

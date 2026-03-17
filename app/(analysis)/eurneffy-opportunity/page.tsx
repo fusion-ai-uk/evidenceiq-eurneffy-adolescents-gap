@@ -7,6 +7,7 @@ import {
   AnalysisSectionHeader,
   EvidenceRowList,
   FrequencyListWithChips,
+  InsightReadout,
   MetricStrip,
   OpportunityThemeCard,
   RankedTaxonomyBars,
@@ -60,6 +61,33 @@ export default function EurneffyOpportunityPage() {
   )
 
   const openQuestions = React.useMemo(() => getOpenQuestionsSummary(eurRows), [eurRows])
+  const opportunityInsights = React.useMemo(() => {
+    const topOpp = opportunityTags[0]
+    const contextualShare =
+      eurRows.length > 0
+        ? formatShare(
+            eurRows.filter((row) => classifySupportLevel(row) === "contextual_support").length,
+            eurRows.length,
+          )
+        : "0%"
+    return [
+      {
+        heading: "Top opportunity territory",
+        detail: topOpp
+          ? `${topOpp.key} is the highest-frequency opportunity signal (${topOpp.percentage.toFixed(0)}%), so this is currently the most defensible EURneffy-linked message direction in this dataset.`
+          : "No EURneffy opportunity concentration signal is available under current selection.",
+      },
+      {
+        heading: "Support strength reality check",
+        detail: `Most current support is contextual (${contextualShare}), so this should be framed as evidence-linked opportunity context rather than direct product-proof territory.`,
+      },
+      {
+        heading: "Practical implication",
+        detail:
+          "Use this page to identify where EURneffy can credibly reduce readiness barriers while keeping guardrails explicit on superiority, universal replacement, and outcome overclaim.",
+      },
+    ]
+  }, [eurRows, opportunityTags])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading EURneffy opportunity view...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -67,6 +95,7 @@ export default function EurneffyOpportunityPage() {
   return (
     <div className="space-y-4">
       <AnalysisSectionHeader title="EURneffy Opportunity View" description="View EURneffy-related themes through a gap lens: where support is thin and what follow-up is needed." />
+      <InsightReadout title="What this means for EURneffy positioning" insights={opportunityInsights} />
       <section id="opportunity-kpis" className="scroll-mt-24">
         <MetricStrip items={overviewItems} />
       </section>

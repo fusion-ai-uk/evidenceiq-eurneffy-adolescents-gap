@@ -14,6 +14,7 @@ import {
 import {
   AnalysisSectionHeader,
   EvidenceRowList,
+  InsightReadout,
   MetricStrip,
   PillarDetailPanel,
   RankedTaxonomyBars,
@@ -112,6 +113,29 @@ export default function PillarsPage() {
     [pillarRows, selectedPillar],
   )
   const rankedGapRows = React.useMemo(() => getTopGapRows(pillarRows, 10), [pillarRows])
+  const pillarInsights = React.useMemo(() => {
+    const top = [...pillarCards].sort((a, b) => b.highPriority - a.highPriority || b.missingBreakoutBurden - a.missingBreakoutBurden || b.gapPressure - a.gapPressure)[0]
+    const active = pillarCards.find((p) => p.key === selectedPillar)
+    return [
+      {
+        heading: "Most gap-exposed pillar",
+        detail: top
+          ? `${top.label} currently leads high-priority gap share (${formatShare(top.highPriority, top.rows)}), which makes it the strongest candidate for immediate message-focus and validation planning.`
+          : "No pillar-level signal is available under current selection.",
+      },
+      {
+        heading: "Current pillar read",
+        detail: active
+          ? `${active.label} shows a ${active.missingBreakoutBurden.toFixed(0)}% missing-breakout burden, indicating how often core adolescent, UK, and real-world details are absent together.`
+          : "No active pillar signal is available.",
+      },
+      {
+        heading: "Implication for messaging",
+        detail:
+          "Treat top pillars as barrier-framing territory first, then use evidence rows below to decide what can be said now versus what still needs follow-up support.",
+      },
+    ]
+  }, [pillarCards, selectedPillar])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading pillar analysis...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -119,6 +143,7 @@ export default function PillarsPage() {
   return (
     <div className="space-y-4">
       <AnalysisSectionHeader title="Pillars" description="Compare where gap pressure is strongest across the five narrative pillars." />
+      <InsightReadout title="What this means for the brand team" insights={pillarInsights} />
 
       <section id="pillars-comparison" className="scroll-mt-24">
         <div className="space-y-2">
