@@ -6,113 +6,26 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Moon, Sun, LayoutDashboard, ShieldAlert, Search, Layers, Radar, FlaskConical, Calendar, CircleHelp, Sparkles } from 'lucide-react'
+import { Moon, Sun, LayoutDashboard, TrendingUp, Users, Calendar, MessageSquare, MessageCircle, Target, Shuffle } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 type AppShellProps = {
   children: React.ReactNode
 }
 
-type SubNavItem = { id: string; label: string }
-type NavItem = { name: string; href: string; icon: any; subNav?: SubNavItem[]; standout?: boolean }
-
-const nav: NavItem[] = [
-  {
-    name: 'Messaging Recommendations',
-    href: '/messaging-recommendations',
-    icon: Sparkles,
-    standout: true,
-    subNav: [
-      { id: 'messaging-hero', label: 'Strategic framing' },
-      { id: 'messaging-hierarchy', label: 'Primary hierarchy' },
-      { id: 'messaging-supporting', label: 'Supporting themes' },
-      { id: 'messaging-watchouts', label: 'What not to overclaim' },
-      { id: 'messaging-gaps', label: 'Evidence still needed' },
-      { id: 'messaging-bottom-line', label: 'Bottom-line recommendation' },
-    ],
-  },
-  {
-    name: 'Overview',
-    href: '/overview',
-    icon: LayoutDashboard,
-    subNav: [
-      { id: 'overview-kpis', label: 'Gap headline' },
-      { id: 'overview-scores', label: 'Pillar and topic profile' },
-      { id: 'overview-distributions', label: 'Evidence mix' },
-      { id: 'overview-taxonomy', label: 'Top themes and gaps' },
-    ],
-  },
-  {
-    name: 'Pillars',
-    href: '/pillars',
-    icon: Layers,
-    subNav: [
-      { id: 'pillars-comparison', label: 'Pillar priorities' },
-      { id: 'pillars-tags', label: 'Theme patterns' },
-      { id: 'pillars-evidence', label: 'Key evidence' },
-    ],
-  },
-  {
-    name: 'Topic & Gap Explorer',
-    href: '/topic-gap-explorer',
-    icon: Search,
-    subNav: [
-      { id: 'topic-comparison', label: 'Topic priorities' },
-      { id: 'topic-themes', label: 'What is missing' },
-      { id: 'topic-questions', label: 'Questions to answer' },
-      { id: 'topic-evidence', label: 'Evidence examples' },
-    ],
-  },
-  {
-    name: 'Barrier & Behaviour',
-    href: '/barrier-behaviour-explorer',
-    icon: Radar,
-    subNav: [
-      { id: 'barrier-overview', label: 'Barrier landscape' },
-      { id: 'barrier-tags', label: 'Behavioural dynamics' },
-      { id: 'barrier-cooccurrence', label: 'Where barriers combine' },
-      { id: 'barrier-evidence', label: 'Evidence examples' },
-    ],
-  },
-  {
-    name: 'Dosing / Response / Risk',
-    href: '/dosing-response-risk-settings',
-    icon: ShieldAlert,
-    subNav: [
-      { id: 'dosing-kpis', label: 'Dosing transition gaps' },
-      { id: 'response-kpis', label: 'Recognition-response gaps' },
-      { id: 'settings-kpis', label: 'Settings of risk gaps' },
-    ],
-  },
-  {
-    name: 'EURneffy Opportunity',
-    href: '/eurneffy-opportunity',
-    icon: FlaskConical,
-    subNav: [
-      { id: 'opportunity-rankings', label: 'Opportunity themes' },
-      { id: 'opportunity-families', label: 'Opportunity families' },
-      { id: 'opportunity-questions', label: 'What needs validation' },
-      { id: 'opportunity-evidence', label: 'Evidence examples' },
-    ],
-  },
-  {
-    name: 'Gap Prioritization',
-    href: '/gap-prioritization',
-    icon: ShieldAlert,
-    subNav: [
-      { id: 'gap-priority-table', label: 'Top gap priorities' },
-      { id: 'gap-priority-clusters', label: 'Gap clusters' },
-      { id: 'gap-priority-questions', label: 'Research questions' },
-      { id: 'gap-priority-evidence', label: 'Supporting evidence' },
-    ],
-  },
+const nav: { name: string; href: string; icon: any; comingSoon?: boolean }[] = [
+  { name: 'Executive Summary', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'General Themes', href: '/themes', icon: MessageCircle },
+  { name: 'Trends Explorer', href: '/trends', icon: TrendingUp },
+  { name: 'Audience Insights', href: '/audience', icon: Users },
+  { name: 'Competitor Lens', href: '/competitors', icon: Target },
+  { name: 'Sequencing & Pathways', href: '/sequencing', icon: Shuffle },
+  { name: 'Events Tracker', href: '/events', icon: Calendar, comingSoon: true },
+  { name: 'Content Recommendations', href: '/messaging', icon: MessageSquare, comingSoon: true },
 ]
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname()
-  const normalizedPath = React.useMemo(() => (pathname?.replace(/\/+$/, '') || '/'), [pathname])
-
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
@@ -127,41 +40,6 @@ export function AppShell({ children }: AppShellProps) {
     window.addEventListener('pageshow', onPageShow)
     return () => window.removeEventListener('pageshow', onPageShow)
   }, [])
-
-  const renderNavItem = React.useCallback((item: NavItem) => {
-    const Icon = item.icon
-    const active = normalizedPath === item.href || (item.href === '/overview' && normalizedPath === '/')
-
-    return (
-      <div key={item.name} className="space-y-1">
-        <Link href={item.href} className={cn(
-          'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
-          item.standout && !active
-            ? 'bg-gradient-to-r from-indigo-500/20 via-fuchsia-500/10 to-cyan-500/20 text-foreground ring-1 ring-indigo-400/30 hover:ring-indigo-300/45'
-            : '',
-          active
-            ? 'bg-primary/15 text-primary ring-1 ring-primary/20'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="truncate">{item.name}</span>
-        </Link>
-        {active && item.subNav && item.subNav.length > 0 ? (
-          <div className="ml-4 flex flex-col gap-1 border-l border-border/50 pl-2">
-            {item.subNav.map((sub) => (
-              <Link
-                key={sub.id}
-                href={`${item.href}#${sub.id}`}
-                className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
-              >
-                {sub.label}
-              </Link>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    )
-  }, [normalizedPath])
 
   // Render bare content on public routes like /login
   if (pathname?.startsWith('/login')) {
@@ -192,26 +70,14 @@ export function AppShell({ children }: AppShellProps) {
             )}
             <span className="sr-only">evidenceIQ Home</span>
           </Link>
-          <div className="hidden lg:block text-sm text-muted-foreground truncate">EURneffy Evidence Gap Analysis</div>
+          <div className="hidden lg:block text-sm text-muted-foreground truncate">
+            Alunbrig Marketing Intelligence
+          </div>
           <div className="ml-auto flex items-center gap-2 pr-4 md:pr-6">
             <div className="hidden sm:flex items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               Last Updated: Today
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="hidden md:inline-flex bg-background/40">
-                  <CircleHelp className="mr-1.5 h-4 w-4" />
-                  How to read
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-[360px] text-sm leading-relaxed">
-                This analysis is built from thousands of online anaphylaxis and wider allergy sources gathered globally,
-                then narrowed to content potentially relevant to UK adolescent anaphylaxis. It shows what is already covered
-                in that evidence base and what remains under-covered, so unresolved gaps can be identified quickly and reviewed
-                in context.
-              </PopoverContent>
-            </Popover>
             <Button
               variant="ghost"
               size="icon"
@@ -250,10 +116,24 @@ export function AppShell({ children }: AppShellProps) {
         <nav className="h-full overflow-y-auto p-3 pb-24 relative">
           <div className="text-xs uppercase text-muted-foreground/80 px-2 py-2">Navigate</div>
           <div className="flex flex-col gap-1">
-            {nav[0] ? renderNavItem(nav[0]) : null}
-            <div className="mx-2 my-2 border-t border-border/60" />
-            <div className="px-2 pb-1 text-[11px] uppercase tracking-wide text-muted-foreground/65">Analysis Explorer</div>
-            {nav.slice(1).map(renderNavItem)}
+            {nav.map(item => {
+              const Icon = item.icon
+              const active = pathname === item.href
+              return item.comingSoon ? (
+                <div key={item.name} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground/70 bg-muted/10 ring-1 ring-border/50 cursor-not-allowed">
+                  <Icon className={cn("h-4 w-4 opacity-60", item.comingSoon ? "animate-pulse" : "")} />
+                  <span className="truncate">{item.name}</span>
+                </div>
+              ) : (
+                <Link key={item.name} href={item.href} className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                  active ? 'bg-primary/15 text-primary ring-1 ring-primary/20' : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground')}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="truncate">{item.name}</span>
+                </Link>
+              )
+            })}
           </div>
           {/* Fusion logo pinned to bottom */}
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center">

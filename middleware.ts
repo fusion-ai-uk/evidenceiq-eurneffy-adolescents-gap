@@ -44,7 +44,7 @@ export async function middleware(req: NextRequest) {
 
   const res = NextResponse.next()
   if (req.method === "GET") {
-    if (pathname.startsWith("/api/")) {
+    if (pathname.startsWith("/api/alunbrig/")) {
       // Private: don't allow shared caches to store authenticated analytics responses.
       res.headers.set("Cache-Control", "private, max-age=30, stale-while-revalidate=60")
     } else {
