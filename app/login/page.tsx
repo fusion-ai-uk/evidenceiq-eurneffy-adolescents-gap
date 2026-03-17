@@ -39,9 +39,9 @@ function LoginContent() {
         throw new Error(data?.message || "Invalid credentials")
       }
       toast.success("Welcome back ✨")
-      const from = searchParams.get('from') || '/dashboard'
+      const from = searchParams.get('from') || '/overview'
       const isSafe = typeof from === 'string' && from.startsWith('/') && !from.startsWith('/login') && !/\.[a-zA-Z0-9]+$/.test(from)
-      router.replace(isSafe ? from : '/dashboard')
+      router.replace(isSafe ? from : '/overview')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Login failed"
       toast.error(message)
@@ -91,7 +91,7 @@ function LoginContent() {
                 suppressHydrationWarning
               />
             )}
-            <span className="text-sm text-muted-foreground">Alunbrig Intelligence</span>
+            <span className="text-sm text-muted-foreground">EURneffy Analysis</span>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Sign in to your intelligence workspace

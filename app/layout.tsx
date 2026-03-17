@@ -1,4 +1,4 @@
-﻿import type React from "react"
+import type React from "react"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -11,8 +11,8 @@ const geistSans = GeistSans
 const geistMono = GeistMono
 
 export const metadata = {
-  title: "evidenceIQ - Alunbrig Intelligence Platform",
-  description: "Pharmaceutical intelligence dashboard for Alunbrig (brigatinib) ALK+ metastatic NSCLC social media data analysis",
+  title: "evidenceIQ - EURneffy Adolescent Gap Analysis",
+  description: "Internal evidence analysis frontend for EURneffy adolescent anaphylaxis messaging and gap exploration.",
     generator: 'v0.app'
 }
 

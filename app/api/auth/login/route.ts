@@ -3,10 +3,13 @@ import { SESSION_MAX_AGE_SECONDS, signSession } from "@/lib/authSession"
 
 // List of allowed users (static)
 const USERS = [
-  // Existing login (unchanged)
+  // Existing login
   { email: "alunbrig@evidenceiq.io", password: "alunbrig.evidenceiq" },
 
-  // New login (add your new credentials here)
+  // EURneffy login
+  { email: "eurneffy@evidenceiq.io", password: "eurneffy" },
+
+  // Fusion login
   { email: "mary@fusionagency.solutions", password: "Moose01!" },
 ]
 
