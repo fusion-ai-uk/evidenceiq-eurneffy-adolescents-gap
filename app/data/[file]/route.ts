@@ -6,8 +6,8 @@ export const runtime = "nodejs"
 
 const ALLOWED = new Set(["enriched_rows.csv", "evidence_extracts.csv"])
 
-export async function GET(_req: NextRequest, { params }: { params: { file: string } }) {
-  const fileName = params.file
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ file: string }> }) {
+  const { file: fileName } = await params
   if (!ALLOWED.has(fileName)) {
     return new Response("Not found", { status: 404 })
   }

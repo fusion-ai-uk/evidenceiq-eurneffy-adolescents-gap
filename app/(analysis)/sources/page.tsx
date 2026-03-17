@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { ExternalLink, Globe, ShieldCheck, Stethoscope, Users } from "lucide-react"
+import { Globe, ShieldCheck, Stethoscope, Users } from "lucide-react"
 import { useAnalysisContext } from "@/components/evidenceiq/analysis-context"
 import { AnalysisSectionHeader } from "@/components/evidenceiq/analysis-components"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -139,11 +138,33 @@ function classifySource(url: string): SourceBucket {
 }
 
 function buildDomainSummary(records: SourceRecord[]) {
-  const counts = new Map<string, number>()
-  for (const record of records) counts.set(record.host, (counts.get(record.host) ?? 0) + 1)
-  return Array.from(counts.entries())
-    .map(([host, count]) => ({ host, count }))
-    .sort((a, b) => b.count - a.count)
+  return Array.from(new Set(records.map((record) => record.host))).sort((a, b) => a.localeCompare(b))
+}
+
+function buildSourceGroups(records: SourceRecord[]) {
+  const grouped = new Map<string, string[]>()
+  for (const record of records) {
+    const existing = grouped.get(record.host) ?? []
+    existing.push(record.url)
+    grouped.set(record.host, existing)
+  }
+  return Array.from(grouped.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([host, urls]) => ({
+      host,
+      samples: urls.sort((a, b) => a.localeCompare(b)).slice(0, 3),
+    }))
+}
+
+function shortPath(url: string) {
+  try {
+    const parsed = new URL(url)
+    const path = parsed.pathname === "/" ? "" : parsed.pathname
+    const raw = `${parsed.hostname.replace(/^www\./, "")}${path}`
+    return raw.length > 95 ? `${raw.slice(0, 95)}...` : raw
+  } catch {
+    return url.length > 95 ? `${url.slice(0, 95)}...` : url
+  }
 }
 
 export default function SourcesPage() {
@@ -179,16 +200,6 @@ export default function SourcesPage() {
     return grouped
   }, [filteredSources])
 
-  const totals = React.useMemo(() => {
-    const total = filteredSources.length
-    return {
-      total,
-      evidence: byBucket.evidence.length,
-      clinical: byBucket.clinical.length,
-      stakeholder: byBucket.stakeholder.length,
-    }
-  }, [filteredSources, byBucket])
-
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading source index...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
 
@@ -207,26 +218,8 @@ export default function SourcesPage() {
           <CardContent className="space-y-3 px-4 text-sm text-muted-foreground">
             <p>
               This page consolidates extracted `_source_url` entries and groups them into evidence-grade material, clinical interpretation
-              context, and stakeholder voice sources. It is designed for transparent auditability and fast source-level navigation.
+              context, and stakeholder voice sources. It is designed to show the breadth and diversity of the evidence ecosystem used for this analysis.
             </p>
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-md border border-border/70 bg-background/70 p-2">
-                <p className="text-[11px] uppercase tracking-wide">Total unique sources</p>
-                <p className="text-lg font-semibold tabular-nums">{totals.total}</p>
-              </div>
-              <div className="rounded-md border border-border/70 bg-background/70 p-2">
-                <p className="text-[11px] uppercase tracking-wide">Evidence-grade</p>
-                <p className="text-lg font-semibold tabular-nums">{totals.evidence}</p>
-              </div>
-              <div className="rounded-md border border-border/70 bg-background/70 p-2">
-                <p className="text-[11px] uppercase tracking-wide">Clinical interpretation</p>
-                <p className="text-lg font-semibold tabular-nums">{totals.clinical}</p>
-              </div>
-              <div className="rounded-md border border-border/70 bg-background/70 p-2">
-                <p className="text-[11px] uppercase tracking-wide">Stakeholder voice</p>
-                <p className="text-lg font-semibold tabular-nums">{totals.stakeholder}</p>
-              </div>
-            </div>
             <div className="relative">
               <Globe className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -250,7 +243,8 @@ export default function SourcesPage() {
 
           {(Object.keys(BUCKET_META) as SourceBucket[]).map((bucketKey) => {
             const entries = byBucket[bucketKey]
-            const topDomains = buildDomainSummary(entries).slice(0, 12)
+            const domains = buildDomainSummary(entries).slice(0, 24)
+            const sourceGroups = buildSourceGroups(entries)
 
             return (
               <TabsContent key={bucketKey} value={bucketKey} className="space-y-3">
@@ -259,25 +253,19 @@ export default function SourcesPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-primary">{BUCKET_META[bucketKey].icon}</span>
                       <CardTitle className="text-sm">{BUCKET_META[bucketKey].label}</CardTitle>
-                      <Badge variant="secondary" className="ml-auto tabular-nums">
-                        {entries.length} sources
-                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="grid gap-3 px-4 xl:grid-cols-[1fr_2fr]">
                     <div className="space-y-2">
                       <p className="text-xs leading-relaxed text-muted-foreground">{BUCKET_META[bucketKey].subtitle}</p>
                       <div className="rounded-md border p-2">
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Top source domains</p>
-                        <div className="mt-2 space-y-1.5">
-                          {topDomains.length === 0 ? (
+                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Example domains in this bucket</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {domains.length === 0 ? (
                             <p className="text-xs text-muted-foreground">No sources matched current filter.</p>
                           ) : (
-                            topDomains.map((domain) => (
-                              <div key={domain.host} className="flex items-center justify-between gap-2 text-xs">
-                                <span className="truncate">{domain.host}</span>
-                                <Badge variant="outline" className="tabular-nums">{domain.count}</Badge>
-                              </div>
+                            domains.map((domain) => (
+                              <Badge key={domain} variant="secondary">{domain}</Badge>
                             ))
                           )}
                         </div>
@@ -288,33 +276,26 @@ export default function SourcesPage() {
                       <CardContent className="p-0">
                         <ScrollArea className="h-[460px]">
                           <div className="space-y-1.5 p-2.5">
-                            {entries.length === 0 ? (
+                            {sourceGroups.length === 0 ? (
                               <p className="p-2 text-sm text-muted-foreground">No sources in this bucket for current filter.</p>
                             ) : (
-                              entries.slice(0, 280).map((entry) => (
-                                <div key={entry.url} className="rounded-md border border-border/70 bg-background/70 p-2">
-                                  <div className="mb-1 flex items-center gap-2">
+                              sourceGroups.map((group) => (
+                                <div key={group.host} className="rounded-md border border-border/70 bg-background/70 p-2">
+                                  <div className="mb-2 flex items-center gap-2">
                                     <Badge variant="secondary" className="max-w-[220px] truncate">
-                                      {entry.host}
+                                      {group.host}
                                     </Badge>
                                   </div>
-                                  <Link
-                                    href={entry.url}
-                                    target="_blank"
-                                    rel="noreferrer noopener"
-                                    className="inline-flex max-w-full items-start gap-1 text-xs text-primary hover:underline"
-                                  >
-                                    <span className="truncate">{entry.url}</span>
-                                    <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                  </Link>
+                                  <div className="space-y-1">
+                                    {group.samples.map((sample) => (
+                                      <p key={sample} className="text-xs text-muted-foreground truncate">
+                                        {shortPath(sample)}
+                                      </p>
+                                    ))}
+                                  </div>
                                 </div>
                               ))
                             )}
-                            {entries.length > 280 ? (
-                              <p className="px-1 pt-1 text-[11px] text-muted-foreground">
-                                Showing first 280 sources in this bucket. Use the filter field to narrow further.
-                              </p>
-                            ) : null}
                           </div>
                         </ScrollArea>
                       </CardContent>
