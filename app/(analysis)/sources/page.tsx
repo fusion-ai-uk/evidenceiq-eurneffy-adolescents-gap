@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
 
 type SourceBucket = "evidence" | "clinical" | "stakeholder"
 
@@ -169,7 +168,6 @@ function shortPath(url: string) {
 
 export default function SourcesPage() {
   const { dataset, isLoading, error } = useAnalysisContext()
-  const [query, setQuery] = React.useState("")
 
   const allSources = React.useMemo<SourceRecord[]>(() => {
     const rows = dataset?.allRows ?? []
@@ -185,20 +183,14 @@ export default function SourcesPage() {
     }))
   }, [dataset])
 
-  const filteredSources = React.useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return allSources
-    return allSources.filter((source) => source.url.toLowerCase().includes(q) || source.host.includes(q))
-  }, [allSources, query])
-
   const byBucket = React.useMemo(() => {
     const grouped: Record<SourceBucket, SourceRecord[]> = { evidence: [], clinical: [], stakeholder: [] }
-    for (const source of filteredSources) grouped[source.bucket].push(source)
+    for (const source of allSources) grouped[source.bucket].push(source)
     for (const key of Object.keys(grouped) as SourceBucket[]) {
       grouped[key] = grouped[key].sort((a, b) => a.host.localeCompare(b.host) || a.url.localeCompare(b.url))
     }
     return grouped
-  }, [filteredSources])
+  }, [allSources])
 
   if (isLoading) return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Loading source index...</div>
   if (error) return <div className="rounded-lg border border-destructive/40 p-6 text-sm text-destructive">{error}</div>
@@ -223,14 +215,9 @@ export default function SourcesPage() {
             <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
               The domains and URLs shown here are a curated handful of key source examples for orientation. The analysis is not limited to only these examples.
             </div>
-            <div className="relative">
-              <Globe className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Filter by domain or URL..."
-                className="pl-8"
-              />
+            <div className="inline-flex items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 py-2 text-xs">
+              <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+              Source examples are grouped by domain family for quick orientation.
             </div>
           </CardContent>
         </Card>
