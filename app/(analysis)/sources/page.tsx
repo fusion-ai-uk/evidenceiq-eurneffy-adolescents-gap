@@ -220,6 +220,9 @@ export default function SourcesPage() {
               This page consolidates extracted `_source_url` entries and groups them into evidence-grade material, clinical interpretation
               context, and stakeholder voice sources. It is designed to show the breadth and diversity of the evidence ecosystem used for this analysis.
             </p>
+            <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+              The domains and URLs shown here are a curated handful of key source examples for orientation. The analysis is not limited to only these examples.
+            </div>
             <div className="relative">
               <Globe className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
